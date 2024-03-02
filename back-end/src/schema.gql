@@ -1,0 +1,395 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Avatar {
+  """The date when the avatar was created"""
+  createdAt: DateTime!
+
+  """Default filename of the avatar"""
+  defaultFilename: String!
+
+  """Filename of the avatar"""
+  filename: String!
+
+  """Unique identifier for the avatar"""
+  id: String!
+
+  """The date when the avatar was last updated"""
+  updatedAt: DateTime!
+
+  """The ID of the associated user"""
+  userId: String!
+}
+
+type Block {
+  """User who is blocked"""
+  blockedUserId: User!
+
+  """User who blocked another user"""
+  blockerId: User!
+
+  """Date the block relationship was created"""
+  createdAt: DateTime!
+
+  """The unique identifier of the block relationship."""
+  id: ID!
+
+  """Date the block relationship was updated"""
+  updatedAt: DateTime!
+}
+
+type Channel {
+  """Users participating in the channel"""
+  channel: [ChannelUser!]!
+
+  """Date the channel was created"""
+  createdAt: DateTime!
+
+  """The unique identifier of the channel."""
+  id: ID!
+
+  """Channel password"""
+  password: String
+
+  """Channel title"""
+  title: String!
+
+  """Channel type"""
+  type: ChannelType!
+
+  """Date the channel was updated"""
+  updatedAt: DateTime!
+}
+
+"""The type of the channel"""
+enum ChannelType {
+  DM
+  PRIVATE
+  PROTECTED
+  PUBLIC
+}
+
+type ChannelUser {
+  """Channel ID"""
+  channelId: String!
+
+  """Date the channel user was created"""
+  createdAt: DateTime!
+  id: ID!
+
+  """Messages sent by the user in the channel"""
+  message: [Message!]!
+
+  """Type of user in the channel"""
+  type: UserType!
+
+  """Date the channel user was updated"""
+  updatedAt: DateTime!
+
+  """User IDr"""
+  userId: String!
+}
+
+type Connection {
+  """The date when the connection was created"""
+  createdAt: DateTime!
+
+  """Unique identifier of the connection"""
+  id: String!
+
+  """
+  Indicates whether two-factor authentication is enabled for the connection
+  """
+  is2faEnabled: Boolean!
+
+  """One-time password associated with the connection"""
+  otp: String
+
+  """The date when the one-time password was created"""
+  otpCreatedAt: DateTime
+
+  """Provider of the connection"""
+  provider: String!
+
+  """Provider ID of the connection"""
+  providerId: String!
+
+  """The date when the connection was last updated"""
+  updatedAt: DateTime!
+
+  """The ID of the associated user"""
+  userId: String!
+}
+
+input CreateMessageInput {
+  """Channel User who sent the message"""
+  channelId: String!
+  id: ID!
+
+  """Content of the message"""
+  text: String!
+
+  """Time the message was sent"""
+  time: DateTime!
+}
+
+input CreateNotificationInput {
+  """Read status of the notification"""
+  isRead: Boolean! = false
+
+  """User who received the notification"""
+  receiverId: String!
+
+  """User who sent the notification"""
+  senderId: String!
+
+  """Time the notification was sent"""
+  time: DateTime!
+
+  """Type of notification"""
+  type: NotificationType!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Friend {
+  """Date the user achievement was created"""
+  createdAt: DateTime!
+
+  """The unique identifier of the friend relationship"""
+  id: String!
+
+  """Friend request acceptance status"""
+  isAccepted: Boolean!
+
+  """User who receive the friend request"""
+  receiverId: String!
+
+  """User who sent the friend request"""
+  senderId: String!
+
+  """Date the user achievement was updated"""
+  updatedAt: DateTime!
+}
+
+type Match {
+  """Date the match was created"""
+  createdAt: DateTime!
+
+  """User who participated as a guest in the match"""
+  guestId: User!
+
+  """Score of the guest in the match"""
+  guest_score_m: Int!
+
+  """User who hosted the match"""
+  hostId: User!
+
+  """Score of the host in the match"""
+  host_score_m: Int!
+  id: String!
+
+  """Start time of the match"""
+  start_m: DateTime!
+
+  """Date the match was updated"""
+  updatedAt: DateTime!
+
+  """User who won the match"""
+  winnerId: User
+}
+
+type Message {
+  """Channel User who sent the message"""
+  channelId: ChannelUser!
+
+  """Date the Message was created"""
+  createdAt: DateTime!
+  id: ID!
+
+  """Content of the message"""
+  text: String!
+
+  """Time the message was sent"""
+  time: DateTime!
+
+  """Date the Message was updated"""
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  createMessage(input: CreateMessageInput!): Message!
+  createNotification(input: CreateNotificationInput!): Notification!
+  deleteChannelUser(id: String!): ChannelUser!
+
+  """Delete friend with their associated id"""
+  deleteFriend: Friend!
+  deleteUser(userId: String!): User!
+  updateChannelTypeUser(id: String!, type: String!): ChannelUser!
+  updateFirstName(firstname: String!, userId: String!): User!
+  updateLastName(firstname: String!, userId: String!): User!
+  updateUserStatus(status: String!, userId: String!): User!
+  updateUsername(userId: String!, username: String!): User!
+}
+
+type Notification {
+  """Date the notification was created"""
+  createdAt: DateTime!
+  id: ID!
+
+  """Read status of the notification"""
+  isRead: Boolean!
+
+  """User who received the notification"""
+  receiverId: User!
+
+  """User who sent the notification"""
+  senderId: User!
+
+  """Time the notification was sent"""
+  time: DateTime!
+
+  """Type of notification"""
+  type: NotificationType!
+
+  """Date the notification was updated"""
+  updatedAt: DateTime!
+}
+
+"""The type of the notification"""
+enum NotificationType {
+  ACHIEVEMENT
+  FRIEND_REQUEST
+  MESSAGE
+}
+
+type Query {
+  getAllChannelUsers: [ChannelUser!]!
+
+  """Get all channels"""
+  getAllChannels: [Channel!]!
+
+  """Retrieves all friends with their associated data"""
+  getAllFriends: [Friend!]!
+  getAllMessages: [Message!]!
+  getAllNotifications: [Notification!]!
+
+  """Retrieves all users with their associated data"""
+  getAllUsers: [User!]!
+
+  """Get a channel by ID"""
+  getChannelById(id: String!): Channel!
+  getChannelUserById(id: String!): ChannelUser!
+
+  """Retrieves friend with their associated id"""
+  getFriendById: Friend!
+  getMessageById(id: String!): Message!
+  getNotificationById(id: String!): Notification!
+
+  """Retrieves a specific user with it's id"""
+  getUserById(id: String!): User!
+}
+
+"""The type of the user status."""
+enum Status {
+  AWAY
+  INGAME
+  OFFLINE
+  ONLINE
+}
+
+type User {
+  """User achievements"""
+  achievements: [UserAchievement!]!
+
+  """The associated avatar entity"""
+  avatar: Avatar
+
+  """Users who blocked the user"""
+  blocked: [Block!]!
+
+  """User blocked users"""
+  blocking: [Block!]!
+
+  """User connection"""
+  connection: Connection
+
+  """Date the user was created"""
+  createdAt: DateTime!
+
+  """User email address"""
+  email: String!
+
+  """User first name"""
+  firstName: String!
+
+  """Matches where the user is the guest"""
+  guest: [Match!]!
+
+  """Matches where the user is the host"""
+  host: [Match!]!
+  id: ID!
+
+  """User last name"""
+  lastName: String!
+
+  """User received friend requests"""
+  receive: [Friend!]!
+
+  """User received notifications"""
+  receiver: [Notification!]!
+
+  """User sent friend requests"""
+  send: [Friend!]!
+
+  """User sent notifications"""
+  sender: [Notification!]!
+
+  """User status"""
+  status: Status!
+
+  """Date the user was last updated"""
+  updatedAt: DateTime!
+
+  """User's channel participation"""
+  user: [ChannelUser!]!
+
+  """User username"""
+  username: String!
+
+  """Matches where the user is the winner"""
+  winner: [Match!]!
+
+  """User experience points"""
+  xp: Int
+}
+
+type UserAchievement {
+  """Date the user achievement was achieved"""
+  achievedAt: DateTime
+  achievementId: String!
+
+  """Date the user achievement was created"""
+  createdAt: DateTime!
+  id: String!
+
+  """Whether the user achievement is achieved"""
+  isAchieved: Boolean!
+
+  """Date the user achievement was updated"""
+  updatedAt: DateTime!
+
+  """User associated with this achievement"""
+  userId: User!
+}
+
+"""The type of the user"""
+enum UserType {
+  ADMIN
+  OWNER
+  USER
+}

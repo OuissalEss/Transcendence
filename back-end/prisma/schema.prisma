@@ -1,0 +1,270 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  ONLINE       // User is online
+  OFFLINE      // User is offline
+  INGAME       // User is in a game
+  AWAY         // User is away
+}
+
+model Achievement {
+  id	          	String				@id @default(uuid())
+
+  title	       		String
+  description		String
+
+  xp	          	Int
+  userachievement 	UserAchievement[] 	@relation("userachievement")
+
+  createdAt 		DateTime 			@default(now())
+  updatedAt 		DateTime 			@updatedAt
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+	id				String			@id @default(uuid())
+
+	userId			String
+
+	achievementId	String
+
+	isAchieved		Boolean   		@default(false)
+	achievedAt    	DateTime?		@default(now())
+
+  	createdAt 		DateTime 		@default(now())
+  	updatedAt 		DateTime 		@updatedAt
+
+	user			User			@relation(name: "userachievements", fields: [userId], references: [id])
+	achievement		Achievement		@relation(name: "userachievement", fields: [achievementId], references: [id])
+
+ 	@@map("user_achievements")
+}
+
+model User {
+	id				String 				@id @default(uuid())
+
+	email			String				@unique
+	username		String				@unique
+
+	firstName		String
+	lastName		String
+
+	xp				Int?
+	avatar			Avatar?
+
+	status			Status?				@default(ONLINE)
+	connection  	Connection?
+
+	achievements	UserAchievement[]	@relation(name: "userachievements")
+
+	send			Friend[]			@relation(name: "send")
+	receive			Friend[]			@relation(name: "receive")
+
+	blocking		Block[]				@relation(name: "blocking")
+	blocked			Block[]				@relation(name: "blocked")
+
+	host			Match[]				@relation(name: "host")
+	guest			Match[]				@relation(name: "guest")
+	winner			Match[]				@relation(name: "winner")
+
+	user			ChannelUser[]		@relation(name: "user")
+
+	sender			Notification[]		@relation(name: "sender")
+	receiver		Notification[]		@relation(name: "receiver")
+
+	createdAt 		DateTime 			@default(now())
+  	updatedAt 		DateTime 			@updatedAt
+
+  	@@map("users")
+}
+
+model Connection {
+    id     			String 		@id	@default(uuid())
+    userId 			String 		@unique
+
+    provider   		String		@default("42")
+    providerId 		String 		@unique
+
+	otp          	String?
+	otpCreatedAt 	DateTime?
+	is2faEnabled	Boolean		@default(false)
+
+    createdAt 		DateTime 	@default(now())
+    updatedAt 		DateTime 	@updatedAt
+
+    user 			User 		@relation(fields: [userId], references: [id])
+
+    @@map("connections")
+}
+
+model Avatar {
+    id     				String 		@id @default(uuid())
+    userId 				String 		@unique
+
+    defaultFilename 	String
+    filename        	String
+
+    createdAt 			DateTime 	@default(now())
+    updatedAt 			DateTime 	@updatedAt
+
+    user 				User 		@relation(fields: [userId], references: [id])
+
+    @@map("avatars")
+}
+
+model Friend {
+	id				String 		@id @default(uuid())
+
+	senderId		String		@unique
+	receiverId		String		@unique
+
+	isAccepted		Boolean		@unique @default(false)
+
+	createdAt 		DateTime 	@default(now())
+    updatedAt 		DateTime 	@updatedAt
+
+	sender			User		@relation(name: "send", fields: [senderId], references: [id])
+	receiver		User		@relation(name: "receive", fields: [receiverId], references: [id])
+
+    @@map("friends")
+}
+
+model Block {
+	id					String 		@id @default(uuid())
+
+	blockerId			String
+	blockedUserId		String
+
+	createdAt 			DateTime @default(now())
+    updatedAt 			DateTime @updatedAt
+
+	blocker				User	@relation(name: "blocking", fields: [blockerId], references: [id])
+	blockedUser			User	@relation(name: "blocked", fields: [blockedUserId], references: [id])
+
+    @@map("blocks")
+}
+
+model Match {
+	id				String 		@id @default(uuid())
+
+	host_score_m	Int
+	guest_score_m	Int
+
+	start_m			DateTime	@default(now())
+
+	hostId			String
+	guestId		 	String
+	winnerId		 String
+
+	host			User		@relation(name: "host", fields: [hostId], references: [id])
+	guest			User		@relation(name: "guest", fields: [guestId], references: [id])
+	winner			User		@relation(name: "winner", fields: [winnerId], references: [id])
+
+	createdAt 		DateTime 	@default(now())
+    updatedAt 		DateTime 	@updatedAt
+
+    @@map("matches")
+}
+
+enum ChannelType {
+  PRIVATE      // Private channel
+  PUBLIC       // Public channel
+  PROTECTED    // Protected channel
+  DM           // Direct Message
+}
+
+
+model Channel {
+	id				String 			@id @default(uuid())
+
+	title			String			@unique
+
+	type			ChannelType
+
+	password		String?
+
+	channel			ChannelUser[]	@relation(name: "channel")
+
+	createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("channels")
+}
+
+enum UserType {
+  ADMIN        // Administrator
+  USER         // Regular user
+  OWNER        // Owner of a resource
+}
+
+model ChannelUser {
+	id			String 		@id @default(uuid())
+
+	userId		String
+	channelId	String
+
+	type		UserType
+
+	message		Message[]	@relation(name: "message")
+
+	user		User		@relation(name: "user", fields: [userId], references: [id])
+	channel		Channel		@relation(name: "channel", fields: [channelId], references: [id])
+
+	createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+	@@map("channelusers")
+}
+
+model Message {
+	id				String 			@id @default(uuid())
+
+	text			String?
+	time			DateTime?
+
+	channelId		String
+
+	channel			ChannelUser		@relation(name: "message", fields: [channelId], references: [id])
+
+	createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+	@@map("messages")
+}
+
+enum NotifType {
+  MESSAGE       // Message notification
+  FRIEND_REQUEST // Friend request notification
+  ACHIEVEMENT   // Achievement notification
+}
+
+model Notification {
+	id			String 		@id @default(uuid())
+
+	time		DateTime?
+	type		NotifType
+
+	isRead		Boolean
+
+	senderId	String
+	receiverId	String
+
+	sender		User		@relation(name: "sender", fields: [senderId], references: [id])
+	receiver	User		@relation(name: "receiver", fields: [receiverId], references: [id])
+
+	createdAt 	DateTime 	@default(now())
+    updatedAt 	DateTime 	@updatedAt
+
+	@@map("notifications")
+}
