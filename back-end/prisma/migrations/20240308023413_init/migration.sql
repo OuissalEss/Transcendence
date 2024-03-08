@@ -8,7 +8,7 @@ CREATE TYPE "ChannelType" AS ENUM ('PRIVATE', 'PUBLIC', 'PROTECTED', 'DM');
 CREATE TYPE "UserType" AS ENUM ('ADMIN', 'USER', 'OWNER');
 
 -- CreateEnum
-CREATE TYPE "NotifType" AS ENUM ('MESSAGE', 'FRIEND_REQUEST', 'ACHIEVEMENT');
+CREATE TYPE "NotifType" AS ENUM ('MESSAGE', 'FRIEND_REQUEST', 'ACHIEVEMENT', 'MATCH');
 
 -- CreateTable
 CREATE TABLE "achievements" (
@@ -116,11 +116,34 @@ CREATE TABLE "matches" (
 );
 
 -- CreateTable
+CREATE TABLE "banned" (
+    "id" TEXT NOT NULL,
+    "channelId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "banned_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "muted" (
+    "id" TEXT NOT NULL,
+    "duration" TIMESTAMP(3),
+    "finished" BOOLEAN NOT NULL DEFAULT true,
+    "permanent" BOOLEAN NOT NULL DEFAULT false,
+    "channelId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "muted_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "channels" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "type" "ChannelType" NOT NULL,
     "password" TEXT,
+    "description" TEXT,
+    "profileImage" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -142,7 +165,7 @@ CREATE TABLE "channelusers" (
 -- CreateTable
 CREATE TABLE "messages" (
     "id" TEXT NOT NULL,
-    "text" TEXT,
+    "text" TEXT NOT NULL,
     "time" TIMESTAMP(3),
     "channelId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -189,6 +212,9 @@ CREATE UNIQUE INDEX "friends_receiverId_key" ON "friends"("receiverId");
 -- CreateIndex
 CREATE UNIQUE INDEX "friends_isAccepted_key" ON "friends"("isAccepted");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "channels_title_key" ON "channels"("title");
+
 -- AddForeignKey
 ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -221,6 +247,18 @@ ALTER TABLE "matches" ADD CONSTRAINT "matches_guestId_fkey" FOREIGN KEY ("guestI
 
 -- AddForeignKey
 ALTER TABLE "matches" ADD CONSTRAINT "matches_winnerId_fkey" FOREIGN KEY ("winnerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "banned" ADD CONSTRAINT "banned_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "banned" ADD CONSTRAINT "banned_channelId_fkey" FOREIGN KEY ("channelId") REFERENCES "channels"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "muted" ADD CONSTRAINT "muted_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "muted" ADD CONSTRAINT "muted_channelId_fkey" FOREIGN KEY ("channelId") REFERENCES "channels"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "channelusers" ADD CONSTRAINT "channelusers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

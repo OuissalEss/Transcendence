@@ -1,12 +1,14 @@
 // channel.entity.ts
 import { Field, ObjectType, ID, registerEnumType} from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsInt, IsDate, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsDate, IsOptional, IsEnum, isString } from 'class-validator';
 import { ChannelUser } from './channel-user.entity';
 
 
 //import {ChannelType} from 'src/enums/channel.enum';
 
 import { ChannelType } from '@prisma/client'; // Import the Prisma-generated Status enum
+import { User } from './user.entity';
+import { Message } from './message.entity';
 
 @ObjectType()
 export class Channel {
@@ -38,6 +40,24 @@ export class Channel {
   password?: string;
 
   /**
+   * description of the channel. (nullable)
+   * @type {string}
+   */
+  @Field({ nullable: true, description: 'Channel description' })
+  @IsOptional()
+  @IsString({ message: 'Description must be a string' })
+  description?: string;
+
+  /**
+   * profile image of the channel. (nullable)
+   * @type {string}
+   */
+  @Field({ nullable: true, description: 'Channel profile image' })
+  @IsOptional()
+  @IsString({ message: 'Profile image must be a string' })
+  profileImage?: string;
+
+  /**
    * The type of the channel.
    * @type {ChannelType}
    */
@@ -50,14 +70,70 @@ export class Channel {
 
   /**
    * Users participating in the channel.
-   * @type {ChannelUser[]}
+   * @type {User[]}
    */
-  @Field(() => [ChannelUser], {
+  @Field(() => [User], {
    description: 'Users participating in the channel',
    defaultValue: []
   })
   @IsNotEmpty({ message: 'Users participating in the channel cannot be empty' })
-  channel?: ChannelUser[];
+  members?: User[];
+
+  /**
+   * Owner of the channel.
+   * @type {User}
+   */
+
+  @Field(() => User, {
+    description: 'Owner of the channel',
+  })
+  @IsNotEmpty({ message: 'Owner of the channel cannot be empty' })
+  owner?: User;
+
+  /**
+   * Channel Admins.
+   * @type {User[]}
+   */
+
+  @Field(() => [User], {
+    description: 'Channel Admins',
+    defaultValue: []
+  })
+  @IsNotEmpty({ message: 'Channel Admins cannot be empty' })
+  admins?: User[];
+
+  /**
+   * banned users from the channel.
+   * @type {User[]}
+   */
+
+  @Field(() => [User], {
+    description: 'banned users from the channel',
+    defaultValue: []
+  })
+  @IsNotEmpty({ message: 'banned users from the channel cannot be empty' })
+  banned?: User[];
+
+  /**
+   * muted users from the channel.
+   */
+  @Field(() => [User], {
+    description: 'muted users from the channel',
+    defaultValue: []
+  })
+  @IsNotEmpty({ message: 'muted users from the channel cannot be empty' })
+  muted?: User[];
+
+  /**
+   * messages in the channel.
+   * @type {Message[]}
+   */
+  @Field(() => [Message], {
+    description: 'messages in the channel',
+    defaultValue: []
+  })
+  @IsNotEmpty({ message: 'messages in the channel cannot be empty' })
+  messages?: Message[];
 
   /**
    * The date when the channel was created.

@@ -6,7 +6,8 @@ import {ChannelUserController} from "../controllers/channel-user.controller";
 
 @Module({
     providers: [ChannelUserService, PrismaService, ChannelUserResolver],
-    controllers: [ChannelUserController]
+    controllers: [ChannelUserController],
+    exports: [ChannelUserService]
 })
 export class ChannelUserModule {
     

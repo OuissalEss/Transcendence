@@ -15,13 +15,13 @@ export class FTStrategy extends PassportStrategy(Strategy, '42') {
     configService: ConfigService,
     // private authService: AuthService,
     private userService: UserService,
-    private prisma: PrismaService
+    private prisma: PrismaService,
   ) {
     super({
       clientID: configService.get('42_UID'),
       clientSecret: configService.get('42_SECRET'),
       callbackURL: configService.get('42_CALLBACK_URI'),
-      Scope: ['profile', 'email'],
+      scope: ['profile', 'email'],
     });
   }
 

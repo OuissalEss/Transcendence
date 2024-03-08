@@ -18,6 +18,26 @@ export class ChannelUserService {
         });
     }
 
+    async getChannelUserByChannelId(channelId: string): Promise<ChannelUser[]> {
+        return this.prisma.channelUser.findMany({
+            where: { channelId: channelId },
+        });
+    }
+
+    async getChannelUserByUserId(userId: string): Promise<ChannelUser[]> {
+        return this.prisma.channelUser.findMany({
+            where: { userId: userId },
+        });
+    }
+
+    async getChannelUser(cid: string, uid: string): Promise<ChannelUser> {
+		return this.prisma.channelUser.findFirst({
+			where: {
+				AND: [{ userId: uid }, { channelId: cid }],
+			},
+		});
+    }
+
     async createChannelUser(createUserChannelInput: CreateChannelUserInput): Promise<ChannelUser> {
         try {
             return this.prisma.channelUser.create({

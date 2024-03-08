@@ -19,6 +19,8 @@ import { Notification } from 'src/entities/notification.entity';
 import {Avatar} from "./avatar.entity";
 
 import { Status } from '@prisma/client'; // Import the Prisma-generated Status enum
+import { ban } from './ban.entity';
+import { mute } from './mute.entity';
 //import { Status } from 'src/enums/status.enum';
 
 @ObjectType()
@@ -248,6 +250,26 @@ export class User {
     description: 'Date the user was last updated'
   })
   updatedAt: Date;
+
+  /**
+   * The channels where the user is banned.
+   * @type {ban[]}
+   */
+  @Field(() => [ban], {
+    description: 'User banned channels',
+    defaultValue: [],
+  })
+  banned?: ban[];
+
+    /**
+   * The channels where the user is muted.
+   * @type {mute[]}
+   */
+    @Field(() => [mute], {
+      description: 'User muted channels',
+      defaultValue: [],
+    })
+    muted?: mute[];
 }
 
 

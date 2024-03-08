@@ -98,6 +98,7 @@ export class UserService {
               lastName: createUserInput.lastName,
               email: createUserInput.email,
               xp: createUserInput.xp,
+            //   password: createUserInput.password, // Add the password property
               connection: {
                   create: {
                       provider: createUserInput.provider,

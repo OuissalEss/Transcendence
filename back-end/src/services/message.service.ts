@@ -18,6 +18,22 @@ export class MessageService {
         });
     }
 
+    async getAllMessagesByChannelId(cid: string): Promise<Message[]> {
+        return this.prisma.message.findMany({
+            where: { channelId: cid },
+        });
+    }
+
+    async getAllMessagesByUserId(uid: string): Promise<Message[]> {
+        return this.prisma.message.findMany({
+            where: {
+                channel: {
+                    userId: uid,
+                }
+            },
+        });
+    }
+
     async createMessage(createMessageInput: CreateMessageInput): Promise<Message> {
         return this.prisma.message.create({
             data: {
@@ -27,7 +43,17 @@ export class MessageService {
             },
         });
     }
-    // Additional methods can be added based on your requirements
+
+    async updateMessage(mid: string, text: string): Promise<Message> {
+        return this.prisma.message.update({
+            where: { id: mid },
+            data: {
+                text: text,
+                updatedAt: new Date(),
+            },
+        });
+    }
+
     async deleteMessage(messageId: string): Promise<Message> {
         return this.prisma.message.delete({
             where : {id : messageId}

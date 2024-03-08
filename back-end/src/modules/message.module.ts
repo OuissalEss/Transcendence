@@ -4,6 +4,7 @@ import {MessageResolver} from "../resolvers/message.resolver";
 import {PrismaService} from "../services/prisma.service";
 
 @Module({
-  providers: [MessageService, MessageResolver, PrismaService]
+  providers: [MessageService, MessageResolver, PrismaService],
+  exports: [MessageService],
 })
 export class MessageModule {}

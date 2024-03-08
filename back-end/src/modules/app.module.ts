@@ -1,5 +1,8 @@
+import { MuteModule } from './mute.module';
+import { BanModule } from './ban.module';
+
 import { join } from 'path';
-import {APP_GUARD} from "@nestjs/core";
+import { APP_GUARD } from "@nestjs/core";
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -12,16 +15,16 @@ import { PrismaService } from 'src/services/prisma.service';
 import { AppController } from 'src/controllers/app.controller';
 
 
-import {JwtGuard} from "src/guards/jwt.guard";
-import {FriendModule} from "./friend.module";
-import {ChannelModule} from "./channel.module";
-import {ChannelUserModule} from "./channel-user.module";
-import {MessageModule} from "./message.module";
-import {NotificationModule} from "./notification.module";
-import {ThrottlerGuard, ThrottlerModule} from "@nestjs/throttler";
+import { JwtGuard } from "src/guards/jwt.guard";
+import { FriendModule } from "./friend.module";
+import { ChannelModule } from "./channel.module";
+import { ChannelUserModule } from "./channel-user.module";
+import { MessageModule } from "./message.module";
+import { NotificationModule } from "./notification.module";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
-import {ChatGateway} from 'src/gateway/chat.gateway';
-import {GameModule} from "./game.module";
+import { ChatGateway } from 'src/gateway/chat.gateway';
+import { GameModule } from "./game.module";
 
 @Module({
   imports: [
@@ -45,7 +48,9 @@ import {GameModule} from "./game.module";
     ChannelUserModule,
     MessageModule,
     NotificationModule,
-    GameModule
+    GameModule,
+    BanModule,
+    MuteModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,4 +1,8 @@
 import { Controller } from '@nestjs/common';
+import { ChannelService } from 'src/services/channel.service';
 
-@Controller('channel')
-export class ChannelController {}
+@Controller('Chat')
+export class ChannelController {
+	constructor(private readonly channelService: ChannelService) {}
+	
+}
