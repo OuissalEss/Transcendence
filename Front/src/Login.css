@@ -1,0 +1,97 @@
+/* sec page */
+
+.Login {
+    position: relative;
+    min-height: 100vh;
+    /* Minimum height of the header, spanning the entire viewport */
+    display: flex;
+    /* Use flexbox for layout */
+    flex-direction: column;
+    /* Arrange child elements in a column */
+    align-items: center;
+    /* Center child elements horizontally */
+    justify-content: center;
+    /* Center child elements vertically */
+    font-size: calc(5px + 1vmin);
+    /* Responsive font size based on viewport size */
+    color: white;
+    /* Text color */
+    background: url('./assets/Background.png') center/cover no-repeat;
+    /* Background image with center/cover properties */
+    z-index: 1;
+    /* Set a z-index value to bring the header above the girl image */
+  }
+  
+  .Login::before {
+    content: "";
+    /* Create a pseudo-element for overlay */
+    position: absolute;
+    /* Position the overlay absolutely within the .Login */
+    top: 0;
+    /* Align the overlay to the top of the .Login */
+    left: 0;
+    /* Align the overlay to the left of the .Login */
+    width: 100%;
+    /* Full width of the .Login */
+    height: 100%;
+    /* Full height of the .Login */
+    background: linear-gradient(to bottom, rgba(255, 129, 160, 0.7), rgba(255, 151, 183, 0.7));
+    /* Gradient overlay from top to bottom with alpha values */
+    filter: blur(5px);
+    /* Loginly a blur effect to the overlay */
+    z-index: 0;
+    /* Set a lower z-index value to position the blur behind the girl image */
+  }
+  .LogoImage {
+    position: absolute;
+    left: 100px;
+    top: 40px;
+    width: 70px;
+    height: auto;
+  }
+  
+  body {
+    margin: 0;
+  }
+  
+  
+  
+  /* Login.css */
+  .transparentButton {
+    position: absolute;
+    top: 500px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #3E1256;
+    color: #3E1256;
+    border-radius: 15px;
+    padding: 25px 150px;
+    cursor: pointer;
+    font-family: 'Yusei Magic';
+    font-size: 30px;
+    z-index: 3;
+    background-color: transparent;
+  }
+  
+  
+  
+  
+  .LogIn {
+    position: absolute;
+    top: 300px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #3E1256;
+    font-family: 'Yusei Magic';
+    z-index: 3;
+    font-size: 80px;
+  }
+  
+  .logo {
+    width: 50px;
+    height: 40px;
+    margin-left: 20px;
+  
+  }
+  
+  

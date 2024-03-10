@@ -1,0 +1,238 @@
+.Start {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(5px + 1vmin);
+  color: white;
+  background: url('./assets/Background.png') center/cover no-repeat;
+  z-index: 1;
+}
+
+.Start::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255, 129, 160, 0.7), rgba(255, 151, 183, 0.7));
+  filter: blur(5px);
+  z-index: 0;
+}
+
+.LogoImage {
+  position: absolute;
+  left: 100px;
+  top: 40px;
+  width: 70px;
+  height: auto;
+}
+
+.Texto {
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  /* Center horizontally */
+  color: #3E1256;
+  font-family: 'Yusei Magic';
+  z-index: 3;
+  font-size: 40px;
+  text-align: center;
+  /* Center text within the div */
+}
+
+.BlurryRectangle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 60%;
+  background-color: rgba(114, 196, 255, 0.2);
+  /* Adjust the alpha channel for transparency */
+  border-radius: 10px;
+  z-index: 2;
+}
+
+.Avatar1 {
+  position: absolute;
+  top: 35%;
+  left: 23%;
+  width: 6%;
+  height: auto;
+  z-index: 3;
+}
+
+.UsernameRectangle {
+  position: absolute;
+  top: 48%;
+  /* Adjust the top position as needed */
+  left: 19%;
+  width: 250px;
+  /* Adjust the width as needed */
+  height: 50px;
+  /* Adjust the height as needed */
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.UsernameText {
+  color: white;
+  font-size: 18px;
+  /* Adjust the font size as needed */
+  font-family: 'Yusei Magic';
+  /* Adjust the font family as needed */
+}
+
+
+.StartRectangle {
+  position: absolute;
+  top: 70%;
+  /* Adjust the top position as needed */
+  left: 20%;
+  width: 200px;
+  /* Adjust the width as needed */
+  height: 50px;
+  /* Adjust the height as needed */
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.StartText {
+  color: white;
+  font-size: 18px;
+  /* Adjust the font size as needed */
+  font-family: 'Yusei Magic';
+  /* Adjust the font family as needed */
+}
+
+.CharacterRectangle {
+  position: absolute;
+  top: 26%;
+  /* Adjust the top position as needed */
+  left: 55%;
+  width: 300px;
+  /* Adjust the width as needed */
+  height: 50px;
+  /* Adjust the height as needed */
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.CharacterText {
+  color: white;
+  font-size: 18px;
+
+  /* Adjust the font size as needed */
+  font-family: 'Yusei Magic';
+  /* Adjust the font family as needed */
+}
+
+.CharacterName {
+  font-size: 30px;
+
+  /* Adjust the font size as needed */
+  font-family: 'Yusei Magic';
+  /* Adjust the font family as needed */
+}
+
+.CharacterName {
+  position: absolute;
+  top: 59%;
+  left: 60%;
+  color: #3E1256;
+  font-family: 'Yusei Magic';
+  z-index: 3;
+  font-size: 40px;
+  text-align: center;
+}
+
+.CharacterImage {
+  position: absolute;
+  top: 30%;
+  left: 58.5%;
+  width: 8%;
+  height: auto;
+  z-index: 3;
+  transition: transform 0.5s ease-in-out;
+}
+
+.CharacterImage.Selected {
+  transform: scale(1.1);
+  /* Adjust the scale factor as needed */
+}
+
+.CharacterInfos {
+  position: absolute;
+  top: 68%;
+  left: 52%;
+  /* width: 200px;  */
+  height: 120px;
+  /* border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;  */
+  z-index: 2;
+}
+
+.ChevronLeft {
+  position: absolute;
+  top: 45%;
+  left: 50;
+  z-index: 3;
+}
+
+.ChevronRight {
+  position: absolute;
+  top: 45%;
+  left: 72.5%;
+  z-index: 3;
+}
+
+.UsernameInput {
+  position: absolute;
+  top: 48%;
+  left: 19%;
+  width: 250px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  color: white;
+  font-size: 18px;
+  font-family: 'Yusei Magic';
+  padding: 0 10px;
+  border: none;
+  outline: none;
+}
+
+ .StartRectangle.NotReady {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-10px); /* Adjust the translation distance as needed */
+   }
+}  
