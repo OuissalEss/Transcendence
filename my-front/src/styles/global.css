@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.container {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.backgroundImage {
+  background-image: url('../assets/Background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  filter: blur(5px);
+  background-color: rgb(242, 237, 237);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background-color: rgba(255, 192, 203, 0.5);
+}
+
+.characterImage, .logo, .title {
+  position: fixed;
+  z-index: 10;
+}
+
+.rightTop {
+  top: 0;
+  right: 0;
+}
+
+.leftTop {
+  top: 0;
+  left: 0;
+}
+
+.leftMiddle {
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+}
+
+.image {
+  width: auto;
+  height: auto;
+}
+
+.textContainer {
+  position: fixed;
+  left: 18%;
+  top: 65%;
+  z-index: 10;
+  }
+  
+  .titleText {
+  font-size: 30px;
+  color: #3E1256;
+  font-family: 'Yusei Magic', sans-serif;
+  }
+  
+  .normalText {
+  color: #3E1256;
+  font-family: 'Yusei Magic', sans-serif;
+  font-size: 20px;
+  }

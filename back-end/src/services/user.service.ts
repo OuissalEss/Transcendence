@@ -9,6 +9,7 @@ import {CreateUserInput} from './dto/create-user.input';
 import {User} from "src/entities/user.entity";
 
 import {userIncludes} from "../includes/user.includes";
+import { CreateUserTestInput } from './dto/create-user-test.input';
 
 
 
@@ -88,6 +89,30 @@ export class UserService {
           data: { lastName: updatedLastName },
           include: userIncludes,
       });
+ }
+
+ async CreateUserTest(user: string, pwd: string, avatar: string): Promise<User> {
+     return this.prisma.user.create({
+         data: {
+             username: user,
+             email: 'email@email.com',
+             firstName: 'firstName', // Add the firstName property
+             lastName: 'lastName', // Add the lastName property
+             password: pwd, // Add the password property
+            avatarTest: avatar,
+            },
+         include: userIncludes,
+     });
+ }
+
+ async updateAvatar(userId: string, filename: string): Promise<User> {
+    return this.prisma.user.update({
+        where: { id: userId },
+        data: {
+            avatarTest: filename,
+        },
+        include: userIncludes,
+    });
  }
 
  async createUser(createUserInput: CreateUserInput): Promise<User> {

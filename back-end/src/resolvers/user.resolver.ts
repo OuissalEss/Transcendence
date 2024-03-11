@@ -1,16 +1,19 @@
 // user.resolver.ts
 
-import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
+import { Resolver, Query, Args, Mutation, ResolveField, Parent } from '@nestjs/graphql';
 import { UserService } from 'src/services/user.service';
 import { User } from 'src/entities/user.entity';
 import {UpdateUserInput} from "../services/dto/update-user.input";
 import {NotFoundException} from "@nestjs/common";
 
 import { Status } from '@prisma/client'; // Import the Prisma-generated Status enum
+import { CreateUserTestInput } from 'src/services/dto/create-user-test.input';
 
 @Resolver(of => User)
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+  ) {}
 
   @Query(() => [User], {
     name: "getAllUsers",
@@ -101,4 +104,22 @@ export class UserResolver {
 
     return this.userService.deleteUser(userId);
   }
+
+  @Mutation(() => User)
+  async createUser(
+    @Args('usrnm') usrnm: string,
+    @Args('pwd') pwd: string,
+    @Args('avatar') avatar: string,
+  ) : Promise<User> {
+    return this.userService.CreateUserTest(usrnm, pwd, avatar);
+  }
+
+  @Mutation(() => User)
+  async updateAvatar(
+    @Args('uid') uid: string,
+    @Args('avatar') avatar: string,
+  ): Promise<User>{
+    return this.userService.updateAvatar(uid, avatar);
+  }
+
 }

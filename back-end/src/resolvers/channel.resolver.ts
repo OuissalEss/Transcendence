@@ -82,7 +82,7 @@ export class ChannelResolver {
   })
   async getChannelBanned(@Parent() channel: Channel): Promise<User[]> {
         const cid = channel.id as string;
-        return this.banService.getBanList(cid);
+        return this.banService.getBannedUserListByCid(cid);
   }
 
   @ResolveField(() => [User], {
@@ -91,7 +91,7 @@ export class ChannelResolver {
   })
   async getChannelMuted(@Parent() channel: Channel): Promise<User[]> {
         const cid = channel.id as string;
-        return this.muteService.getMuteList(cid);
+        return this.muteService.getMutedUserListCid(cid);
   }
 
   @ResolveField(() => [Message], {

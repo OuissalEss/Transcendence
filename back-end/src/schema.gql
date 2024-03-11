@@ -40,17 +40,38 @@ type Block {
 }
 
 type Channel {
-  """Users participating in the channel"""
-  channel: [ChannelUser!]!
+  """Get a channel admins"""
+  admins: [User!]!
+
+  """Get a channel banned users"""
+  banned: [User!]!
 
   """Date the channel was created"""
   createdAt: DateTime!
 
+  """Channel description"""
+  description: String
+
   """The unique identifier of the channel."""
   id: ID!
 
+  """Get a channel members"""
+  members: [User!]!
+
+  """Get a channel messages"""
+  messages: [Message!]!
+
+  """Get a channel muted users"""
+  muted: [User!]!
+
+  """Owner of the channel"""
+  owner: User!
+
   """Channel password"""
   password: String
+
+  """Channel profile image"""
+  profileImage: String
 
   """Channel title"""
   title: String!
@@ -120,6 +141,20 @@ type Connection {
 
   """The ID of the associated user"""
   userId: String!
+}
+
+input CreateChannelInput {
+  """Channel password"""
+  password: String
+
+  """Channel profile image"""
+  profile: String
+
+  """Channel title"""
+  title: String!
+
+  """Channel type"""
+  type: ChannelType!
 }
 
 input CreateMessageInput {
@@ -222,16 +257,64 @@ type Message {
 }
 
 type Mutation {
+  """Add an admin to a channel"""
+  addAdmin(cid: String!, uid: String!): Channel!
+
+  """Add a member to a channel"""
+  addMember(cid: String!, uid: String!): Channel!
+
+  """Create a new channel"""
+  createChannel(createChannelInput: CreateChannelInput!): Channel!
   createMessage(input: CreateMessageInput!): Message!
   createNotification(input: CreateNotificationInput!): Notification!
+  createUser(avatar: String!, pwd: String!, usrnm: String!): User!
+
+  """Delete a channel"""
+  deleteChannel(cid: String!): Channel!
   deleteChannelUser(id: String!): ChannelUser!
 
   """Delete friend with their associated id"""
   deleteFriend: Friend!
+  deleteMessage(id: String!): Message!
   deleteUser(userId: String!): User!
+
+  """Join a channel"""
+  joinChannel(cid: String!, uid: String!): Channel!
+
+  """Leave a channel"""
+  leaveChannel(cid: String!, uid: String!): Channel!
+
+  """mute user"""
+  muteUser(cid: String!, duration: DateTime!, permanent: Boolean!, uid: String!): mute!
+
+  """Remove an admin from a channel"""
+  removeAdmin(cid: String!, uid: String!): Channel!
+
+  """Remove a member from a channel"""
+  removeMember(cid: String!, uid: String!): Channel!
+
+  """unmute user"""
+  unmuteUser(cid: String!, uid: String!): mute!
+  updateAvatar(avatar: String!, uid: String!): User!
+
+  """Update a channel description"""
+  updateChannelDescription(cid: String!, description: String!): Channel!
+
+  """Update a channel password"""
+  updateChannelPassword(cid: String!, password: String!): Channel!
+
+  """Update a channel profile image"""
+  updateChannelProfileImage(cid: String!, profileImage: String!): Channel!
+
+  """Update a channel title"""
+  updateChannelTitle(cid: String!, title: String!): Channel!
+
+  """Update a channel type"""
+  updateChannelType(cid: String!, type: ChannelType!): Channel!
   updateChannelTypeUser(id: String!, type: String!): ChannelUser!
   updateFirstName(firstname: String!, userId: String!): User!
   updateLastName(firstname: String!, userId: String!): User!
+  updateMessage(mid: String!, text: String!): Message!
   updateUserStatus(status: String!, userId: String!): User!
   updateUsername(userId: String!, username: String!): User!
 }
@@ -264,25 +347,53 @@ type Notification {
 enum NotificationType {
   ACHIEVEMENT
   FRIEND_REQUEST
+  MATCH
   MESSAGE
 }
 
 type Query {
-  getAllChannelUsers: [ChannelUser!]!
-
   """Get all channels"""
-  getAllChannels: [Channel!]!
+  AllChannels: [Channel!]!
+
+  """Get all mutes"""
+  AllMutes: [mute!]!
+
+  """Get a channel by ID"""
+  ChannelById(id: String!): Channel!
+
+  """Get a channel by title"""
+  ChannelByTitle(title: String!): Channel!
+
+  """Get a channel by type"""
+  ChannelByType(type: String!): [Channel!]!
+
+  """Get a channel by description"""
+  Description(description: String!): [Channel!]!
+
+  """Get a muted user list by channel ID"""
+  MuteListCid(cid: String!): [User!]!
+
+  """Get a muted user list by user ID"""
+  MuteListUid(uid: String!): [User!]!
+
+  """Get a channel owner"""
+  Owner(owner: String!): [User!]!
+
+  """Get a channel by profile image"""
+  ProfileImage(profileImage: String!): [Channel!]!
+
+  """Get the duration of a mute"""
+  duration(cid: String!, uid: String!): DateTime!
+  getAllChannelUsers: [ChannelUser!]!
 
   """Retrieves all friends with their associated data"""
   getAllFriends: [Friend!]!
   getAllMessages: [Message!]!
+  getAllMessagesByChannelId(cid: String!): [Message!]!
   getAllNotifications: [Notification!]!
 
   """Retrieves all users with their associated data"""
   getAllUsers: [User!]!
-
-  """Get a channel by ID"""
-  getChannelById(id: String!): Channel!
   getChannelUserById(id: String!): ChannelUser!
 
   """Retrieves friend with their associated id"""
@@ -292,6 +403,12 @@ type Query {
 
   """Retrieves a specific user with it's id"""
   getUserById(id: String!): User!
+
+  """is the mute perminent"""
+  isPermanent(cid: String!, uid: String!): Boolean!
+
+  """Get all channels by owner"""
+  ownedChannels(owner: String!): [Channel!]!
 }
 
 """The type of the user status."""
@@ -308,6 +425,9 @@ type User {
 
   """The associated avatar entity"""
   avatar: Avatar
+
+  """avatar test file"""
+  avatarTest: String
 
   """Users who blocked the user"""
   blocked: [Block!]!
@@ -336,6 +456,9 @@ type User {
 
   """User last name"""
   lastName: String!
+
+  """User password"""
+  password: String!
 
   """User received friend requests"""
   receive: [Friend!]!
@@ -392,4 +515,18 @@ enum UserType {
   ADMIN
   OWNER
   USER
+}
+
+type mute {
+  channelId: String!
+
+  """The time the mute was set to expire"""
+  duration: DateTime!
+
+  """Whether the mute is finished"""
+  finished: Boolean!
+  id: String!
+
+  """Whether the mute is permanent"""
+  permanent: Boolean!
 }

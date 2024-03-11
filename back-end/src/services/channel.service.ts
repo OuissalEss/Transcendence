@@ -135,24 +135,6 @@ export class ChannelService {
         return channelUser.type == UserType.OWNER;
     }
 
-    async isUserBanned(cid: string, uid: string): Promise<boolean> {
-        const banned = await this.prisma.ban.findFirst({
-            where: {
-                AND: [{ userId: uid }, { channelId: cid }],
-            }
-        });
-        return banned != null;
-    }
-
-    async isUserMuted(cid: string, uid: string): Promise<boolean> {
-        const muted = await this.prisma.mute.findFirst({
-            where: {
-                AND: [{ userId: uid }, { channelId: cid }],
-            }
-        });
-        return muted.finished;
-    }
-
     /**
      * Mutators
     */
@@ -299,7 +281,7 @@ export class ChannelService {
         const channel = await this.prisma.channel.findUnique({
             where: {id: cid},
         });
-        if (await this.isUserBanned(cid, uid))
+        if (await this.banService.isUserBanned(cid, uid))
             throw new ForbiddenException("User is banned from channel");
         if (channel.type === ChannelType.PUBLIC) {
             return this.prisma.channelUser.create({

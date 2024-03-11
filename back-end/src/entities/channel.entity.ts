@@ -1,7 +1,6 @@
 // channel.entity.ts
 import { Field, ObjectType, ID, registerEnumType} from '@nestjs/graphql';
 import { IsString, IsNotEmpty, IsInt, IsDate, IsOptional, IsEnum, isString } from 'class-validator';
-import { ChannelUser } from './channel-user.entity';
 
 
 //import {ChannelType} from 'src/enums/channel.enum';

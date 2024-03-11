@@ -56,10 +56,10 @@ import { GameModule } from "./game.module";
   providers: [
     ChatGateway,
     PrismaService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtGuard
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtGuard
+    // },
 //    {
 //      provide: APP_GUARD,
 //      useClass: ThrottlerGuard

@@ -1,0 +1,36 @@
+.textContainer {
+position: fixed;
+left: 20px;
+top: 50%;
+z-index: 10;
+}
+
+.titleText {
+font-size: 30px;
+color: #3E1256;
+font-family: 'Yusei Magic', sans-serif;
+}
+
+.normalText {
+color: #3E1256;
+font-family: 'Yusei Magic', sans-serif;
+font-size: 20px;
+}
+
+.buttonContainer {
+position: fixed;
+bottom: 20px;
+left: 40px;
+z-index: 10;
+}
+
+.button {
+background-color: #3E1256;
+font-family: 'Yusei Magic', sans-serif;
+color: white;
+font-weight: bold;
+padding: 10px 20px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+}

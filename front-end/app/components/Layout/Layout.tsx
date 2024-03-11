@@ -1,9 +1,9 @@
 import React from "react";
-import Pong from "../pong/page";
 // import "./Layout.css";
 
 // Importing all created components
 import Sidebar from "../Sidebar/Sidebar";
+import Players from "../Player/Player";
 
 // Pass the child props
 export default function Layout({ children }) {

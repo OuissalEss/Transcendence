@@ -1,0 +1,90 @@
+.BlurryRectangle {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 70%;
+height: 60%;
+background-color: rgba(114, 196, 255, 0.2);
+border-radius: 10px;
+z-index: 10;
+}
+
+.AvatarContainer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+  .avatar-navigation {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-left: 70px; /* Adjust the margin as needed */
+  }
+  
+
+.Avatar { 
+position: absolute;
+top: 25%;
+left: 10%;
+width: 20%;
+height: auto;
+border-radius: 50%;
+z-index: 10;
+}
+
+.ChevronLeft {
+	position: absolute;
+	top: 43.5%;
+	right: 90%;
+	z-index: 10;
+	cursor: pointer;
+}
+
+.ChevronRight {
+	position: absolute;
+	top: 43.5%;
+	left: 30%;
+	z-index: 10;
+	cursor: pointer;
+}
+
+.user-card {
+	display: flex;
+	align-items: center;
+	background-color: #f9f9f9;
+	padding: 10px;
+	border-radius: 8px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* .avatar {
+	position: relative;
+  }
+  
+  .avatar img {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+  } */
+  
+  .connected-icon {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+	width: 15px;
+	height: 15px;
+	background-color: #2ecc71; /* Green color */
+	border-radius: 50%;
+  }
+  
+  .user-info {
+	margin-left: 20px;
+  }
+  
+  .user-info h2 {
+	margin: 0;
+	font-size: 18px;
+	color: #333;
+  }
+  

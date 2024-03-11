@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useContext } from "react";
 import jwt from 'jsonwebtoken';
 import { useEffect, useState } from "react";
-import User from "../types/user-interace";
 import { getCookie } from "cookies-next";
 
 // import { AiOutlineHome, AiFillHome, AiOutlineWechat } from "react-icons/ai";

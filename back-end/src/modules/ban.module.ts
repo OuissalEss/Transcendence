@@ -4,7 +4,10 @@ import { PrismaService } from 'src/services/prisma.service';
 import { ChannelModule } from './channel.module';
 @Module({
     imports: [forwardRef(() => ChannelModule)],
-    providers: [BanService, PrismaService],
+    providers: [
+        BanService,
+        PrismaService,
+    ],
     exports: [BanService]
 })
 export class BanModule { }

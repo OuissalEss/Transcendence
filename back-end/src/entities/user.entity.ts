@@ -19,8 +19,6 @@ import { Notification } from 'src/entities/notification.entity';
 import {Avatar} from "./avatar.entity";
 
 import { Status } from '@prisma/client'; // Import the Prisma-generated Status enum
-import { ban } from './ban.entity';
-import { mute } from './mute.entity';
 //import { Status } from 'src/enums/status.enum';
 
 @ObjectType()
@@ -178,6 +176,25 @@ export class User {
   host?: Match[];
 
   /**
+   * avatar test file
+   * @type {String}
+   */
+  @Field(() => String, {
+    description: 'avatar test file',
+    nullable: true,
+  })
+  avatarTest?: string;
+
+  /**
+   * User password.
+   * @type {string}
+   */
+  @Field({ description: 'User password' })
+  @IsString({ message: 'Password must be a string' })
+  @IsNotEmpty({ message: 'Password cannot be empty' })
+  password: string;
+
+  /**
    * Matches where the user is the guest (nullable).
    * @type {Match[]}
    */
@@ -251,25 +268,25 @@ export class User {
   })
   updatedAt: Date;
 
-  /**
-   * The channels where the user is banned.
-   * @type {ban[]}
-   */
-  @Field(() => [ban], {
-    description: 'User banned channels',
-    defaultValue: [],
-  })
-  banned?: ban[];
+  // /**
+  //  * The channels where the user is banned.
+  //  * @type {ban[]}
+  //  */
+  // @Field(() => [Channel], {
+  //   description: 'User banned channels',
+  //   defaultValue: [],
+  // })
+  // banned?: Channel[];
 
-    /**
-   * The channels where the user is muted.
-   * @type {mute[]}
-   */
-    @Field(() => [mute], {
-      description: 'User muted channels',
-      defaultValue: [],
-    })
-    muted?: mute[];
+  //   /**
+  //  * The channels where the user is muted.
+  //  * @type {mute[]}
+  //  */
+  //   @Field(() => [mute], {
+  //     description: 'User muted channels',
+  //     defaultValue: [],
+  //   })
+  //   muted?: mute[];
 }
 
 

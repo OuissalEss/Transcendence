@@ -30,7 +30,7 @@ export class mute {
 	})
 	@IsNotEmpty({ message: 'Mute expiry time cannot be empty' })
 	@IsOptional()
-	expiryTime?: Date;
+	duration?: Date;
 
 	/**
 	 * Indicates whether the mute finished or not.
@@ -42,7 +42,7 @@ export class mute {
 		defaultValue: false,
 		description: 'Whether the mute is finished',
 	})
-	isFinished: boolean;
+	finished: boolean;
 
 	/**
 	 * Indicates whether the mute is permanent or not.
@@ -54,23 +54,15 @@ export class mute {
 		defaultValue: false,
 		description: 'Whether the mute is permanent',
 	})
-	isPermanent: boolean;
+	permanent: boolean;
 
 	/**
-	 * The user associated with this mute.
-	 * @type {User}
+	 * channel id
+	 * @type {string}
 	 */
-	@Field(() => User, {
-		description: 'User associated with this mute'
-	})
-	userID: User;
+	@Field(() => String)
+	@IsString({ message: 'Mute ID must be an string' })
+	@IsNotEmpty({ message: 'Mute ID cannot be empty' })
+	channelId: string;
 
-	/**
-	 * The channel associated with this mute.
-	 * @type {Channel}
-	 */
-	@Field(() => Channel, {
-		description: 'Channel associated with this mute'
-	})
-	channelID: Channel;
 }
