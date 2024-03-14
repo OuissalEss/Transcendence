@@ -1,134 +1,135 @@
 /* sec page */
 
 .Login {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(5px + 1vmin);
-  color: white;
-  background: url('./assets/Background.png') center/cover no-repeat;
-  z-index: 1;
-}
-
-.Login::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, rgba(255, 129, 160, 0.7), rgba(255, 151, 183, 0.7));
-  filter: blur(5px);
-  z-index: 0;
-}
-.LogoImage {
-  position: absolute;
-  left: 100px;
-  top: 40px;
-  width: 70px;
-  height: auto;
-}
-
-body {
-  margin: 0;
-}
-
-/* Login.css */
-.transparentButton {
-  position: absolute;
-  top: 250px;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 3px solid #3E1256;
-  color: #3E1256;
-  border-radius: 50px;
-  padding: 15px 85px;
-  cursor: pointer;
-  font-family: 'Yusei Magic';
-  font-size: 25px;
-  z-index: 3;
-  background-color: transparent;
-}
-
-.LogIn {
-  position: absolute;
-  top: 150px;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #3E1256;
-  font-family: 'Yusei Magic';
-  z-index: 3;
-  font-size: 50px;
-}
-
-.logo {
-  width: 40px;
-  height: 30px;
-  margin-left: 15px;
-
-}
-
-.GoogleLoginButton {
-  position: absolute;
-  top: 350px; /* Adjust this value to lift up or down */
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 3px solid #3E1256;
-  color: #3E1256;
-  border-radius: 50px;
-  padding: 11px 85px;
-  cursor: pointer;
-  font-family: 'Yusei Magic';
-  font-size: 25px;
-  z-index: 3;
-  background-color: transparent;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(5px + 1vmin);
+    color: white;
+    background: url('./assets/Background.png') center/cover no-repeat;
+    z-index: 1;
+  }
+  
+  .Login::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255, 129, 160, 0.7), rgba(255, 151, 183, 0.7));
+    filter: blur(5px);
+    z-index: 0;
+  }
+  .LogoImage {
+    position: absolute;
+    left: 100px;
+    top: 40px;
+    width: 70px;
+    height: auto;
+  }
+  
+  body {
+    margin: 0;
+    overflow: hidden;
+  }
+  
+  /* Login.css */
+  .transparentButton {
+    position: absolute;
+    top: 250px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid #3E1256;
+    color: #3E1256;
+    border-radius: 50px;
+    padding: 15px 85px;
+    cursor: pointer;
+    font-family: 'Yusei Magic';
+    font-size: 25px;
+    z-index: 3;
+    background-color: transparent;
+  }
+  
+  .LogIn {
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #3E1256;
+    font-family: 'Yusei Magic';
+    z-index: 3;
+    font-size: 50px;
+  }
+  
+  .logo {
+    width: 40px;
+    height: 30px;
+    margin-left: 15px;
+  
+  }
+  
+  .GoogleLoginButton {
+    position: absolute;
+    top: 350px; /* Adjust this value to lift up or down */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid #3E1256;
+    color: #3E1256;
+    border-radius: 50px;
+    padding: 11px 85px;
+    cursor: pointer;
+    font-family: 'Yusei Magic';
+    font-size: 25px;
+    z-index: 3;
+    background-color: transparent;
 }
 
 .GoogleLoginButton .continue-text {
-position: relative;
-top: -10px; /* Adjust this value to lift up or down */
+  position: relative;
+  top: -10px; /* Adjust this value to lift up or down */
 }
 
-.GoogleLogo {
-  width: 40px;
-  height: 40px;
-  margin-left: 15px;
+  .GoogleLogo {
+    width: 40px;
+    height: 40px;
+    margin-left: 15px;
+  
+  }
 
-}
+  .transparentButton:hover,
+  .GoogleLoginButton:hover {
+      background-color: #3E1256;
+      color: white;
+  }
 
-.transparentButton:hover,
-.GoogleLoginButton:hover {
-    background-color: #3E1256;
-    color: white;
-}
-
-.transparentButton:hover .logo {
-  filter: brightness(0) invert(1);
+  .transparentButton:hover .logo {
+    filter: brightness(0) invert(1);
 }
 
 .Pixie{
-position: absolute;
-top: 656px;
-height: 40vh;
-left: 50%; /* Place the left edge of the image at the horizontal center of the page */
-transform: translate(-50%, -50%);
+  position: absolute;
+  top: 656px;
+  height: 40vh;
+  left: 50%; /* Place the left edge of the image at the horizontal center of the page */
+  transform: translate(-50%, -50%);
 }
 
 .Nova{
-position: absolute;
-top: 173px;
-left: 200px;
-height: 81vh;
+  position: absolute;
+  top: 173px;
+  left: 200px;
+  height: 81vh;
 
 
 }
 
 .Aegeon{
-position: absolute;
-top: 169px;
-left: 1000px;
-height: 82vh;
+  position: absolute;
+  top: 169px;
+  left: 1000px;
+  height: 82vh;
 }

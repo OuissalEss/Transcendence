@@ -16,8 +16,7 @@ import NovaInfos from './assets/NovaInfos.png';
 import AuroraInfos from './assets/AuroraInfos.png';
 import ChevronLeft from './assets/ChevronLeft.png';
 import ChevronRight from './assets/ChevronRight.png';
-import {useNavigate } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 
 const characters = [
   { name: 'Aurora', image: Aurora, infos: AuroraInfos },
@@ -33,7 +32,6 @@ function Start() {
   const [username, setUsername] = useState('');
   const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
   const [isCharacterSelected, setIsCharacterSelected] = useState(false);
-  const [isReadyToGo, setIsReadyToGo] = useState(false);
   const navigate = useNavigate();
 
   const handleSetUsernameClick = () => {
@@ -42,19 +40,17 @@ function Start() {
 
   const handleUsernameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value);
-    setIsReadyToGo(false);
   };
-
+  
   const handleUsernameInputEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       setShowUsernameInput(false);
-      setIsReadyToGo(true);
     }
   };
+  
 
   const handleLeftChevronClick = () => {
     setCurrentCharacterIndex((prevIndex) => (prevIndex - 1 + characters.length) % characters.length);
-    setIsReadyToGo(false);
   };
 
   const handleRightChevronClick = () => {
@@ -65,32 +61,14 @@ function Start() {
 
   const handleChooseCharacterClick = () => {
     setIsCharacterSelected(true);
-    setTimeout(() => {
-      setIsCharacterSelected(false);
-    }, 1000); // Adjust the timeout as needed for the transition duration
   };
 
   const handleStartButtonClick = () => {
-    if (isReadyToGo) {
-      // Navigate to the dashboard page
+    if (username && isCharacterSelected) {
       navigate('/dashboard');
-    } else {
-      // If any condition is not met, add the 'NotReady' class and trigger the animation
-      const startButton = document.querySelector('.StartRectangle') as HTMLElement;
-
-      // Use optional chaining to handle null case
-      startButton?.classList.add('NotReady');
-
-      // Trigger reflow to force the class to be applied before the animation starts
-      startButton?.offsetWidth;
-
-      // Remove the 'NotReady' class after the animation duration (0.3 seconds)
-      setTimeout(() => {
-        // Use optional chaining to handle null case
-        startButton?.classList.remove('NotReady');
-      }, 300);
     }
   };
+  
 
   return (
     <div className="Start">
@@ -110,15 +88,12 @@ function Start() {
             <p className="UsernameText">{username || 'Set username'}</p>
           </button>
         )}
-        {/* <Link to="/dashboard"> */}
         <button
           className={`StartRectangle ${(!username || !isCharacterSelected) && 'Disabled'}`}
           onClick={handleStartButtonClick}
-          disabled={!isReadyToGo}
         >
           <p className="StartText">Let's go!</p>
         </button>
-        {/* </Link> */}
         <button className="CharacterRectangle" onClick={handleChooseCharacterClick}>
           <p className="CharacterText">Choose your character</p>
         </button>

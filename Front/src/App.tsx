@@ -19,7 +19,7 @@ function Landing() {
         <img src={GirlImage} className="GirlImage" alt="GirlImage" />
         <img src={LogoImage} className="LogoImage" alt="LogoImage" />
         <img src={TitleImage} className="TitleImage" alt="TitleImage" />
-        <Link to="/login">
+        <Link to="/start">
           <button className="GetStartedButton">Get Started</button>
         </Link>
       </header>

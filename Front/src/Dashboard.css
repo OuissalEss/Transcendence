@@ -1,67 +1,70 @@
 .Border1 {
     position: absolute;
-    width: 110px;
+    width: 86px;
     height: 97%;
-    background-color: rgba(114, 196, 255, 0.30);
+    background-color: rgba(114, 196, 255, 0.28);
     border-radius: 60px;
-    left: 79px;
+    left: 29px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
 }
 
 .Border2 {
     position: absolute;
-    width: 110px;
+    width: 86px;
     height: 97%;
-    background-color: rgba(114, 196, 255, 0.30);
+    background-color: rgba(114, 196, 255, 0.28);
     border-radius: 60px;
-    right: 79px;
+    right: 29px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .HomeIcon {
     position: absolute;
-    left: 89px;
-    top: 350px;
-    height: 75px;
+    left: 40px;
+    top: 210px;
+    height: 57px;
 }
 
 .GameIcon {
     position: absolute;
-    left: 100px;
-    top: 495px;
-    height: 67px;
+    left: 46px;
+    top: 290px;
+    height: 53px;
 }
 
 .ChatIcon {
     position: absolute;
-    left: 105px;
-    top: 622px;
-    height: 57px;
+    left: 50px;
+    top: 365px;
+    height: 43px;
 }
 
 .SettingsIcon {
     position: absolute;
-    left: 105px;
-    top: 745px;
-    height: 61px;
+    left: 49px;
+    top: 440px;
+    height: 48px;
 }
 
 .InfosIcon {
     position: absolute;
-    left: 103px;
-    top: 885px;
-    height: 60px;
+    left: 48px;
+    top: 520px;
+    height: 47px;
 }
 
 .LogoutIcon {
     position: absolute;
-    left: 103px;
-    top: 1210px;
+    left: 48px;
+    top: 715px;
+    height: 60px;
 }
 
 .Avatar {
     position: absolute;
-    top: 40px;
-    height: 80px;
-    right: 94px;
+    top: 37px;
+    height: 72px;
+    right: 36px;
 }
 
 .Avatar2 {

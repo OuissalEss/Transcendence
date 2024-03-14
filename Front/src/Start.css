@@ -23,34 +23,24 @@
   z-index: 0;
 }
 
-.LogoImage {
-  position: absolute;
-  left: 100px;
-  top: 40px;
-  width: 70px;
-  height: auto;
-}
-
 .Texto {
   position: absolute;
-  top: 10%;
-  left: 15%;
-  /* Center horizontally */
+  top: 40px;
+  left: 200px;
   color: #3E1256;
   font-family: 'Yusei Magic';
   z-index: 3;
   font-size: 40px;
   text-align: center;
-  /* Center text within the div */
 }
 
 .BlurryRectangle {
   position: absolute;
-  top: 50%;
+  top: 450px;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 70%;
-  height: 60%;
+  width: 65%;
+  height: 70%;
   background-color: rgba(114, 196, 255, 0.2);
   /* Adjust the alpha channel for transparency */
   border-radius: 10px;
@@ -59,8 +49,8 @@
 
 .Avatar1 {
   position: absolute;
-  top: 35%;
-  left: 23%;
+  top: 280px;
+  left: 410px;
   width: 6%;
   height: auto;
   z-index: 3;
@@ -68,9 +58,10 @@
 
 .UsernameRectangle {
   position: absolute;
-  top: 48%;
+  top: 400px;
+
   /* Adjust the top position as needed */
-  left: 19%;
+  left: 330px;
   width: 250px;
   /* Adjust the width as needed */
   height: 50px;
@@ -94,9 +85,11 @@
 
 .StartRectangle {
   position: absolute;
-  top: 70%;
+  top: 610px;
+
   /* Adjust the top position as needed */
-  left: 20%;
+  left: 350px;
+
   width: 200px;
   /* Adjust the width as needed */
   height: 50px;
@@ -119,9 +112,9 @@
 
 .CharacterRectangle {
   position: absolute;
-  top: 26%;
+  top: 24%;
   /* Adjust the top position as needed */
-  left: 55%;
+  left: 780px;
   width: 300px;
   /* Adjust the width as needed */
   height: 50px;
@@ -137,23 +130,20 @@
 .CharacterText {
   color: white;
   font-size: 18px;
-
-  /* Adjust the font size as needed */
   font-family: 'Yusei Magic';
-  /* Adjust the font family as needed */
 }
 
-.CharacterName {
-  font-size: 30px;
+/* .CharacterName {
+  font-size: 37px;
 
   /* Adjust the font size as needed */
-  font-family: 'Yusei Magic';
+  /*font-family: 'Yusei Magic';*/
   /* Adjust the font family as needed */
-}
+/* }  */
 
 .CharacterName {
   position: absolute;
-  top: 59%;
+  top: 500px;
   left: 60%;
   color: #3E1256;
   font-family: 'Yusei Magic';
@@ -164,8 +154,8 @@
 
 .CharacterImage {
   position: absolute;
-  top: 30%;
-  left: 58.5%;
+  top: 260px;
+  left: 870px;
   width: 8%;
   height: auto;
   z-index: 3;
@@ -174,41 +164,35 @@
 
 .CharacterImage.Selected {
   transform: scale(1.1);
-  /* Adjust the scale factor as needed */
 }
 
 .CharacterInfos {
   position: absolute;
-  top: 68%;
-  left: 52%;
-  /* width: 200px;  */
+  top: 600px;
+  right: 315px;
   height: 120px;
-  /* border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;  */
   z-index: 2;
 }
 
 .ChevronLeft {
   position: absolute;
-  top: 45%;
-  left: 50;
+  top: 400px;
+  left: 707px;
   z-index: 3;
 }
 
 .ChevronRight {
   position: absolute;
-  top: 45%;
-  left: 72.5%;
+  top: 400px;
+  right: 300px;
   z-index: 3;
 }
 
 .UsernameInput {
   position: absolute;
-  top: 48%;
-  left: 19%;
-  width: 250px;
+  top: 400px;
+  left: 330px;
+  width: 240px;
   height: 50px;
   background-color: rgba(61, 55, 133, 0.34);
   border-radius: 20px;
@@ -224,7 +208,7 @@
   outline: none;
 }
 
- .StartRectangle.NotReady {
+ /* .StartRectangle.NotReady {
   animation: shake 0.3s ease-in-out;
 }
 
@@ -233,6 +217,13 @@
     transform: translateX(0);
   }
   50% {
-    transform: translateX(-10px); /* Adjust the translation distance as needed */
+    transform: translateX(-10px); 
    }
-}  
+}   */
+
+/* .CharacterImage.Luna,
+.CharacterImage.Nova,
+.CharacterImage.Starlight,
+.CharacterImage.Lumina {
+  transform: scale(0.9); 
+} */
