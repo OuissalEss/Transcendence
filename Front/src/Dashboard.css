@@ -20,89 +20,639 @@
 
 .HomeIcon {
     position: absolute;
-    left: 40px;
+    left: 46px;
     top: 210px;
-    height: 57px;
+    height: 43px;
+    cursor: pointer;
+
 }
 
 .GameIcon {
     position: absolute;
-    left: 46px;
+    left: 51px;
     top: 290px;
-    height: 53px;
+    height: 40px;
+    cursor: pointer;
+
 }
 
 .ChatIcon {
     position: absolute;
-    left: 50px;
+    left: 53px;
     top: 365px;
-    height: 43px;
+    height: 35px;
+    cursor: pointer;
+
 }
 
 .SettingsIcon {
     position: absolute;
-    left: 49px;
+    left: 53px;
     top: 440px;
-    height: 48px;
+    height: 39px;
+    cursor: pointer;
+
 }
 
 .InfosIcon {
     position: absolute;
-    left: 48px;
+    left: 52px;
     top: 520px;
-    height: 47px;
+    height: 39px;
+    cursor: pointer;
+
 }
 
 .LogoutIcon {
     position: absolute;
-    left: 48px;
-    top: 715px;
-    height: 60px;
+    left: 52px;
+    top: 760px;
+    height: 45px;
+    cursor: pointer;
+
 }
 
 .Avatar {
     position: absolute;
-    top: 37px;
-    height: 72px;
-    right: 36px;
+    top: 27px;
+    height: 65px;
+    right: 39px;
 }
 
 .Avatar2 {
     position: absolute;
-    height: 70px;
-    top: 170px;
-    right: 99px;
+    height: 50px;
+    top: 120px;
+    right: 46px;
 
 }
 
 .Avatar3 {
     position: absolute;
-    height: 70px;
-    top: 270px;
-    right: 99px;
-
+    height: 50px;
+    top: 200px;
+    right: 46px;
 }
 
 .Avatar4 {
     position: absolute;
-    height: 70px;
-    top: 370px;
-    right: 99px;
+    height: 50px;
+    top: 280px;
+    right: 46px;
 
 }
 
 .Avatar5 {
     position: absolute;
-    height: 70px;
-    top: 470px;
-    right: 99px;
+    height: 50px;
+    top: 360px;
+    right: 46px;
 
 }
 
 .Avatar6 {
     position: absolute;
-    height: 70px;
-    top: 570px;
-    right: 99px;
+    height: 50px;
+    top: 440px;
+    right: 46px;
 
+}
+
+.SearchBar {
+    position: absolute;
+    top: 40px; /* Adjust the top position as needed */
+    right: 20px; /* Position in the center */
+    transform: translateX(-50%);
+    width: 420px; /* Adjust the width as needed */
+    height: 60px; /* Adjust the height as needed */
+    background-color: rgba(255, 255, 241, 0.2);
+    border-radius: 30px; /* Adjust border-radius for smoother edges */
+    display: flex;
+    align-items: center;
+    padding: 0 50px; /* Adjust padding as needed */
+    /* filter: blur(2px); */
+  }
+  
+  .SearchIcon {
+    height: 25px; /* Adjust the size as needed */
+    margin-right: 20px;
+    margin-left: -30px;
+  }
+  
+  .SearchInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: white;
+    font-size: 18px; /* Adjust font-size as needed */
+    font-weight: 600;
+  }
+  
+  .SearchInput::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+    font-weight: 600;
+
+  }
+  
+  .WelcomeMssg {
+    position: absolute;
+    top: 30px;
+    left: 170px;
+    font: 600 30px 'Manrope', sans-serif;
+    font-size: 20px;
+    color: rgba(62, 18, 86, 1);
+  }
+
+  .Character{
+    position: absolute;
+    top: 150px;
+    left: 170px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    color: rgba(62, 18, 86, 1);
+  }
+
+  .Character p{
+    position: absolute;
+    top: 60px;
+    left: 230px;
+    font-size: 35px;
+    font-weight: 600;
+    font-family: 'Manrope', sans-serif;
+
+  }
+  .CharacterBar {
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    width: 540px;
+    height: 300px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+  }
+  
+  .NotificationBar {
+    position: absolute;
+    width: 60px; 
+    height: 60px; 
+    top: 45px; 
+    right: 162px;
+    border-radius: 50%; 
+    background-color: rgba(255, 255, 241, 0.2);
+    border: none; 
+    cursor: pointer;
+  }
+
+  .NotificationIcon {
+    position: absolute; 
+    width: 40px; 
+    height: 40px; 
+    top: 10px;
+    right: 10px;
+  }
+  
+  .TopFivePlayers{
+    position: absolute;
+    right: 460px;
+    top: 150px;
+    color: rgba(62, 18, 86, 1);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+
+  }
+
+    .Question{
+        position: absolute;
+        left: 170px;
+        top: 520px;
+        color: rgba(62, 18, 86, 1);
+        font-size: 15px;
+        font-family: 'Manrope', sans-serif;
+    }
+
+.OnlineBar{
+    position: absolute;
+    top: 590px;
+    left: 160px;
+    width: 170px;
+    height: 170px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+    font-family: 'Manrope', sans-serif;
+    color: rgba(62, 18, 86, 1);
+}
+
+.OnlineBar h1{
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.OnlineBar p{
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    font-size: 11px;
+}
+
+.OfflineBar h1{
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.OfflineBar p{
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    font-size: 11px;
+}
+
+.RobotBar h1{
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.RobotBar p{
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    font-size: 11px;
+}
+
+.OfflineBar{
+    position: absolute;
+    top: 590px;
+    left: 360px;
+    width: 170px;
+    height: 170px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+    font-family: 'Manrope', sans-serif;
+    color: rgba(62, 18, 86, 1);
+}
+
+.RobotBar{
+    position: absolute;
+    top: 590px;
+    left: 560px;
+    width: 170px;
+    height: 170px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+    font-family: 'Manrope', sans-serif;
+    color: rgba(62, 18, 86, 1);
+}
+
+.OnlinePic{
+    position: absolute;
+    top: 591px;
+    left: 222px;
+    height: 280px;
+}
+
+.OfflinePic{
+    position: absolute;
+    top: 589px;
+    left: 440px;
+    height: 170px;
+}
+
+.RobotPic{
+    position: absolute;
+    top: 618px;
+    left: 635px;
+    height: 140px;
+}
+
+.PlayNow1 {
+    position: absolute;
+    top: 713px;
+    left: 170px;
+    width: 150px; /* Increase the width to make the bar bigger */
+    height: 39px; /* Increase the height to make the bar bigger */
+    display: flex; /* Use flexbox */
+    border-radius: 14px;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px; /* Decrease the font size to make the text smaller */
+    background-color: rgba(62, 18, 86, 0.4);
+    backdrop-filter: blur(19px);
+    color: white;
+    z-index: 3;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.PlayNow1:hover {
+    background-color: rgba(62, 18, 86, 0.6);
+}
+
+.PlayNow2 {
+    position: absolute;
+    top: 713px;
+    left: 370px;
+    width: 150px; /* Increase the width to make the bar bigger */
+    height: 39px; /* Increase the height to make the bar bigger */
+    display: flex; /* Use flexbox */
+    border-radius: 14px;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px; /* Decrease the font size to make the text smaller */
+    background-color: rgba(62, 18, 86, 0.4);
+    backdrop-filter: blur(19px);
+    color: white;
+    z-index: 3;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.PlayNow2:hover {
+    background-color: rgba(62, 18, 86, 0.6);
+}
+
+.PlayNow3 {
+    position: absolute;
+    top: 713px;
+    left: 570px;
+    width: 150px; /* Increase the width to make the bar bigger */
+    height: 39px; /* Increase the height to make the bar bigger */
+    display: flex; /* Use flexbox */
+    border-radius: 14px;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px; /* Decrease the font size to make the text smaller */
+    background-color: rgba(62, 18, 86, 0.4);
+    backdrop-filter: blur(19px);
+    color: white;
+    z-index: 3;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.PlayNow3:hover {
+    background-color: rgba(62, 18, 86, 0.6);
+}
+
+.DashLeft{
+    position: absolute;
+    height: 300px;
+    left: 190px;
+    top: 220px;
+}
+
+.DashRight{
+    position: absolute;
+    height: 300px;
+    left: 620px;
+    top: 220px;
+}
+
+.AuroraInfos{
+    position: absolute;
+    top: 370px;
+    left: 323px;  
+    height: 85px;
+}
+
+.Top1{
+    position: absolute;
+    top: 100px;
+    right: 130px;
+    height: 65px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.Top2{
+    position: absolute;
+    top: 220px;
+    right: 130px;
+    height: 65px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.Top3{
+    position: absolute;
+    top: 340px;
+    right: 130px;
+    height: 65px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.Top4{
+    position: absolute;
+    top: 460px;
+    right: 130px;
+    height: 65px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.Top5{
+    position: absolute;
+    top: 580px;
+    right: 130px;
+    height: 65px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.AvatarContainer1 {
+    position: absolute;
+    top: 232px;
+    right: 180px;
+    width: 490px;
+    height: 100px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+}
+
+.AvatarContainer1 h1{
+    position: absolute;
+    right: 315px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 23px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+
+}
+
+.AvatarContainer1 p{
+    position: absolute;
+    right: 263px;
+    top: 35px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 15px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+}
+
+.AvatarContainer2 {
+    position: absolute;
+    top: 352px;
+    right: 180px;
+    width: 490px;
+    height: 100px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+}
+
+.AvatarContainer2 h1{
+    position: absolute;
+    right: 330px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 23px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+
+}
+
+.AvatarContainer2 p{
+    position: absolute;
+    right: 263px;
+    top: 35px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 15px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+}
+
+.AvatarContainer3 {
+    position: absolute;
+    top: 472px;
+    right: 180px;
+    width: 490px;
+    height: 100px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+}
+
+.AvatarContainer3 h1{
+    position: absolute;
+    right: 314px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 23px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+}
+
+.AvatarContainer3 p{
+    position: absolute;
+    right: 263px;
+    top: 35px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 15px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+}
+
+.AvatarContainer4 {
+    position: absolute;
+    top: 592px;
+    right: 180px;
+    width: 490px;
+    height: 100px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+}
+
+.AvatarContainer4 h1{
+    position: absolute;
+    right: 317px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 23px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+
+}
+
+.AvatarContainer4 p{
+    position: absolute;
+    right: 263px;
+    top: 35px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 15px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+}
+
+
+.AvatarContainer5 {
+    position: absolute;
+    top: 712px;
+    right: 180px;
+    width: 490px;
+    height: 100px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 20px;
+}
+
+.AvatarContainer5 h1{
+    position: absolute;
+    right: 305px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 23px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+
+}
+
+.AvatarContainer5 p{
+    position: absolute;
+    right: 263px;
+    top: 35px;
+    color: rgba(62, 18, 86, 1);
+    font-size: 15px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+}
+
+.Leaderboard1{
+    position: absolute;
+    top: 225px;
+    right: 170px;
+    height: 120px;
+}
+
+.Leaderboard2{
+    position: absolute;
+    top: 345px;
+    right: 170px;
+    height: 120px;
+}
+
+.Leaderboard3{
+    position: absolute;
+    top: 465px;
+    right: 170px;
+    height: 120px;
+}
+
+.Leaderboard4{
+    position: absolute;
+    top: 585px;
+    right: 170px;
+    height: 120px;
+}
+
+.Leaderboard5{
+    position: absolute;
+    top: 705px;
+    right: 170px;
+    height: 120px;
 }
