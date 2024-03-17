@@ -62,7 +62,6 @@ model User {
 
 	xp				Int?
 	avatar			Avatar?
-	password		String?
 	avatarTest		String?
 
 	status			Status?				@default(ONLINE)

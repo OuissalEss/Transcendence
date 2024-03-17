@@ -44,6 +44,15 @@ export class UserService {
     return user;
   }
 
+  async CheckUserExistence(username: string, email: string) : Promise<User> {
+    return this.prisma.user.findFirst({
+        where: {
+            username: username,
+            email: email,
+        }
+    });
+  }
+
   /**
    * Updates a user's information.
    * @param {number} userId - User ID
@@ -91,15 +100,14 @@ export class UserService {
       });
  }
 
- async CreateUserTest(user: string, pwd: string, avatar: string): Promise<User> {
-     return this.prisma.user.create({
+ async CreateUserTest(user: string, avatar: string, email: string): Promise<User> {
+    return this.prisma.user.create({
          data: {
              username: user,
-             email: 'email@email.com',
-             firstName: 'firstName', // Add the firstName property
-             lastName: 'lastName', // Add the lastName property
-             password: pwd, // Add the password property
-            avatarTest: avatar,
+             email: email,
+             firstName: 'test',
+             lastName: 'test',
+             avatarTest: avatar,
             },
          include: userIncludes,
      });

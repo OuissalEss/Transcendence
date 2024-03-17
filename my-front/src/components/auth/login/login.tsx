@@ -49,14 +49,7 @@ function LogingPage() {
       		<div className="i h-16 w-64 bg-gradient-to-br from-pink-400 to-yellow-600 items-center rounded-full shadow-2xl cursor-pointer absolute overflow-hidden transform hover:scale-x-110 hover:scale-y-105 transition duration-300 ease-out"></div>
 			<button className="text-center text-white font-semibold z-10 pointer-events-none">Sign Up</button>
 		</div>
-		</Link>	
-		
-		<Link to="/signin">
-		<div className="b mx-auto h-16 w-64 flex justify-center items-center">
-      		<div className="i h-16 w-64 bg-gradient-to-br from-pink-400 to-yellow-600 items-center rounded-full shadow-2xl cursor-pointer absolute overflow-hidden transform hover:scale-x-110 hover:scale-y-105 transition duration-300 ease-out"></div>
-			<button className="text-center text-white font-semibold z-10 pointer-events-none">Sign In</button>
-		</div>
-		</Link>	
+		</Link>
 	</div>
 
 

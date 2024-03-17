@@ -186,15 +186,6 @@ export class User {
   avatarTest?: string;
 
   /**
-   * User password.
-   * @type {string}
-   */
-  @Field({ description: 'User password' })
-  @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password cannot be empty' })
-  password: string;
-
-  /**
    * Matches where the user is the guest (nullable).
    * @type {Match[]}
    */

@@ -1,0 +1,47 @@
+.friends-sidebar {
+	top: 2%;
+	right: 1%;
+	height: 96vh;
+	width: 63px;
+	background-color: rgb(105, 81, 170, 0.29);
+	backdrop-filter: blur(5px);
+	border-radius: 10rem;
+  }
+  
+  .friends-sidebar__container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	height: 45%;
+	padding: 1rem;
+	/* Add other styles as needed */
+  }
+  
+  .friends-sidebar__top {
+	width: 44px;
+	gap: 16px;
+	padding-bottom: 16px;
+	/* margin-bottom: 90px; */
+  }
+  
+  .friends-sidebar__list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+  }
+  
+  .friends-sidebar__item {
+	margin-bottom: 20px;
+	position: relative;
+  }
+  
+  .friends-sidebar__item img {
+	width: 35px;
+	height: 30px;
+	border-radius: 50%;
+	/* border: 2px solid #fff; */
+	/* box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); */
+  }
+
+  

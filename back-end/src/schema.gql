@@ -267,7 +267,7 @@ type Mutation {
   createChannel(createChannelInput: CreateChannelInput!): Channel!
   createMessage(input: CreateMessageInput!): Message!
   createNotification(input: CreateNotificationInput!): Notification!
-  createUser(avatar: String!, pwd: String!, usrnm: String!): User!
+  createUser(avatar: String!, email: String!, usrnm: String!): User!
 
   """Delete a channel"""
   deleteChannel(cid: String!): Channel!
@@ -456,9 +456,6 @@ type User {
 
   """User last name"""
   lastName: String!
-
-  """User password"""
-  password: String!
 
   """User received friend requests"""
   receive: [Friend!]!

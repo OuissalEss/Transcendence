@@ -32,6 +32,17 @@ export class UserResolver {
     return this.userService.getUserById(id);
   }
 
+  // @Query(() => Boolean, {
+  //   name: "CheckUserExistence",
+  //   description: "check if user already exists"
+  // })
+  // async CheckUserExistence(
+  //   @Args('username') username: string,
+  //   @Args('email') email: string,
+  // ) : Promise<boolean> {
+  //   return this.CheckUserExistence(username, email);
+  // }
+
 
   @Mutation(() => User)
   async updateUsername(
@@ -108,10 +119,10 @@ export class UserResolver {
   @Mutation(() => User)
   async createUser(
     @Args('usrnm') usrnm: string,
-    @Args('pwd') pwd: string,
     @Args('avatar') avatar: string,
+    @Args('email') email: string,
   ) : Promise<User> {
-    return this.userService.CreateUserTest(usrnm, pwd, avatar);
+    return this.userService.CreateUserTest(usrnm, avatar, email);
   }
 
   @Mutation(() => User)

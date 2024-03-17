@@ -1,5 +1,5 @@
 import Layout from '../components/layout';
-import React, { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import AvatarSelection from '../components/auth/signup/AvatarSelection';
 import FormInput from '../components/auth/signup/FormInput';
 import UserCard from '../components/auth/signup/UserCard';
@@ -7,7 +7,9 @@ import UserCard from '../components/auth/signup/UserCard';
 function SignUpPageContainer() {
     const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
     const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+	const [email, setEmail] = useState("");
+	const [isFormValid, setIsFormValid] = useState(false);
+
 
 	const avatarList = [
 		'../../../../public/assets/Avatars/01.jpeg',
@@ -30,19 +32,22 @@ function SignUpPageContainer() {
 		'../../../../public/assets/Avatars/18.png',
 	  ];
 
-    // const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-	// 	console.log('Form submitted');
-    //     event.preventDefault();
-    //     const signUp = handleSignUp(username, password, avatarList[currentCharacterIndex]);
-
-    // };
+	const validateForm = () => {
+        if (username.trim() !== '' && email.trim() !== '') {
+            setIsFormValid(true);
+        } else {
+            setIsFormValid(false);
+        }
+    };
 
     const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
         setUsername(event.target.value);
+		validateForm();
     };
 
-    const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setPassword(event.target.value);
+    const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setEmail(event.target.value);
+		validateForm();
     };
 
     const handleLeftChevronClick = () => {
@@ -67,10 +72,11 @@ function SignUpPageContainer() {
 						/>
 						<FormInput
 							username={username}
-							password={password}
 							avatar={avatarList[currentCharacterIndex]}
+							email={email}
+							isFormValid={isFormValid}
 							handleUsernameChange={handleUsernameChange}
-							handlePasswordChange={handlePasswordChange}
+							handleEmailChange={handleEmailChange}
 						/>
 						<UserCard avatar={avatarList[currentCharacterIndex]} userName={username} />
 					</div>

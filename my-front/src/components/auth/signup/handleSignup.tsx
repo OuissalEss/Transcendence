@@ -1,38 +1,58 @@
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 
 // Define the GraphQL mutation
 const CREATE_USER = gql`
-  mutation CreateUser($avatar: String!, $pwd: String!, $usrnm: String!) {
-    createUser(avatar: $avatar, pwd: $pwd, usrnm: $usrnm) {
+  mutation CreateUser($avatar: String!, $email: String!,  $usrnm: String!) {
+    createUser(avatar: $avatar, email: $email, usrnm: $usrnm) {
       id
       username
-      avatar
-      password
+      avatarTest
     }
   }
 `;
 
+// const CHECK_USER_EXISTENCE = gql`
+//   query CheckUserExistence($email: String!, $username: String!) {
+//     CheckUserExistence(email: $email, username: $username)
+//   }
+// `;
+
 const useSignUp = () => {
   const [createUser] = useMutation(CREATE_USER);
+  
 
-  const signUp = async (username: string, password: string, avatar: string) => {
-    console.log('username: ', username);
-    console.log('password: ', password);
-    console.log('avatar: ', avatar);
+  const signUp = async (username: string, avatar: string, email: string) => {
     try {
-      const { data } = await createUser({
+      // Function to check if a user exists with the provided username or email
+      // const checkUserExistence = useQuery(CHECK_USER_EXISTENCE, {
+      //   variables: { username, email },
+      // });
+
+      // Await the result of the query
+      // await checkUserExistence.refetch();
+
+      // If user with the username or email exists, throw an error
+      // if (
+      //   checkUserExistence.data &&
+      //   (checkUserExistence.data.userExistsByUsername || checkUserExistence.data.userExistsByEmail)
+      // ) {
+      //   throw new Error("Username or email already exists");
+      // }
+
+      // Create the new user if the username and email are available
+      const { data: createUserResponse } = await createUser({
         variables: {
-          avatar: avatar,
-          pwd: password,
+          avatar,
+          email,
           usrnm: username,
         },
       });
 
       // Log the successful creation of the user
-      console.log('User created successfully:', data);
+      console.log('User created successfully:', createUserResponse);
 
       // Return the created user data if needed
-      return data;
+      return { data: createUserResponse };
     } catch (error) {
       // Handle errors by logging and throwing them to be handled in the component
       console.error('Error signing up:', error);

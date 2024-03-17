@@ -10,17 +10,12 @@ import './landing.css';
 function LandingPage() {
   return (
     <>
-      <div className='backgroundImage'></div>
-      <div className="overlay bg-pink-300 opacity-50"></div>
       <div className="fixed top-0 right-0 z-10">
         <img
           src={girlImage}
           alt="Your Character"
           className="object-cover h-auto sm:h-auto md:h-screen lg:h-screen xl:h-screen"
         />
-      </div>
-      <div className="fixed top-0 left-0 m-4 z-10">
-        <img src={logoImage} alt="Logo" className="w-12 h-12 image" />
       </div>
       <div className="fixed top-1/2 -translate-y-1/2 left-12 z-10">
         <img
