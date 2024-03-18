@@ -1,0 +1,271 @@
+.SettingsBar {
+  position: absolute;
+  top: 150px;
+  left: 150px;
+  width: 800px;
+  height: 630px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 20px;
+}
+
+.Settings {
+  position: absolute;
+  top: 30px;
+  left: 170px;
+  font: 600 30px 'Manrope', sans-serif;
+  font-size: 20px;
+  color: rgba(62, 18, 86, 1);
+}
+
+.CharacterRectangleSettings {
+  position: absolute;
+  top: 180px;
+  left: 580px;
+  width: 280px;
+  height: 50px; 
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  cursor: pointer;
+
+}
+
+.CharacterTextSettings {
+  position: absolute;
+  color: white;
+  top: -6px;
+  left: 41px;
+  font-size: 18px;
+  font-family: 'Manrope', sans-serif;
+}
+
+.ChevronLeftSettings {
+  position: absolute;
+
+  left: 530px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+
+}
+
+.ChevronRightSettings {
+  position: absolute;
+
+  left: 850px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+
+}
+
+.CharacterNameSettings {
+  position: absolute;
+
+  left: 680px;
+  top: 550px;
+  font-size: 30px;
+  color: rgba(62, 18, 86, 1);
+  font-family: 'Manrope', sans-serif;
+}
+
+.CharacterInfosSettings{
+  position: absolute;
+
+  left: 560px;
+  top: 640px;
+  width: 320px;
+  height: 110px;
+}
+
+.CharacterImageSettings {
+  position: absolute;
+  top: 250px;
+  left: 660px;
+  width: 120px;
+}
+
+.BlockedList {
+  position: absolute;
+  top: 150px;
+  left: 980px;
+  width: 310px;
+  height: 630px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 20px;
+}
+
+.BlockedListTitle {
+  position: absolute;
+  top: 10px;
+  left: 60px;
+  font: 600 30px 'Manrope', sans-serif;
+  font-size: 15px;
+  color: rgba(62, 18, 86, 1);
+}
+
+.BlockedItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  top: 90px;
+  padding: 10px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.BlockedAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.BlockedName {
+  font-size: 17px;
+  margin-right: auto;
+  font-family: 'Manrope', sans-serif;
+
+}
+
+.UnblockIcon {
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.AvatarBackground{
+  position: absolute;
+  top: 280px;
+  left: 270px;
+  width: 110px;
+}
+
+
+.AvatarEditCircle {
+  position: absolute;
+  top: 280px;
+  left: 270px;
+  width: 110px;
+  height: 110px;
+  background-color: rgba(61, 55, 133, 0.65);
+  border-radius: 50%;
+  z-index: 7;
+  cursor: pointer;
+}
+
+.AvatarEditCircle:hover {
+  transform: scale(1.1); 
+}
+.AvatarEditText {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  font-size: 17px;
+  font-family: 'Manrope', sans-serif;
+  color: #fff;
+  transition: transform 0.3s ease-in-out; 
+  transform: scale(0.8); 
+}
+
+.AvatarEditCircle:hover .AvatarEditText {
+  transform: scale(1);
+}
+
+.Profile {
+  position: absolute;
+  top: 410px;
+  left: 220px;
+  display: flex;
+  align-items: center;
+  width: 220px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 17px;
+}
+
+.UserIcon {
+  position: absolute;
+
+  width: 25px;
+  height: 25px;
+  left: 235px;
+}
+
+.Username {
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  margin-left: 50px;
+}
+
+.EditIcon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  left: 410px;
+}
+.EditInput {
+  background-color: transparent; 
+  border: none; 
+  color: #fff; 
+  font-family: 'Manrope', sans-serif; 
+  font-size: 18px; 
+  outline: none; 
+  margin-left: 50px;
+
+}
+
+.EditInput:focus {
+  border: none; 
+}
+
+.TFA {
+  position: absolute;
+  top: 490px;
+  left: 190px;
+  display: flex;
+  align-items: center;
+  width: 280px;
+  height: 50px;
+  font-size: 10px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 17px;
+  cursor: pointer;
+}
+
+.TFA h1 {
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  margin-left: 50px;
+  top: 100px;
+}
+
+.TFAIcon{
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  left: 200px;
+  top: 503px;
+}
+
+.SaveTheChangesRectangle{
+  position: absolute;
+  top: 700px;
+  left: 220px;
+  width: 220px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.SaveTheChangesText{
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+}

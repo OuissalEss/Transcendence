@@ -11,7 +11,7 @@ import Avatar3 from './assets/Avatar3.png';
 import Avatar4 from './assets/Avatar4.png';
 import Avatar5 from './assets/Avatar5.png';
 import Avatar6 from './assets/Avatar6.png';
-import SearchIcon from './assets/search.png';
+import SearchIcon from './assets/Search.png';
 import Notification from './assets/Notification.png';
 import OnlinePic from './Characters/Aurora/Challenge.png';
 import OfflinePic from './Characters/Lumina/Challenge.png';
@@ -29,11 +29,17 @@ import Leaderboard2 from './Leaderboard/Leaderboard2.png';
 import Leaderboard3 from './Leaderboard/Leaderboard3.png';
 import Leaderboard4 from './Leaderboard/Leaderboard4.png';
 import Leaderboard5 from './Leaderboard/Leaderboard5.png';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import './Dashboard.css';
 
 
 function Dashboard() {
+  const navigate = useNavigate();
+
+  const handleHomeIconClick = () => {
+    navigate('/dashboard'); // Navigate to the Dashboard component
+  };
   return (
     <div className="Login">
        <div className="Border1"></div>
@@ -63,27 +69,26 @@ function Dashboard() {
           <img src={Top4} alt="Top4" className="Top4" />
           <img src={Top5} alt="Top5" className="Top5" />
       </div>
-  <div className="AvatarContainer1">
-    <h1>Ethan</h1>
-    <p>5.6k xp   |   42 wins</p>
-  </div>
-  <div className="AvatarContainer2">
-    <h1>Slim</h1>
-    <p>5.2k xp   |   38 wins</p>
-  </div>
-  <div className="AvatarContainer3">
-    <h1>Olivia</h1>
-    <p>4.9k xp   |   35 wins</p>
-  </div>
-  <div className="AvatarContainer4">
-    <h1>Noah</h1>
-    <p>4.7k xp   |   33 wins</p>
-  </div>
-  <div className="AvatarContainer5">
-    <h1>Emma</h1>
-    <p>4.5k xp   |   31 wins</p>
-  </div>
-
+        <div className="AvatarContainer1">
+          <h1>Ethan</h1>
+          <p>5.6k xp   |   42 wins</p>
+        </div>
+        <div className="AvatarContainer2">
+          <h1>Slim</h1>
+          <p>5.2k xp   |   38 wins</p>
+        </div>
+        <div className="AvatarContainer3">
+          <h1>Olivia</h1>
+          <p>4.9k xp   |   35 wins</p>
+        </div>
+        <div className="AvatarContainer4">
+          <h1>Noah</h1>
+          <p>4.7k xp   |   33 wins</p>
+        </div>
+        <div className="AvatarContainer5">
+          <h1>Emma</h1>
+          <p>4.5k xp   |   31 wins</p>
+        </div>
       <div className="Question">
         <h1>Up for a game?</h1>
       </div>
@@ -112,7 +117,12 @@ function Dashboard() {
         <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" />
         <img src={Robot} alt="Robot" className="RobotPic" />
         <img src={LogoImage} className="LogoImage" alt="LogoImage" />
-        <img src={HomeIcon} className="HomeIcon" alt="HomeIcon" />
+        <img
+          src={HomeIcon}
+          className="HomeIcon"
+          alt="HomeIcon"
+          onClick={handleHomeIconClick} //
+        />
         <img src={GameIcon} className="GameIcon" alt="GameIcon" />
         <img src={ChatIcon} className="ChatIcon" alt="ChatIcon" />
         <img src={SettingsIcon} className="SettingsIcon" alt="SettingsIcon" />

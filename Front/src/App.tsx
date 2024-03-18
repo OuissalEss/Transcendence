@@ -7,6 +7,7 @@ import Login from './Login.tsx';
 import Start from './Start.tsx';
 import Dashboard from './Dashboard.tsx';
 import './App.css';
+import Settings from './Settings.tsx';
 
 function Landing() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/start" element={<Start />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );

@@ -39,8 +39,12 @@ function Start() {
   };
 
   const handleUsernameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(event.target.value);
+    const inputValue = event.target.value;
+    if (inputValue.length <= 10) {
+      setUsername(inputValue);
+    }
   };
+  
   
   const handleUsernameInputEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -65,7 +69,7 @@ function Start() {
 
   const handleStartButtonClick = () => {
     if (username && isCharacterSelected) {
-      navigate('/dashboard');
+      navigate('/settings');
     }
   };
   
