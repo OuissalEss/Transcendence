@@ -905,23 +905,21 @@
 	position: relative;
 	display: inline-block;
 	left: 3%;
-	/* bottom: 65%; */
+	top: 65%;
 	z-index: 10;
   }
   
   .dropdown-content {
 	/*display: none;
-	*/
-	position: absolute;
+	*/position: absolute;
 	background-color: #5f267dd5;
 	min-width: 160px;
 	border-radius: 10px;
 	box-shadow: 0 8px 16px 0 rgba(255, 255, 255, 0.278);
-
 }
 
 .settings:hover .dropdown {
-	display: block;
+		display: block;
 }
   
 .dropdown-content li:hover ul {

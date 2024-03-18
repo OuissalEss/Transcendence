@@ -89,6 +89,9 @@ function getStatusColor(status: string) {
 	}
   }
 
+// const settings = (channel: channelItems) => {
+
+// }
 
 const Chat: React.FC<chatProps> = ({ channel, setChannels, channels, index }) => {
 	const [inputMessage, setInputMessage] = useState('');
@@ -321,7 +324,7 @@ const Chat: React.FC<chatProps> = ({ channel, setChannels, channels, index }) =>
 											<div className="lock-icon">
 												<button 
 												onClick={() => { 
-													if ((channel.admins?.some(admin => admin.name === "me") || channel.owner?.name === "me")) {
+													if (channel.owner?.name === "me") {
 														setLock(prevState => !prevState);
 														if (!lock) {
 															setAddPassword(true);
@@ -386,7 +389,7 @@ const Chat: React.FC<chatProps> = ({ channel, setChannels, channels, index }) =>
 											</>
 										)}	
 									</div>
-									{channel.type === "protected" && (
+									{channel.type === "protected" && channel.owner?.name === "me" && (
 										<div className="changePwd-container">
 											<button className="font-Manrope text-white" onClick={() => {
 												setChangePwd(true);
@@ -407,8 +410,8 @@ const Chat: React.FC<chatProps> = ({ channel, setChannels, channels, index }) =>
 													<button className="settings-button">
 														<HiDotsHorizontal className="moderator-icon" />
 													</button>
-													{(channel.admins?.some(admin => admin.name === "me") || channel.owner?.name === "me") && (
-														<div className="dropdown ">
+													{(channel.admins?.some(admin => admin.name === "me") || channel.owner?.name === "me") ? (
+														<div className="dropdown hidden">
 															<ul className="dropdown-content">
 																{channel.owner?.name === "me" && (
 																	<>
@@ -422,7 +425,7 @@ const Chat: React.FC<chatProps> = ({ channel, setChannels, channels, index }) =>
 																	<a>mute</a>
 																	<ul className="hidden">
 																		<li className="text-white border border-transparent hover:border-white">7h</li>
-																		<li className="text-white border border-transparent hover:border-white">168h</li>
+																		<li className="text-white border border-transparent hover:border-white">1 week</li>
 																		<li className="text-white border border-transparent hover:border-white">always</li>
 																	</ul>
 																</li>
@@ -430,6 +433,12 @@ const Chat: React.FC<chatProps> = ({ channel, setChannels, channels, index }) =>
 																<li className="text-white border border-transparent rounded-bl-lg rounded-br-lg hover:border-white">dm</li>
 															</ul>
 														</div>															
+													) : (
+														<div className="dropdown hidden">
+															<ul className="dropdown-content">
+																<li className="text-white border border-transparent hover:border-white">dm</li>
+															</ul>
+														</div>	
 													)}
 												</div>
 											</div>
