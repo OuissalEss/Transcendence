@@ -114,7 +114,7 @@ const currentCharacter = characters[currentCharacterIndex];
                 <img src={LogoutIcon} className="LogoutIcon" alt="LogoutIcon" />
                 <img src={InfosIcon} className="InfosIcon" alt="InfosIcon" />
                 <img src={Avatar} className="Avatar" alt="Avatar" />
-                <div className="Profile">
+                <div className="ProfileSet">
                 {isEditing ? (
                     <input
                     type="text"

@@ -207,23 +207,3 @@
   border: none;
   outline: none;
 }
-
- /* .StartRectangle.NotReady {
-  animation: shake 0.3s ease-in-out;
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(-10px); 
-   }
-}   */
-
-/* .CharacterImage.Luna,
-.CharacterImage.Nova,
-.CharacterImage.Starlight,
-.CharacterImage.Lumina {
-  transform: scale(0.9); 
-} */
