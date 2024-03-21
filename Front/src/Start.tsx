@@ -69,7 +69,7 @@ function Start() {
 
   const handleStartButtonClick = () => {
     if (username && isCharacterSelected) {
-      navigate('/profile');
+      navigate('/pprofile');
     }
   };
   

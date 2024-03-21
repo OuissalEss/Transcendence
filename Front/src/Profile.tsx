@@ -29,7 +29,7 @@ import Fr2 from './assets/Fr2.png';
 import Fr3 from './assets/Fr3.png';
 import Fr4 from './assets/Fr4.png';
 import CircleSettings from './assets/CircleSettings.png';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 function Profile() {
   const achievements = [WelcomeWithoutB, FiveWithoutB, ThreeWithoutB, FirstfWithoutB, RobotWithoutB, RoomWithoutB];

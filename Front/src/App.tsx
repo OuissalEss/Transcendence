@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GirlImage from './assets/Girl.png';
 import LogoImage from './assets/Logo.png';
@@ -9,6 +8,7 @@ import Dashboard from './Dashboard.tsx';
 import './App.css';
 import Settings from './Settings.tsx';
 import Profile from './Profile.tsx';
+import Pprofile from './Pprofile.tsx';
 
 function Landing() {
   return (
@@ -39,6 +39,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/pprofile" element={<Pprofile />} />
       </Routes>
     </Router>
   );
