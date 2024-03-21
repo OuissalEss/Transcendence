@@ -9,6 +9,7 @@ import './App.css';
 import Settings from './Settings.tsx';
 import Profile from './Profile.tsx';
 import Pprofile from './Pprofile.tsx';
+import Infos from './Infos.tsx';
 
 function Landing() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/pprofile" element={<Pprofile />} />
+        <Route path="/infos" element={<Infos />} />
       </Routes>
     </Router>
   );
