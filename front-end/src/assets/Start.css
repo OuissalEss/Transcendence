@@ -1,0 +1,183 @@
+/ .Start {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* font-size: calc(5px + 1vmin); */
+  color: white;
+  z-index: 1;
+}
+
+.Start::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  filter: blur(5px);
+  z-index: 0;
+}
+
+.Texto {
+  position: absolute;
+  top: 40px;
+  left: 200px;
+  color: #3E1256;
+  z-index: 3;
+  font-size: 40px;
+  text-align: center;
+}
+
+.BlurryRectangle {
+  position: absolute;
+  top: 450px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 65%;
+  height: 70%;
+  background-color: rgba(114, 196, 255, 0.2);
+  backdrop-filter: blur(2px);
+  border-radius: 20px;
+  z-index: 2;
+}
+
+.Avatar1 {
+  position: absolute;
+  top: 280px;
+  left: 410px;
+  width: 6%;
+  height: auto;
+  z-index: 3;
+  border-radius: 45px;
+}
+
+.UsernameRectangle {
+  position: absolute;
+  top: 400px;
+  left: 330px;
+  width: 250px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.UsernameText {
+  color: white;
+  font-size: 18px;
+}
+
+
+.StartRectangle {
+  position: absolute;
+  top: 610px;
+  left: 350px;
+  width: 200px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.StartText {
+  color: white;
+  font-size: 18px;
+}
+
+.CharacterRectangle {
+  position: absolute;
+  top: 24%;
+  left: 780px;
+  width: 300px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.CharacterText {
+  color: white;
+  font-size: 18px;
+}
+
+
+.Name {
+  position: absolute;
+  top: 540px;
+  left: 59%;
+  color: #3E1256;
+  z-index: 3;
+  font-size: 40px;
+  text-align: center;
+  justify-content: center;
+  width: 150px;
+}
+
+.CharacterImage {
+  position: absolute;
+  top: 245px;
+  left: 870px;
+  width: 100px;
+  z-index: 3;
+  transition: transform 0.5s ease-in-out;
+}
+
+.CharacterImage.Selected {
+  transform: scale(1.1);
+  z-index: 100;
+
+}
+
+.CharacterInfos {
+  position: absolute;
+  top: 595px;
+  right: 319px;
+  height: 120px;
+  z-index: 2;
+}
+
+.ChevronLeft {
+  position: absolute;
+  top: 400px;
+  left: 707px;
+  z-index: 3;
+}
+
+.ChevronRight {
+  position: absolute;
+  top: 400px;
+  right: 300px;
+  z-index: 3;
+}
+
+.UsernameInput {
+  position: absolute;
+  top: 400px;
+  left: 330px;
+  width: 240px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  color: white;
+  font-size: 18px;
+  font-family: 'Yusei Magic';
+  padding: 0 10px;
+  border: none;
+  outline: none;
+}

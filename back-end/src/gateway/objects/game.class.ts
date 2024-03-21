@@ -26,6 +26,9 @@ export class GameState {
     this.rightPaddle = new Paddle(p2Id, false, this.width, this.height, this.mode);
   }
 
+  getMode(): string {
+    return this.mode;
+  }
   getGameState() {
     let leftPaddleState;
     let rightPaddleState;
@@ -75,10 +78,14 @@ export class GameState {
     }
   }
 
-  updateOfflinePaddle(playerId: string, side: string, movement: string) {
-    if (side == 'L'){
+  updatePaddleMovement(playerId: string, side: string, movement: string) {
+    if (side === 'L' && this.leftPaddle.getPaddle().id == playerId && this.mode === 'online') {
+      this.leftPaddle.updateMovement(movement);
+    } else if (side === 'L' && this.rightPaddle.getPaddle().id == playerId && this.mode === 'online') {
+      this.rightPaddle.updateMovement(movement);
+    } else if (side == 'L' && this.mode != "online"){
         this.leftPaddle.updateMovement(movement);
-    }else if (side == 'R'){
+    } else if (side == 'R' && this.mode != 'online'){
         this.rightPaddle.updateMovement(movement);
     }
   }

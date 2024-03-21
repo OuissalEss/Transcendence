@@ -13,6 +13,7 @@ import { UserService } from 'src/services/user.service';
 import {Connection} from "../entities/connection.entity";
 import { userIncludes } from "src/includes/user.includes";
 import {CreateUserInput} from "../services/dto/create-user.input";
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -34,10 +35,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _refreshToken: string,
     profile: any,
     _done: VerifyCallback,
-  ): Promise<any> {
+  ): Promise<{user: User, firstLogIn: Boolean}> {
     let user= null;
 
     /* TO-DO: Searching for the user if exist */
+    let firstLogIn: Boolean = false;
 
     try {
       user = await this.prisma.user.findFirst({
@@ -53,6 +55,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     try {
       if (!user) {
+        firstLogIn = true;
         const data: CreateUserInput = {
           username: `${(profile.name.familyName+profile.name.givenName).toLocaleLowerCase()}_${crypto.randomBytes(5).readUInt16BE(0) % 10000}`,
           firstName: profile.name.givenName,
@@ -73,7 +76,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     console.log(user);
     if (!user)
       throw new InternalServerErrorException("Unable to retrieve user");
-
-    return user;
+      
+    return {user, firstLogIn};
   }
 }

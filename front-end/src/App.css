@@ -1,0 +1,147 @@
+/* @tailwind base;*/
+/*@tailwind components;*/
+/*@tailwind utilities; */
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+
+/* --------------- Body --------------- */
+
+body {
+  /* position: relative; */
+  background: url('/bg01.png') center/cover no-repeat;
+  padding: 0px;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  box-sizing: border-box !important;
+  font-family: 'Yusei Magic';
+  overflow-y: auto;
+}
+
+
+/* ------- Scrollbar ------- */
+body::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgb(62 18 86 / 50%);
+  background-size: contain;
+  border-radius: 6px;
+}
+
+body::-webkit-scrollbar-track {
+  background-color: #ffa3bf;
+  padding: 5px;
+}
+
+/* Firefox */
+body {
+  scrollbar-width: none;
+}
+
+body {
+  scrollbar-color: rgba(62, 18, 86, 0.5) #ffa3bf;
+}
+
+
+
+.App {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(5px + 1vmin);
+  color: white;
+  background: url('./assets/Background.png') center/cover no-repeat;
+  z-index: 1;
+}
+
+.App::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255, 129, 160, 0.7), rgba(255, 151, 183, 0.7));
+  filter: blur(5px);
+  z-index: 0;
+}
+
+/* Girl image styling */
+.GirlImage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1020px;
+  height: 820px;
+  z-index: 2;
+}
+
+/* Logo styling */
+.LogoImage {
+  position: absolute;
+  left: 50px;
+  top: 30px;
+  width: 45px;
+}
+
+.TitleImage {
+  position: absolute;
+  left: 50px;
+  top: 170px;
+  width: 450px;
+  height: 240px;
+  z-index: 2;
+}
+
+.TextContainer {
+  position: absolute;
+  left: 50px;
+  top: 520px;
+  color: #3E1256;
+  font-family: 'Yusei Magic';
+  z-index: 3;
+  font-size: 24px;
+}
+
+.GetStartedButton {
+  position: absolute;
+  left: 50px;
+  top: 640px;
+  background-color: #3E1256;
+  color: white;
+  /* border: none; */
+  border-radius: 17px;
+  padding: 12px 90px;
+  cursor: pointer;
+  font-family: 'Yusei Magic';
+  font-size: 23px;
+  z-index: 3;
+}
+
+body {
+  margin: 0;
+}
+
+.TextLine {
+  margin: 0;
+}

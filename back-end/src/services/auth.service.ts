@@ -14,14 +14,14 @@ export class AuthService {
      * @returns {Promise<JwtResponse>} Jwt Token
      * @param user
      */
-    async getJwttoken(user: User): Promise<JwtResponse> {
-        console.log(user);
+    async getJwttoken(data: any): Promise<JwtResponse> {
+        const user: User = data.user;
         const payload: Payload = {
             sub: user.id,
             username: user.username,
-            createdAt: user.createdAt
+            createdAt: user.createdAt,
+            firstLogIn: data.firstLogIn,
         };
-
         return {
             access_token: await this.jwtService.signAsync(payload)
         }

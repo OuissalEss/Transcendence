@@ -11,24 +11,25 @@ import { GqlExecutionContext } from "@nestjs/graphql";
 import { Reflector } from '@nestjs/core';
 
 import { IS_PUBLIC_KEY } from 'src/auth/public-metadata';
+import { Payload } from "src/services/types/auth.service";
 
 
 @Injectable()
 export class JwtGuard implements CanActivate {
-  constructor(private jwtService: JwtService,private reflector: Reflector,
-  ) {}
+  constructor(private jwtService: JwtService, private reflector: Reflector,
+  ) { }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     // Checking if the route is public or not
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
-      ]);
+    ]);
 
     if (isPublic) {
       return true;
     }
-    
+
     const gqlContext = GqlExecutionContext.create(context);
 
     if (gqlContext.getType() === 'graphql') {
@@ -50,9 +51,11 @@ export class JwtGuard implements CanActivate {
     }
 
     try {
-      req["user"] = await this.jwtService.verifyAsync(token, {
+      const user = await this.jwtService.verifyAsync<Payload>(token, {
         secret: jwtConstants.secret,
       });
+      req['id'] = user.sub;
+      req['user'] = user;
       return true;
     } catch {
       throw new UnauthorizedException();
@@ -68,9 +71,12 @@ export class JwtGuard implements CanActivate {
     }
 
     try {
-      request["user"] = await this.jwtService.verifyAsync(token, {
+      const user = await this.jwtService.verifyAsync<Payload>(token, {
         secret: jwtConstants.secret,
       });
+      request['id'] = user.sub;
+      request['user'] = user;
+
       return true;
     } catch {
       throw new UnauthorizedException();

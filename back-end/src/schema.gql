@@ -91,6 +91,16 @@ type ChannelUser {
   userId: String!
 }
 
+"""The type of the user character."""
+enum Character {
+  Aegon
+  Aurora
+  Lumina
+  Luna
+  Nova
+  Starlight
+}
+
 type Connection {
   """The date when the connection was created"""
   createdAt: DateTime!
@@ -120,6 +130,20 @@ type Connection {
 
   """The ID of the associated user"""
   userId: String!
+}
+
+input CreateMatchInput {
+  """Guest ID of the user"""
+  guestId: String!
+
+  """Guest score"""
+  guest_score_m: Float!
+
+  """Host ID of the user"""
+  hostId: String!
+
+  """Host score"""
+  host_score_m: Float!
 }
 
 input CreateMessageInput {
@@ -167,7 +191,13 @@ type Friend {
   isAccepted: Boolean!
 
   """User who receive the friend request"""
+  receiver: User!
+
+  """User who receive the friend request"""
   receiverId: String!
+
+  """User who receive the friend request"""
+  sender: User!
 
   """User who sent the friend request"""
   senderId: String!
@@ -181,13 +211,13 @@ type Match {
   createdAt: DateTime!
 
   """User who participated as a guest in the match"""
-  guestId: User!
+  guestId: String!
 
   """Score of the guest in the match"""
   guest_score_m: Int!
 
   """User who hosted the match"""
-  hostId: User!
+  hostId: String!
 
   """Score of the host in the match"""
   host_score_m: Int!
@@ -200,7 +230,7 @@ type Match {
   updatedAt: DateTime!
 
   """User who won the match"""
-  winnerId: User
+  winnerId: String
 }
 
 type Message {
@@ -222,18 +252,27 @@ type Message {
 }
 
 type Mutation {
+  """Creates a new match."""
+  createMatch(createMatchInput: CreateMatchInput!): Match!
   createMessage(input: CreateMessageInput!): Message!
   createNotification(input: CreateNotificationInput!): Notification!
   deleteChannelUser(id: String!): ChannelUser!
-
-  """Delete friend with their associated id"""
-  deleteFriend: Friend!
-  deleteUser(userId: String!): User!
   updateChannelTypeUser(id: String!, type: String!): ChannelUser!
-  updateFirstName(firstname: String!, userId: String!): User!
-  updateLastName(firstname: String!, userId: String!): User!
-  updateUserStatus(status: String!, userId: String!): User!
-  updateUsername(userId: String!, username: String!): User!
+  updateFirstName(firstname: String!): User!
+
+  """Updates the score of the guest in a match."""
+  updateGuestScore(guest_score: Float!, matchId: String!): Match!
+
+  """Updates the score of the host in a match."""
+  updateHostScore(host_score: Float!, matchId: String!): Match!
+  updateLastName(firstname: String!): User!
+
+  """Updates the winner of a match."""
+  updateMatchWinner(matchId: String!, match_winner: String!): Match!
+  updateUserAvatar(newAvatar: String!): User!
+  updateUserCharacter(character: String!): User!
+  updateUserStatus(status: String!): User!
+  updateUsername(username: String!): User!
 }
 
 type Notification {
@@ -275,6 +314,9 @@ type Query {
 
   """Retrieves all friends with their associated data"""
   getAllFriends: [Friend!]!
+
+  """Retrieves all matches associated with a specific user."""
+  getAllMatches(userId: String!): [Match!]!
   getAllMessages: [Message!]!
   getAllNotifications: [Notification!]!
 
@@ -287,16 +329,27 @@ type Query {
 
   """Retrieves friend with their associated id"""
   getFriendById: Friend!
+
+  """Retrieves a specific match by its ID."""
+  getMatchById(id: String!): Match!
   getMessageById(id: String!): Message!
   getNotificationById(id: String!): Notification!
 
   """Retrieves a specific user with it's id"""
   getUserById(id: String!): User!
+
+  """Retrieves all friends with their associated data"""
+  getUserFriends: [User!]!
+
+  """Retrieves authenticated user information"""
+  getUserInfo: User!
+
+  """Searches for users based on the provided query"""
+  searchUsers(query: String!): [User!]!
 }
 
 """The type of the user status."""
 enum Status {
-  AWAY
   INGAME
   OFFLINE
   ONLINE
@@ -314,6 +367,9 @@ type User {
 
   """User blocked users"""
   blocking: [Block!]!
+
+  """User character"""
+  character: Character!
 
   """User connection"""
   connection: Connection

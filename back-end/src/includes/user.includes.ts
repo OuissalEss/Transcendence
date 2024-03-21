@@ -9,5 +9,6 @@
 export const userIncludes: object = {
     user: true,
     connection: true,
-    avatar: true
+    avatar: true,
+    send: true,
 };

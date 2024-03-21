@@ -1,6 +1,6 @@
 // match.entity.ts
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import {IsInt, IsDate, IsNotEmpty, IsString} from 'class-validator';
+import { IsInt, IsDate, IsNotEmpty, IsString } from 'class-validator';
 
 import { User } from "./user.entity";
 
@@ -44,30 +44,30 @@ export class Match {
 
   /**
    * The user who hosted the match.
-   * @type {String}
+   * @type {string}
    */
-  @Field(() => User, { description: 'User who hosted the match' })
+  @Field(() => String, { description: 'User who hosted the match' })
   @IsNotEmpty({ message: 'User who hosted the match cannot be empty' })
   @IsString({ message: 'User who hosted the match must be a string' })
-  hostId: String;
+  hostId: string;
 
   /**
    * The user who participated as a guest in the match.
-   * @type {String}
+   * @type {string}
    */
-  @Field(() => User, { description: 'User who participated as a guest in the match' })
+  @Field(() => String, { description: 'User who participated as a guest in the match' })
   @IsNotEmpty({ message: 'User who participated as a guest the match cannot be empty' })
   @IsString({ message: 'User who participated as a guest the match must be a string' })
-  guestId: String;
+  guestId: string;
 
   /**
    * The user who won the match (nullable).
    * @type {String}
    */
-  @Field(() => User, { nullable: true, description: 'User who won the match' })
+  @Field(() => String, { nullable: true, description: 'User who won the match' })
   @IsNotEmpty({ message: 'User who won the match cannot be empty' })
   @IsString({ message: 'User who won the match must be a string' })
-  winnerId: User;
+  winnerId: string;
 
   /**
    * The date when the match was created.

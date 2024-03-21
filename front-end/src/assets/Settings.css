@@ -1,0 +1,309 @@
+
+.SettingsBar {
+  position: absolute;
+  top: 150px;
+  left: 150px;
+  width: 800px;
+  height: 630px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 20px;
+}
+
+.SearchBarS {
+  position: absolute;
+  top: 25px; /* Adjust the top position as needed */
+  right: 20px; /* Position in the center */
+  transform: translateX(-50%);
+  width: 550px; /* Adjust the width as needed */
+  display: flex;
+  align-items: center;
+  padding: 0 50px; /* Adjust padding as needed */
+  z-index: 4;
+}
+  
+.NotificationBarS {
+  position: absolute;
+  width: 60px; 
+  height: 60px; 
+  top: 25px; 
+  right: 360px;
+  transform: translateX(50%, 50%);
+  cursor: pointer;
+}
+
+.Settings {
+  position: absolute;
+  top: 25px;
+  left: 150px;
+  font: 'Manrope', sans-serif;
+  font-size: 40px;
+  color: rgba(62, 18, 86, 1);
+}
+
+.CharacterRectangleSettings {
+  position: absolute;
+  top: 180px;
+  left: 580px;
+  width: 280px;
+  height: 50px; 
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 20px;
+  cursor: pointer;
+
+}
+
+.CharacterTextSettings {
+  position: absolute;
+  color: white;
+  top: 25%;
+  transform: translateX(50%, 50%);
+  left: 41px;
+  font-size: 18px;
+  font-family: 'Manrope', sans-serif;
+}
+
+.ChevronLeftSettings {
+  position: absolute;
+  top: 50%;
+  left: 530px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+
+}
+
+.ChevronRightSettings {
+  position: absolute;
+  top: 50%;
+  left: 850px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+
+}
+
+.NameS {
+  position: absolute;
+  top: 600px;
+  left: 670px;
+  color: #3E1256;
+  z-index: 3;
+  font-size: 40px;
+  text-align: center;
+  justify-content: center;
+  width: 150px;
+}
+
+.CharacterNameSettings {
+  position: absolute;
+  /* top: 50px; */
+  font-size: 30px;
+  color: rgba(62, 18, 86, 1);
+  font-family: 'Manrope', sans-serif;
+}
+
+.CharacterInfosSettings{
+  position: absolute;
+  left: 560px;
+  top: 650px;
+  width: 320px;
+  height: 110px;
+}
+
+.CharacterImageSettings {
+  position: absolute;
+  top: 230px;
+  left: 660px;
+  width: 120px;
+}
+
+.BlockedList {
+  position: absolute;
+  top: 150px;
+  left: 980px;
+  width: 310px;
+  height: 630px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 20px;
+}
+
+.BlockedListTitle {
+  position: absolute;
+  top: 10px;
+  left: 60px;
+  font: 'Manrope', sans-serif;
+  font-size: 30px;
+  color: rgba(62, 18, 86, 1);
+}
+
+.BlockedItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  top: 90px;
+  padding: 10px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.BlockedAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.BlockedName {
+  font-size: 17px;
+  margin-right: auto;
+  font-family: 'Manrope', sans-serif;
+  color: #fff;
+}
+
+.UnblockIcon {
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.AvatarBackground{
+  position: absolute;
+  top: 280px;
+  left: 270px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+}
+
+
+.AvatarEditCircle {
+  position: absolute;
+  top: 280px;
+  left: 270px;
+  width: 110px;
+  height: 110px;
+  background-color: rgba(62, 55, 133, 0.446);
+  border-radius: 50%;
+  z-index: 7;
+}
+
+.AvatarEditCircle:hover {
+  transform: scale(1.1); 
+}
+.AvatarEditText {
+  position: absolute;
+  top: 20px;
+  left: 31px;
+  font-size: 17px;
+  font-family: 'Manrope', sans-serif;
+  color: #ffffff8f;
+  transition: transform 0.3s ease-in-out; 
+  transform: scale(0.8); 
+  cursor: pointer;
+}
+
+.AvatarEditCircle:hover .AvatarEditText {
+  transform: scale(1);
+}
+
+.Profile {
+  position: absolute;
+  top: 410px;
+  left: 220px;
+  display: flex;
+  align-items: center;
+  width: 220px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 17px;
+}
+
+.UserIcon {
+  position: absolute;
+
+  width: 25px;
+  height: 25px;
+  left: 3%;
+}
+
+.Username {
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  margin-left: 50px;
+}
+
+.EditIcon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  left: 87%;
+}
+.EditInput {
+  background-color: transparent; 
+  border: none; 
+  color: #fff; 
+  font-family: 'Manrope', sans-serif; 
+  font-size: 18px; 
+  outline: none; 
+  margin-left: 50px;
+  /* width: 110px; */
+}
+
+.EditInput:focus {
+  border: none; 
+}
+.EditInput:focus-visible {
+  outline: none;
+}
+
+.TFA {
+  position: absolute;
+  top: 490px;
+  left: 190px;
+  display: flex;
+  align-items: center;
+  width: 280px;
+  height: 50px;
+  font-size: 10px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 17px;
+  cursor: pointer;
+}
+
+.TFA h1 {
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  margin-left: 50px;
+  top: 100px;
+}
+
+.TFAIcon{
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  left: 200px;
+  top: 503px;
+}
+
+.SaveTheChangesRectangle{
+  position: absolute;
+  top: 700px;
+  left: 220px;
+  width: 220px;
+  height: 50px;
+  background-color: rgba(61, 55, 133, 0.34);
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.SaveTheChangesText{
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+}

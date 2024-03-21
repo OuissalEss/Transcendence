@@ -1,0 +1,134 @@
+body {
+    color: #3E1256;
+}
+.login-page {
+    margin: 10px 10px 0px 10px;
+}
+
+.btn-login {
+    padding: 10px 0px;
+    display: flex;
+    border-radius: 30px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 5px 5px 10px #00000050;
+    border: 2px solid #3E1256;
+    margin-top: 30px;
+    font-size: 18px;
+}
+
+.btn-login:hover {
+    background-color: #3E1256;
+    color: #fff;
+}
+
+.logo {
+    margin: 0px 5px 0px 0px;
+    width: 40px;
+}
+
+.svg {
+    display: inline;
+    margin-left: 10px;
+}
+
+.t {
+    display: flex;
+    justify-content: center;
+}
+
+.title-login {
+    font-size: 32px;
+    font-weight: 450;
+}
+
+/* ------------------------ Characters ------------------------ */
+
+.left-character-login,
+.right-character-login {
+    width: 250px;
+}
+
+.middle-character {
+    width: 300px;
+}
+
+.mc {
+    justify-content: center;
+    align-items: center;
+}
+
+/* ----- S ----- */
+@media (max-width: 767.98px) {
+    .login-page .grid-cols-3 {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+
+    .left-character-login,
+    .right-character-login {
+        display: none;
+    }
+    .justify-bottom {
+        min-height: 0px;
+    }
+}
+
+/* ----- M ----- */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .login-page .grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .left-character-login {
+        display: none;
+    }
+
+    .mb-9 {
+        margin-bottom: 25px;
+    }
+
+    .btn-login {
+        padding: 7px 0px;
+        margin-top: 20px;
+    }
+
+    .title-login {
+        font-size: 25px;
+    }
+    .justify-bottom {
+        min-height: 0xp;
+        display: flex;
+        align-items: flex-end;
+    }
+}
+
+/* ----- L ----- */
+@media (min-width: 992px) and (max-width: 1299.98px) {
+
+    .left-character-login,
+    .right-character-login {
+        width: 250px;
+    }
+
+    .middle-character {
+        width: 300px;
+    }
+
+    .title-login {
+        font-size: 23px;
+    }
+    .justify-bottom {
+        min-height: calc(100vh - 10px);
+        display: flex;
+        align-items: flex-end;
+    }
+}
+
+/* ----- XL ----- */
+@media (min-width: 1300px) {
+    .justify-bottom {
+        min-height: calc(100vh - 10px);
+        display: flex;
+        align-items: flex-end;
+    }
+}

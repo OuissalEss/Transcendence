@@ -1,28 +1,22 @@
-import {Body, Controller, ForbiddenException, Get, Req, Post, Render} from '@nestjs/common';
-
-import { Public } from "src/auth/public-metadata";
-import {ChannelService} from "../services/channel.service";
-import {Channel} from "../entities/channel.entity";
-import {PrismaService} from "../services/prisma.service";
-import {ChannelUser} from "../entities/channel-user.entity";
+import {Body, Controller, Get, Req, Post} from '@nestjs/common';
 
 @Controller()
 export class AppController {
   constructor() {}
 
   @Get()
-  root(@Req() req: Request, @Body() body) {
+  root(@Req() req: Request) {
     return { message: 'Ping Pong Multiplayer' };
   }
 
   @Post()
-  async router(@Req() req: Request, @Body() body): Promise<string> {
+  async router(@Req() req: Request, @Body() body: Body): Promise<string> {
     console.log(req);
     return `HELLO ${body}`
   }
 
   @Get('validate')
-  validation(@Req() req: Request, @Body() body): Boolean {
+  validation(@Req() req: Request, @Body() body: Body): Boolean {
     return true
   }
 }

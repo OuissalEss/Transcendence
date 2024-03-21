@@ -1,6 +1,9 @@
 // game.gateway.ts
 import { WebSocketGateway, SubscribeMessage, WebSocketServer, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+// import { JwtMiddleware } from 'src/middleware/jwt.middleware';
+import { CreateMatchInput } from 'src/services/dto/create-match.input';
+import { MatchService } from 'src/services/match.service';
 
 import { GameState } from './objects/game.class';
 import { CanvasConfig } from "./types/game.service";
@@ -10,20 +13,24 @@ let height = 600;
 
 @WebSocketGateway({ cors: true })
 export class GameGateway {
+  constructor(private readonly matchService: MatchService) {
+  //   this.server.use(new JwtMiddleware().use);
+  }
   @WebSocketServer() server: Server;
 
   private games: Map<string, GameState> = new Map(); // Map to store game instances for each client
   private onlinePlayersQueue: Socket[] = [];
 
+
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
 
+    if (!client.handshake.query || !client.handshake.query.gameType)
+      return;
     // Check if the client wants to play online
     const wantsToPlayOnline = client.handshake.query && client.handshake.query.gameType === 'online';
 
     if (wantsToPlayOnline) {
-
-
       // Create a new game instance for the client
       // const game = new GameState(width, height, 'online');
       // this.games.set(client.id, game);
@@ -58,10 +65,17 @@ export class GameGateway {
         player1.join(`onlineRoom_${player1.id}${player2.id}`);
         player1.join(`onlineRoom_${player1.id}${player2.id}`);
 
+        const data: CreateMatchInput = {
+          host_score_m: 0,
+          guest_score_m: 0,
+          hostId: '',
+          guestId: '',
+        }
+        this.matchService.createMatch(data);
+
         // Broadcast the initial game state
         this.broadcastGameState();
       }
-      this.broadcastGameState();
     } else {
       // Handle other scenarios, such as offline or AI games
       console.log(`Player ${client.id} connected for other game types.`);
@@ -104,18 +118,10 @@ export class GameGateway {
   }
 
   @SubscribeMessage('updatePaddleMovement')
-  updatePaddleMovement(client: Socket, movement: string) {
+  updatePaddleMovement(client: Socket, sideMovement: string) {
     const game = this.games.get(client.id);
     if (game) {
-      game.updatePaddle(client.id, movement);
-    }
-  }
-
-  @SubscribeMessage('updateOfflinePaddle')
-  updateOfflinePaddle(client: Socket, sideMovement: string) {
-    const game = this.games.get(client.id);
-    if (game) {
-      game.updateOfflinePaddle(client.id, sideMovement[0], sideMovement[1]);
+      game.updatePaddleMovement(client.id, sideMovement[0], sideMovement[1]);
     }
   }
 
@@ -128,7 +134,7 @@ export class GameGateway {
   private broadcastGameState() {
     this.games.forEach((game, clientId) => {
       game.updateGameState();
-      this.server.to(clientId). emit('updateGameState', game.getGameState());
+      this.server.to(clientId).emit('updateGameState', game.getGameState());
 
     });
   }

@@ -14,7 +14,6 @@ enum Status {
   ONLINE       // User is online
   OFFLINE      // User is offline
   INGAME       // User is in a game
-  AWAY         // User is away
 }
 
 model Achievement {
@@ -51,6 +50,15 @@ model UserAchievement {
  	@@map("user_achievements")
 }
 
+enum Character {
+	Aurora
+	Luna
+	Lumina
+	Nova
+	Starlight
+	Aegon
+}
+
 model User {
 	id				String 				@id @default(uuid())
 
@@ -62,6 +70,8 @@ model User {
 
 	xp				Int?
 	avatar			Avatar?
+
+	character		Character?			@default(Aurora)
 
 	status			Status?				@default(ONLINE)
 	connection  	Connection?
@@ -126,10 +136,10 @@ model Avatar {
 model Friend {
 	id				String 		@id @default(uuid())
 
-	senderId		String		@unique
-	receiverId		String		@unique
+	senderId		String		
+	receiverId		String		
 
-	isAccepted		Boolean		@unique @default(false)
+	isAccepted		Boolean		@default(false)
 
 	createdAt 		DateTime 	@default(now())
     updatedAt 		DateTime 	@updatedAt
@@ -165,11 +175,11 @@ model Match {
 
 	hostId			String
 	guestId		 	String
-	winnerId		 String
+	winnerId		String?
 
 	host			User		@relation(name: "host", fields: [hostId], references: [id])
 	guest			User		@relation(name: "guest", fields: [guestId], references: [id])
-	winner			User		@relation(name: "winner", fields: [winnerId], references: [id])
+	winner			User?		@relation(name: "winner", fields: [winnerId], references: [id])
 
 	createdAt 		DateTime 	@default(now())
     updatedAt 		DateTime 	@updatedAt
@@ -188,7 +198,7 @@ enum ChannelType {
 model Channel {
 	id				String 			@id @default(uuid())
 
-	title			String			@unique
+	title			String			
 
 	type			ChannelType
 

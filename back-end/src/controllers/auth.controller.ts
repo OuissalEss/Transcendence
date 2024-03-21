@@ -23,34 +23,34 @@ export class AuthController {
   
   }
 
-  @Public()
-  @UseGuards(FTAuthGuard)
-  @Get('42-redirect')
-  async auth42Redirect(
-    @Req() req: Request & {user: User},
-    @Res() res: Response
+  // @Public()
+  // @UseGuards(FTAuthGuard)
+  // @Get('42-redirect')
+  // async auth42Redirect(
+  //   @Req() req: Request & {user: User},
+  //   @Res() res: Response
     
-    ) {
-    const token : JwtResponse = await this.authService.getJwttoken(req.user);
+  //   ) {
+  //   const token : JwtResponse = await this.authService.getJwttoken(req.user);
 
-    res.cookie('token', token['access_token'], {
-      maxAge: 2592000000,
-    });
+  //   res.cookie('token', token['access_token'], {
+  //     maxAge: 2592000000,
+  //   });
 
-    res.redirect(`${this.configService.get("CLIENT_URL")}/dashboard/profile`);     // res.json(token);
-  }
+  //   res.redirect(`${this.configService.get("CLIENT_URL")}/dashboard/profile`);     // res.json(token);
+  // }
 
   @Public()
   @UseGuards(GoogleOauthGuard)
   @Get('google')
   authGoogle() {
-
   }
+  
   @Public()
   @UseGuards(GoogleOauthGuard)
   @Get('google/callback')
   async authGoogleCallBack(
-    @Req() req: Request & {user : User},
+    @Req() req: Request & {user : User, firstLogIn: Boolean},
     @Res() res: Response
     ) {
     const token: JwtResponse = await this.authService.getJwttoken(req.user);
@@ -58,7 +58,9 @@ export class AuthController {
     res.cookie('token', token['access_token'], {
       maxAge: 2592000000,
     });
-
-    res.redirect(`${this.configService.get("CLIENT_URL")}/dashboard/profile`); 
+    if ( true )
+    
+    req.firstLogIn = false;
+    res.redirect(`${this.configService.get("CLIENT_URL")}/`);
   }
 }

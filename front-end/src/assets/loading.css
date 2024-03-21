@@ -1,0 +1,41 @@
+
+.container {
+    width: 80vw;
+    margin-top: 45px;
+    color: #3E1256;
+    display: flex;
+    justify-content: center;
+}
+
+.image {
+    margin-right: 4px;
+    margin-left: -55px;
+}
+
+.text-loading {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+.par{
+    font-size: 1.3rem;
+}
+.gif{
+    background-color: rgb(101 175 229 / 18%);
+    backdrop-filter: blur(2px);
+    border-radius: 20px;
+    padding: 0px 20px 20px 20px;
+    margin-top: 25vh;
+}
+.stories {
+    font-size: 1.5rem;
+    background-color: rgb(101 175 229 / 18%);
+    backdrop-filter: blur(2px);
+    border-radius: 20px;
+    padding: 20px;
+    height: 90vh;
+}
+.gifL{
+    backdrop-filter: blur(0px);
+    padding: 0px 20px 20px 20px;
+    margin-top: 20vh;
+}

@@ -1,0 +1,496 @@
+
+/* ---------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+
+.main-game-page{
+    margin-top: 20px;
+    margin-left: 10px;
+    width: 80vw;
+
+}
+/* ----- L ----- */
+@media (max-width: 992px) {
+    .main-game-page .modes{
+        grid-template-columns: repeat(1, 1fr);
+        gap: 15px;
+    }
+}
+
+.game-modes{
+    width: 80vw;
+    margin-left: 23px;
+    margin-top: 20px;
+}
+
+
+.header{
+    margin: 0px 0px 30px 0px;
+}
+
+.game-mode{
+    /* display: flex; */
+    /* justify-content: center;
+    align-items: center; */
+    position: relative;
+    margin: auto;
+    background-color: rgb(114 196 255 / 20%);
+    backdrop-filter: blur(2px);
+    border-radius: 25px;
+    font-family: "Manrope", sans-serif;
+    color: #3E1256;
+    font-weight: 500;
+    padding: 0px 20px 0px 20px;
+    height: 355px;
+    width: 380px;
+}
+    .mode-text{
+    width: 160px;
+    margin: auto;
+}
+    .mode-text h3{
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+    .mode-text p{
+    font-size: 18px;
+}
+    .mode-char{
+        width: 190px;
+        margin-top: -17px;
+}
+    .robot .mode-char{
+        margin-top: -8px;
+        
+    }
+    .mode-img{
+    width: 190px;
+}
+    .mode-btn{
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(62 18 86 / 50%);
+    z-index: 1;
+    backdrop-filter: blur(10px);
+    color: #fff;
+    width: 70%;
+    padding: 10px 0px;
+    border-radius: 15px;
+}
+    .mode-btn div{
+    font-size: 22px;
+    display: flex;
+    justify-content: center;
+}
+
+    .robot .mode-img{
+        margin-top: 20px;
+    }
+
+
+    .live{
+    background-color: rgb(62 18 86 / 5%);
+    border-radius: 15px;
+    height: 150px;
+    margin: 20px 0px 0px -5px;
+    padding: 10px 0px 10px 10px;
+    font-size: 14px;
+
+}
+    .live-btn{
+    background-color: rgb(62 18 86 / 65%);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    width: 70%;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 2px;
+    font-weight: 400;
+}
+
+    .match{
+    margin: 1px 0px 15px 0px;
+    font-weight: 600;
+    /* width: 180px; */
+}
+    .match .players{
+    /* width: 180px; */
+
+}
+    .matches{
+    overflow-y: auto; /* Enable vertical scrolling */
+        height: 130px;
+}
+
+    .matches::-webkit-scrollbar {
+        width: 0px;
+    }
+    /* For Firefox */
+    .matches {
+        scrollbar-width: none;
+    }
+
+    /* .w .mode-text{
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        width: 100%;
+        padding: 0px 15px;
+        margin: auto;
+    }
+    .w .mode-text h3{
+        font-size: 36px;
+        font-weight: 600;
+        margin-bottom: 0px;
+    } */
+
+
+
+    /* ----- XL ---- */
+    @media (min-width: 1300px) {
+        .full-game-page{
+            margin-right: 10px;
+        }
+    }
+
+
+/* ------------------------ Game ------------------------ */
+    /* ----- XS ----- */
+    @media (max-width: 469.98px) {
+        .full-game-page .grid-cols-12{
+            grid-template-columns: repeat(1, 1fr);
+            gap: 10px;
+        }
+        .game-modes{
+            grid-column: span 1;
+        }
+    }
+
+    /* ----- S ----- */
+    @media (min-width: 470px) and (max-width: 767.98px) {
+        .full-game-page .grid-cols-12{
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        .game-modes{
+            grid-column: span 5;
+        }
+    }
+
+    /* ----- M ----- */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .full-game-page .grid-cols-12{
+            grid-template-columns: repeat(12, 1fr);
+            gap: 10px;
+        }
+    }
+
+    /* ----- L ----- */
+    @media (min-width: 992px) and (max-width: 1299.98px) {
+        .full-game-page .grid-cols-12{
+            grid-template-columns: repeat(12, 1fr);
+            gap: 15px;
+        }
+    }
+
+
+
+/* ------------------------ Characters ------------------------ */
+    .left-character{
+        width: 90px;
+    }
+    .right-character{
+        width: 90px;
+    }
+
+    /* ----- S ----- */
+    @media (max-width: 767.98px) {
+        .left-character{
+            width: 50px;
+        }
+        .right-character{
+            width: 50px;
+            margin-left: -13px;
+        }
+    }
+
+    /* ----- M ----- */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .left-character{
+            width: 60px;
+        }
+        .right-character{
+            width: 60px;
+        }
+    }
+
+    /* ----- L ----- */
+    @media (min-width: 992px) and (max-width: 1299.98px) {
+        .left-character{
+            width: 80px;
+        }
+        .right-character{
+            width: 80px;
+        }
+    }
+
+
+
+/* ------------------------ Players ------------------------ */
+
+    .players-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 1070px;
+        margin: auto;
+    }
+
+    .player-img{
+        box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.5);
+        border-radius: 19px;
+        margin-bottom: 10px;
+    }
+
+    .player-name{
+        color: #3E1256;
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    .left-player-data{
+        margin-left: 20px;
+        width: 60px;
+        /* margin: auto; */
+    }
+
+    .right-player-data{
+        margin-left: 160px;
+        width: 60px;
+        /* margin: auto; */
+    }
+
+    /* ----- S ----- */
+    @media (max-width: 767.98px) {
+        .player-img{
+            margin-bottom: 0px;
+        }
+        .player-name{
+            font-size: 10px;
+        }
+        .left-player-data{
+            /* margin-right: 33px; */
+            width: 30px;
+        }
+        .right-player-data{
+            margin-left: 20px;
+            width: 30px;
+        }
+        .players-container{
+            width: 300px;
+        }
+    }
+
+    /* ----- M ----- */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .player-img{
+            margin-bottom: 5px;
+        }
+        .player-name{
+            font-size: 18px;
+        }
+        .left-player-data{
+            width: 45px;
+        }
+        .right-player-data{
+            margin-left: 80px;
+            width: 45px;
+        }
+        .players-container{
+            width: 650px;
+        }
+    }
+    @media (min-width: 768px) and (max-width: 799.98px) {
+        .players-container{
+            width: 620px;
+        }
+    }
+
+    /* ----- L ----- */
+    @media (min-width: 992px) and (max-width: 1299.98px) {
+        .player-img{
+            margin-bottom: 5px;
+        }
+        .player-name{
+            font-size: 18px;
+        }
+        .left-player-data{
+            /* margin-right: 160px; */
+            width: 55px;
+        }
+        .right-player-data{
+            margin-left: 110px;
+            width: 55px;
+        }
+        .players-container{
+            width: 800px;
+        }
+    }
+
+
+
+
+
+/* ------------------------ Score ------------------------ */
+    .score-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgb(114 196 255 / 20%);
+        backdrop-filter: blur(2px);
+        border-radius: 19px;
+        height: 130px;
+        width: 750px;
+        /* margin: 0vh 2vw 30px 2vw; */
+        margin: auto;
+        margin-bottom: 35px;
+    }
+    .rounds{
+        font-size: 24px;
+        color: #3E1256;
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .score{
+        color: #3E1256;
+        font-size: 40px;
+        font-weight: 600;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: auto;
+    }
+
+    /* ----- S ----- */
+    @media (max-width: 767.98px) {
+        .score-container {
+            height: 70px;
+            width: 200px;
+            margin: 0px 0px 20px 18px;
+        }
+        .rounds{
+            font-size: 13px;
+            font-weight: 400;
+        }
+        .score{
+            font-size: 22px;
+            font-weight: 400;
+        }
+    }
+
+    /* ----- M ----- */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .score-container {
+            height: 100px;
+            width: 450px;
+            margin: 0px 0px 10px 28px;
+        }
+        .rounds{
+            font-size: 18px;
+        }
+        .score{
+            font-size: 30px;
+        }
+    }
+
+    /* ----- L ----- */
+    @media (min-width: 992px) and (max-width: 1299.98px) {
+        .score-container {
+            height: 120px;
+            width: 550px;
+            margin: 0vh 0px 25px 35px;
+        }
+        .rounds{
+            font-size: 20px;
+        }
+        .score{
+            font-size: 35px;
+        }
+    }
+
+
+
+/* ------------------------ Board ------------------------ */
+    .board-container {
+        display: flex;
+        border: 200;
+    }
+
+    .canvas-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: auto;
+        background-color: rgb(114 196 255 / 20%);
+        backdrop-filter: blur(4px);
+        border-radius: 13px;
+        height: 620px;
+        width: 1070px;
+    }
+
+    /* ----- S ----- */
+    @media (max-width: 767.98px) {
+        .canvas-container {
+            height: 160px;
+            width: 300px;
+        }
+    }
+
+    /* ----- M ----- */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .canvas-container {
+            height: 350px;
+            width: 650px;
+        }
+    }
+        @media (min-width: 768px) and (max-width: 799.98px) {
+            .canvas-container {
+                width: 610px;
+            }
+        }
+        @media (min-width: 800px) and (max-width: 820.98px) {
+            .canvas-container {
+                width: 630px;
+            }
+        }
+
+
+    /* ----- L ----- */
+    @media (min-width: 992px) and (max-width: 1299.99px) {
+        .canvas-container {
+            height: 430px;
+            width: 800px;
+        }
+    }
+
+
+
+    /* Add this CSS to your stylesheet */
+.spinner {
+    border: 6px solid rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

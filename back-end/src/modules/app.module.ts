@@ -22,6 +22,7 @@ import {ThrottlerGuard, ThrottlerModule} from "@nestjs/throttler";
 
 import {ChatGateway} from 'src/gateway/chat.gateway';
 import {GameModule} from "./game.module";
+import { MatchModule } from './match.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import {GameModule} from "./game.module";
       context: ({ req, res }) => ({ req, res }),
     }),
     UserModule,
+    MatchModule,
     FriendModule,
     ChannelModule,
     ChannelUserModule,

@@ -1,5 +1,5 @@
 // user.entity.ts
-import { Field, ObjectType, Int, ID, registerEnumType} from '@nestjs/graphql';
+import { Field, ObjectType, Int, ID, registerEnumType } from '@nestjs/graphql';
 import {
   IsEmail,
   IsInt,
@@ -16,9 +16,9 @@ import { Match } from 'src/entities/match.entity';
 import { ChannelUser } from 'src/entities/channel-user.entity';
 import { Notification } from 'src/entities/notification.entity';
 
-import {Avatar} from "./avatar.entity";
+import { Avatar } from "./avatar.entity";
 
-import { Status } from '@prisma/client'; // Import the Prisma-generated Status enum
+import { Status, Character } from '@prisma/client'; // Import the Prisma-generated Status enum
 //import { Status } from 'src/enums/status.enum';
 
 @ObjectType()
@@ -28,7 +28,7 @@ export class User {
    * @type {number}
    */
   @Field(() => ID)
-  @IsString({ message: 'ID must be an string' })
+  @IsString({ message: 'ID must be string' })
   @IsNotEmpty({ message: 'ID cannot be empty' })
   id: String;
 
@@ -46,7 +46,7 @@ export class User {
    * @type {string}
    */
   @Field({ description: 'User username' })
-  @IsString({ message: 'Username must be an string' })
+  @IsString({ message: 'Username must be string' })
   @IsNotEmpty({ message: 'Username cannot be empty' })
   username: string;
 
@@ -55,7 +55,7 @@ export class User {
    * @type {string}
    */
   @Field({ description: 'User first name' })
-  @IsString({ message: 'FirstName must be an string' })
+  @IsString({ message: 'FirstName must be string' })
   @IsNotEmpty({ message: 'FirstName cannot be empty' })
   firstName: string;
 
@@ -64,7 +64,7 @@ export class User {
    * @type {string}
    */
   @Field({ description: 'User last name' })
-  @IsString({ message: 'LastName must be an string' })
+  @IsString({ message: 'LastName must be string' })
   @IsNotEmpty({ message: 'LastName cannot be empty' })
   lastName: string;
 
@@ -98,6 +98,17 @@ export class User {
   })
   @IsNotEmpty({ message: 'Status must not be empty' })
   status?: Status;
+
+  /**
+   * User Character (nullable).
+   * @type {Character}
+   */
+  @Field(() => Character, {
+    defaultValue: "Aurora",
+    description: 'User character'
+  })
+  @IsNotEmpty({ message: 'Character must not be empty' })
+  character?: Character;
 
   /**
    * The associated connection entity.
@@ -201,7 +212,7 @@ export class User {
    * User's channel participation (nullable).
    * @type {ChannelUser[]}
    */
-  @IsNotEmpty({ message: "User's channel must not be empty"})
+  @IsNotEmpty({ message: "User's channel must not be empty" })
   @Field(() => [ChannelUser], {
     description: "User's channel participation",
     defaultValue: [],
@@ -255,4 +266,10 @@ export class User {
 registerEnumType(Status, {
   name: 'Status',
   description: 'The type of the user status.',
+});
+
+// Register the PrismaCharacter enum with GraphQL
+registerEnumType(Character, {
+  name: 'Character',
+  description: 'The type of the user character.',
 });

@@ -6,4 +6,5 @@ export interface Payload {
     sub: int;
     username: string;
     createdAt: date;
+    firstLogIn: Boolean;
 }
