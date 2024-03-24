@@ -18,58 +18,9 @@ import { useState } from 'react';
 import NewRoom from '../components/chat/newRoom';
 import JoinRoom from '../components/chat/joinRomm';
 import Layout from '../components/chat/layout';
-
-interface discussionItems {
-	title: string;
-	icon: string;
-	type: string;
-	text: string;
-	read: boolean;
-	time: Date;
-	unread: number;
-	status?: string;
-	sender?: string;
-}
-
-interface messageItems {
-	text: string;
-	sender: string;
-	time: Date;
-	read: boolean;
-}
-
-interface channelItems {
-	messages: messageItems[];
-	admins?: {
-	  name: string;
-	  icon: string;
-	}[];
-	owner?: {
-	  name: string;
-	  icon: string;
-  };
-	password?: string;
-	description?: string;
-	type: string;
-	icon: string;
-	title: string;
-	members?: {
-	  name: string;
-	  icon: string;
-	}[];
-	banned?: {
-	  name: string;
-	  icon: string;
-	}[];
-	muted?: {
-	  name: string;
-	  icon: string;
-	  duration?: number; // 7h - 168h (week) - always (permanent = true)
-	  isMuted?: boolean;
-	  isPermanent?: boolean;
-	}[];
-	status?: string;
-}
+import { channel, channelItems, discussionItems } from '../interfaces/props';
+import { useQuery } from '@apollo/client';
+import { ALL_CHANNELS } from '../graphql/queries';
 
 function NoChannelSelected() {
   return (
@@ -83,53 +34,86 @@ function NoChannelSelected() {
 }
 
 function ChatPageContainer() {
-  const [lock, setLock] = useState(true);
-  const [showPasswordContainer, setShowPasswordContainer] = useState(false);
   const [display, setDisplay] = useState('');
-  const [index, setIndex] = useState(0);
-  
+  const [id, setId] = useState('');
+  const {loading, error, data} = useQuery(ALL_CHANNELS);
 
-  const toggleLock = () => {
-    setLock((prevState: any) => !prevState);
-    setShowPasswordContainer(true);
-    console.log(lock + ' ha lock');
-  };
-
-  const friendsItems = [
-    { name: "Stella", icon: friend1},
-    { name: "Slan", icon: friend2},
-    { name: "James", icon: friend3},
-    { name: "Jinxx", icon: friend4 },
-    // { name: "Stella", icon: friend1},
-    // { name: "Slan", icon: friend2},
-    // { name: "James", icon: friend3},
-    // { name: "Jinxx", icon: friend4 },
-    // { name: "Jinxx", icon: friend4 },
-    // { name: "Slan", icon: friend2},
-    // { name: "James", icon: friend3},
-    // { name: "Jinxx", icon: friend4 },
-    // { name: "Jinxx", icon: friend4 },
-  ];
+  if (loading) console.log('channels : Loading...');
+  else if (error) console.log('channel : Error:', error.message);
+  else if (data) {
+    console.log('All channels:', data);
+    // extract the channels from the data
+    const channels = data.AllChannels
+    .map((channel: channel) => ({
+            id: channel.id,
+            title: channel.title,
+            description: channel.description,
+            type: channel.type,
+            password: channel.password,
+            icon: channel.profileImage,
+            updatedAt: channel.updatedAt,
+            owner: {
+              id: channel.owner.id,
+              name: channel.owner.username,
+              icon: channel.owner.avatarTest
+            },
+            admins: channel.admins
+            .map((admin: { id: string, username: string, avatarTest: string }) => ({
+              id: admin.id,
+              name: admin.username,
+              icon: admin.avatarTest
+            })),
+            members: channel.members
+            .map((member: { id: string, username: string, avatarTest: string, status: string }) => ({
+              id: member.id,
+              name: member.username,
+              icon: member.avatarTest,
+              status: member.status,
+            })),
+            banned: channel.banned.map((banned: { id: string, username: string, avatarTest: string }) => ({
+              id: banned.id,
+              name: banned.username,
+              icon: banned.avatarTest
+            })),
+            muted: channel.muted.map((muted: { id: string, username: string, avatarTest: string }) => ({
+              id: muted.id,
+              name: muted.username,
+              icon: muted.avatarTest
+            })),
+            messages: channel.messages
+            .map((message: { id: string, text: string, time: Date, sender: string }) => ({
+              text: message.text,
+              sender: message.sender,
+              time: message.time,
+              read: true,
+              unread: 0
+            })).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
+      })).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      console.log('channels:', channels)
+    localStorage.setItem('channels', JSON.stringify(channels));
+  }
 
   const channelsItems = [
-    { title: "channel1", icon: banner, type: "private"},
-    { title: "channel2", icon: banner, type: "protected"},
-    { title: "channel3", icon: banner, type: "public"},
-    { title: "channel4", icon: banner, type: "dm"},
-    { title: "channel5", icon: banner, type: "public", description: "public chat room !"},
-  { title: "channel6", icon: banner, type: "protected", description: "This is a protected channel with a long description exceeding 30 characters." },
+    {id: "1", title: "channel1", icon: banner, type: "private"},
+    {id: "2", title: "channel2", icon: banner, type: "protected"},
+    {id: "3", title: "channel3", icon: banner, type: "public"},
+    {id: "4", title: "channel4", icon: banner, type: "dm"},
+    {id: "5", title: "channel5", icon: banner, type: "public", description: "public chat room !"},
+  {id: "6", title: "channel6", icon: banner, type: "protected", description: "This is a protected channel with a long description exceeding 30 characters." },
   ];
 
   // to be updated : sort based on the last updated channel
 
   const discussions: discussionItems[] = [
-    {title: "channel1", icon: banner, type: "private", text: "Hey guys, I am new here !", read: false, time: new Date("2024-03-09T12:00:00"), unread: 3, sender: "Stella"},
-    {title: "channel2", icon: banner, type: "protected", text: "Hey guys, I am new here !", read: false, time: new Date("2024-03-09T09:00:00"), unread: 5, sender: "Slan"},
-    {title: "channel3", icon: banner, type: "public", text: "Hey guys, I am new here !", read: true, time: new Date("2024-03-09T08:00:00"), unread: 0, sender: "James"},
-    {title: "James", icon: friend3, type: "dm", text: "I am in the game, we can play later in the afternoon aaaaaaaaaaa", read: true, time: new Date("2024-03-09T08:00:00"), unread: 0, status: "INGAME"},
-    {title: "Stella", icon: friend1, type: "dm", text: "Hey, how are you ?", read: false, time: new Date("2024-03-09T12:00:00"), unread: 3, status: "ONLINE"},
-    {title: "Slan", icon: friend2, type: "dm", text: "Up for a game ?", read: true, time: new Date("2024-03-09T09:00:00"), unread: 0, status: "OFFLINE"},
+    {id: "1", title: "channel1", icon: banner, type: "private", text: "Hey guys, I am new here !", read: false, time: new Date("2024-03-09T12:00:00"), unread: 3, sender: "Stella"},
+    {id: "2", title: "channel2", icon: banner, type: "protected", text: "Hey guys, I am new here !", read: false, time: new Date("2024-03-09T09:00:00"), unread: 5, sender: "Slan"},
+    {id: "3", title: "channel3", icon: banner, type: "public", text: "Hey guys, I am new here !", read: true, time: new Date("2024-03-09T08:00:00"), unread: 0, sender: "James"},
+    {id: "4", title: "James", icon: friend3, type: "dm", text: "I am in the game, we can play later in the afternoon aaaaaaaaaaa", read: true, time: new Date("2024-03-09T08:00:00"), unread: 0, status: "INGAME"},
+    {id: "5", title: "Stella", icon: friend1, type: "dm", text: "Hey, how are you ?", read: false, time: new Date("2024-03-09T12:00:00"), unread: 3, status: "ONLINE"},
+    {id: "6", title: "Slan", icon: friend2, type: "dm", text: "Up for a game ?", read: true, time: new Date("2024-03-09T09:00:00"), unread: 0, status: "OFFLINE"},
   ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+
 
 const Channels: channelItems[] = [
   {
@@ -260,21 +244,15 @@ const Channels: channelItems[] = [
     status: "OFFLINE",
   },
 ];
-
-  const [discussion, setDiscussion] = useState(discussions);
-  const [channels, setChannels] = useState(Channels);
-  return (
+return (
     <>
       <Layout/>
-      <Discussions setDisplay={setDisplay} setIndex={setIndex} setDiscussion={setDiscussion} discussionItems={discussion}/>
+      <Discussions setDisplay={setDisplay} setId={setId}/>
       <div className="chat-container">
-        {/* <NoChannelSelected/>
-        <NewRoom friendsItems={friendsItems} lock={lock} toggleLock={toggleLock} setShowPasswordContainer={setShowPasswordContainer} showPasswordContainer={showPasswordContainer} />
-        <JoinRoom channelsItems={channelsItems} /> */}
         {display === '' ? <NoChannelSelected/> : null}
         {display === 'JoinRoom' ? <JoinRoom channelsItems={channelsItems}/> : null}
-        {display === 'NewRoom' ? <NewRoom friendsItems={friendsItems} lock={lock} toggleLock={toggleLock} setShowPasswordContainer={setShowPasswordContainer} showPasswordContainer={showPasswordContainer}/> : null}
-        {display === 'Chat' ? <Chat channel={channels[channels.findIndex(item => item.title === discussions[index].title)]} setChannels={setChannels} channels={channels} index={index}/> : null}
+        {display === 'NewRoom' ? <NewRoom setDisplay={setDisplay}/> : null}
+        {display === 'Chat' ? <Chat id={id}/> : null}
       </div>
     </>
   );

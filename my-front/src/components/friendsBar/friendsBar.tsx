@@ -5,31 +5,57 @@ import friend3 from '../../../public/assets/Avatars/14.png';
 import friend4 from '../../../public/assets/Avatars/18.png';
 import test from '../../../public/assets/Avatars/06.png'
 import './friendsBar.css';
+import { useQuery } from '@apollo/client';
+import { ALL_USERS } from '../../graphql/queries';
 
 function FriendsBar() {
-  const friendsItems = [
-    { name: "Stella", icon: friend1, status: "ONLINE" },
-    { name: "Slan", icon: friend2, status: "OFFLINE" },
-    { name: "James", icon: friend3, status: "INGAME" },
-    { name: "Jinxx", icon: friend4, status: "AWAY" },
-  ];
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  let friendsItems;
+  
+
+  // query all the users
+  const { loading, error, data } = useQuery(ALL_USERS);
+  if (loading) console.log('Loading...');
+  if (error) console.log('Error:', error.message);
+  if (data) {
+    // console.log('All users:', data);
+    // console.log('All users:', data.getAllUsers);
+    friendsItems = data.getAllUsers
+    .filter((u: { username: string }) => u.username !== user.username)
+    .map((user: { id: string, username: string, avatarTest: string, status: string, xp: number }) => ({
+      id: user.id,
+      name: user.username,
+      icon: user.avatarTest, // Assuming avatarTest is the avatar URL
+      status: user.status,
+      xp: user.xp,
+    }));
+    // console.log('All friends:', friendsItems);
+    // save the friends in local storage
+    localStorage.setItem('friends', JSON.stringify(friendsItems));
+  }
+  else {
+    friendsItems = [
+      { name: "Stella", icon: friend1, status: "ONLINE", xp: Math.floor(Math.random() * 100) },
+    ];
+  }
 
   return (
-    <div className="friends-sidebar fixed z-10">
-      <div className="friends-sidebar__container items-center z-10">
-      <div className="friends-sidebar__top z-10">
-		    <img src={test} alt="test" className="rounded-full" />
-	    </div>
-        <ul className="friends-sidebar__list">
-          {friendsItems.map((item, index) => (
-            <li className="friends-sidebar__item" key={index}>
-              <img className="w-16 h-16 rounded-full" src={item.icon} alt={item.name} />
-              <span className={`status-indicator ${getStatusColor(item.status)}`} />
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+        <div className="friends-sidebar fixed z-10">
+          <div className="friends-sidebar__container items-center z-10">
+          <div className="friends-sidebar__top z-10">
+    		    <img src={user.avatarTest} title={user.username} className="rounded-full" />
+    	    </div>
+            <ul className="friends-sidebar__list">
+              {friendsItems.map((item: { name: string, icon: string, status: string }, index: number) => (
+                <li className="friends-sidebar__item" key={index}>
+                  <img className="w-16 h-16 rounded-full" src={item.icon} alt={item.name} />
+                  <span className={`status-indicator ${getStatusColor(item.status)}`} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
   );
 }
 

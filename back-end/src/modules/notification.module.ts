@@ -4,7 +4,8 @@ import {NotificationResolver} from "../resolvers/notification.resolver";
 import {PrismaService} from "../services/prisma.service";
 
 @Module({
-    providers: [NotificationService, NotificationResolver, PrismaService]
+    providers: [NotificationService, NotificationResolver, PrismaService],
+    exports: [NotificationService],
 })
 
 export class NotificationModule {}

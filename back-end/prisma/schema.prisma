@@ -213,6 +213,8 @@ model Mute {
 	user		User		@relation(name: "muted", fields: [userId], references: [id])
 	channel		Channel		@relation(name: "muted", fields: [channelId], references: [id])
 
+	@@unique([userId, channelId])
+
 	@@map("muted")
 }
 
@@ -267,6 +269,7 @@ model Message {
 
 	text			String
 	time			DateTime?
+	read			Boolean			@default(false)
 
 	channelId		String
 

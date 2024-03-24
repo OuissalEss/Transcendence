@@ -3,14 +3,7 @@ import React from 'react';
 import ChevronLeft from '../../../../public/assets/Icons/ChevronLeft.png';
 import ChevronRight from '../../../../public/assets/Icons/ChevronRight.png';
 import './signUp.css';
-
-
-interface AvatarSelectionProps {
-    currentCharacterIndex: number;
-    handleLeftChevronClick: () => void;
-    handleRightChevronClick: () => void;
-    avatarList: string[];
-}
+import { AvatarSelectionProps } from '../../../interfaces/props';
 
 const AvatarSelection: React.FC<AvatarSelectionProps> = ({
     currentCharacterIndex,

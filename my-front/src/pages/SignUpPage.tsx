@@ -4,6 +4,7 @@ import AvatarSelection from '../components/auth/signup/AvatarSelection';
 import FormInput from '../components/auth/signup/FormInput';
 import UserCard from '../components/auth/signup/UserCard';
 
+
 function SignUpPageContainer() {
     const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
     const [username, setUsername] = useState("");
@@ -78,7 +79,6 @@ function SignUpPageContainer() {
 							handleUsernameChange={handleUsernameChange}
 							handleEmailChange={handleEmailChange}
 						/>
-						<UserCard avatar={avatarList[currentCharacterIndex]} userName={username} />
 					</div>
 				</div>
             </div>

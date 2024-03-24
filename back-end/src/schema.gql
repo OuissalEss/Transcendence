@@ -64,7 +64,7 @@ type Channel {
   """Get a channel muted users"""
   muted: [User!]!
 
-  """Owner of the channel"""
+  """Get a channel owner"""
   owner: User!
 
   """Channel password"""
@@ -144,11 +144,20 @@ type Connection {
 }
 
 input CreateChannelInput {
+  """Channel description"""
+  description: String
+
+  """Channel owner id"""
+  ownerId: String!
+
   """Channel password"""
   password: String
 
   """Channel profile image"""
   profile: String
+
+  """Channel profile"""
+  profileImage: String
 
   """Channel title"""
   title: String!
@@ -158,9 +167,11 @@ input CreateChannelInput {
 }
 
 input CreateMessageInput {
-  """Channel User who sent the message"""
+  """Channel the message belongs to"""
   channelId: String!
-  id: ID!
+
+  """User who sent the message"""
+  sender: String!
 
   """Content of the message"""
   text: String!
@@ -239,12 +250,18 @@ type Match {
 }
 
 type Message {
+  """Channel where the message belongs"""
+  channel: Channel!
+
   """Channel User who sent the message"""
   channelId: ChannelUser!
 
   """Date the Message was created"""
   createdAt: DateTime!
   id: ID!
+
+  """User who sent the message"""
+  sender: String!
 
   """Content of the message"""
   text: String!
@@ -275,7 +292,6 @@ type Mutation {
 
   """Delete friend with their associated id"""
   deleteFriend: Friend!
-  deleteMessage(id: String!): Message!
   deleteUser(userId: String!): User!
 
   """Join a channel"""
@@ -381,6 +397,7 @@ type Query {
 
   """Get a channel by profile image"""
   ProfileImage(profileImage: String!): [Channel!]!
+  SignIn(email: String!, username: String!): User!
 
   """Get the duration of a mute"""
   duration(cid: String!, uid: String!): DateTime!
@@ -389,7 +406,6 @@ type Query {
   """Retrieves all friends with their associated data"""
   getAllFriends: [Friend!]!
   getAllMessages: [Message!]!
-  getAllMessagesByChannelId(cid: String!): [Message!]!
   getAllNotifications: [Notification!]!
 
   """Retrieves all users with their associated data"""

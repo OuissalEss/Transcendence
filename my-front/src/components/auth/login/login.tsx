@@ -1,14 +1,36 @@
 // components/landing/LandingPage.tsx
 
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import girlImage from '../../../../public/assets/Characters/Nova/01.png'
 import botImage from '../../../../public/assets/Characters/Pixie/01.png'
 import logoImage from '../../../../public/assets/logo.png';
 import boyImage from '../../../../public/assets/Characters/Aegon/04.png'
 import './login.css';
+import { useQuery } from '@apollo/client';
+import { SIGN_IN } from '../../../graphql/queries';
+import { useNavigate } from 'react-router-dom';
 
-function LogingPage() {
+
+function LoginPage() {
+	const navigate = useNavigate();
+    const [toggleSignin, setToggleSignin] = useState(false);
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const { loading, error, data } = useQuery(SIGN_IN, {
+        variables: { email, username },
+        skip: !toggleSignin, // Skip the query if toggleSignin is false
+    });
+
+    useEffect(() => {
+        // Check if data is available and update state accordingly
+        if (data && data.SignIn) {
+            console.log('User successfully signed in:', data.SignIn);
+			localStorage.setItem('user', JSON.stringify(data.SignIn));
+			navigate('/chat');
+        }
+    }, [data]);
+
   return (
     <>
 	<div className='backgroundImage'></div>
@@ -44,12 +66,39 @@ function LogingPage() {
         <p className="normalText">Welcome to the chat !</p>
     </div>
 	<div className="fixed top-1/4 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center space-y-4">
-		<Link to="/signup">
-		<div className="b mx-auto h-16 w-64 flex justify-center items-center">
-      		<div className="i h-16 w-64 bg-gradient-to-br from-pink-400 to-yellow-600 items-center rounded-full shadow-2xl cursor-pointer absolute overflow-hidden transform hover:scale-x-110 hover:scale-y-105 transition duration-300 ease-out"></div>
-			<button className="text-center text-white font-semibold z-10 pointer-events-none">Sign Up</button>
-		</div>
-		</Link>
+		{toggleSignin === false ? (
+			<>
+				<Link to="/signup">
+					  <div className="b mx-auto h-16 w-64 flex justify-center items-center">
+						  <div className="i h-16 w-64 bg-gradient-to-br from-pink-400 to-yellow-600 items-center rounded-full shadow-2xl cursor-pointer absolute overflow-hidden transform hover:scale-x-110 hover:scale-y-105 transition duration-300 ease-out"></div>
+						  <button className="text-center text-white font-semibold z-10 pointer-events-none">Sign Up</button>
+					  </div>
+				</Link>
+				<div className="b mx-auto h-16 w-64 flex justify-center items-center">
+					<div className="i h-16 w-64 bg-gradient-to-br from-pink-400 to-yellow-600 items-center rounded-full shadow-2xl cursor-pointer absolute overflow-hidden transform hover:scale-x-110 hover:scale-y-105 transition duration-300 ease-out" onClick={() => setToggleSignin(true)}></div>
+					<button 
+						className="text-center text-white font-semibold z-10"
+						onClick={() => setToggleSignin(true)}
+					>Sign In</button>
+				</div>
+			</>			
+		) : (
+                <>
+					<input
+						type="email"
+						className="w-48 h-8 p-2 rounded-md border-2 border-pink-300 mb-2"
+						placeholder="email"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)} />
+					<input
+						type="test"
+						className="w-48 h-8 p-2 rounded-md border-2 border-pink-300 mb-2"
+						placeholder="username"
+						value={username}
+						onChange={(e) => setUsername(e.target.value)} />
+
+				</>
+		)}
 	</div>
 
 
@@ -57,4 +106,5 @@ function LogingPage() {
   );
 }
 
-export default LogingPage;
+export default LoginPage;
+

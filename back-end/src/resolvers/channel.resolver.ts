@@ -94,6 +94,16 @@ export class ChannelResolver {
         return this.muteService.getMutedUserListCid(cid);
   }
 
+  @ResolveField(() => User, {
+    name: "owner",
+    description: 'Get a channel owner'
+  })
+  async getOwner(@Parent() channel: Channel): Promise<User> {
+        const cid = channel.id as string;
+        return this.channelService.getChannelOwner(cid);
+  }
+
+
   @ResolveField(() => [Message], {
     name: "messages",
     description: 'Get a channel messages'

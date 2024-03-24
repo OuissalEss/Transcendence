@@ -24,4 +24,17 @@ export class CreateChannelInput {
   @IsEnum(PrismaChannelType, { message: 'Invalid channel type, must be one of these values: '+Object.values(PrismaChannelType).join(', ') })
   type: PrismaChannelType;
 
+  @Field({ nullable: true, description: 'Channel description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true, description: 'Channel profile' })
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
+
+  @Field({ description: 'Channel owner id' })
+  @IsString()
+  ownerId: string;
 }

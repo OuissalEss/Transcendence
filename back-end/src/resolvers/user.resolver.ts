@@ -43,6 +43,18 @@ export class UserResolver {
   //   return this.CheckUserExistence(username, email);
   // }
 
+  @Query (() => User)
+  async SignIn(
+    @Args('email') email:string,
+    @Args('username') username:string,
+  ): Promise<User> {
+    try {
+      return await this.userService.SignIn(email, username);
+    } catch (error) {
+      throw new Error('Failed to sign in user: ' + error.message);
+    }
+  }
+
 
   @Mutation(() => User)
   async updateUsername(

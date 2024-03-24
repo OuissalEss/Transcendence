@@ -3,10 +3,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { Message } from '../entities/message.entity';
 import { CreateMessageInput } from 'src/services/dto/create-message.input';
+import { ChannelUserService } from './channel-user.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class MessageService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly channelUser: ChannelUserService,
+    ) {}
 
     async getAllMessages(): Promise<Message[]> {
         return this.prisma.message.findMany({});
@@ -19,9 +24,20 @@ export class MessageService {
     }
 
     async getAllMessagesByChannelId(cid: string): Promise<Message[]> {
-        return this.prisma.message.findMany({
-            where: { channelId: cid },
-        });
+        try {
+            const messages = await this.prisma.message.findMany({
+                where: {
+                    channel: {
+                        channelId: cid,
+                    }
+                },
+            })
+            if (messages)
+                return messages;
+            return [];
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async getAllMessagesByUserId(uid: string): Promise<Message[]> {
@@ -34,14 +50,21 @@ export class MessageService {
         });
     }
 
-    async createMessage(createMessageInput: CreateMessageInput): Promise<Message> {
-        return this.prisma.message.create({
-            data: {
-                text: createMessageInput.text,
-                time: createMessageInput.time,
-                channelId: createMessageInput.channelId,
-            },
-        });
+    async createMessage(input: CreateMessageInput): Promise<Message> {
+        try {
+            const channelUser = await this.channelUser.getChannelUser(input.channelId, input.sender);
+            if (!channelUser)
+                throw new Error('User is not a member of the channel');
+            return this.prisma.message.create({
+                data: {
+                    text: input.text,
+                    time: input.time,
+                    channel: { connect: { id: channelUser.id } }, // Add the 'channel' property
+                },
+            });        
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async updateMessage(mid: string, text: string): Promise<Message> {
@@ -58,5 +81,27 @@ export class MessageService {
         return this.prisma.message.delete({
             where : {id : messageId}
         })
+    }
+
+    async getMessageSender(mid: string): Promise<string> {
+        try {
+            const msg = await this.prisma.message.findUnique({
+                where: { id: mid },
+                include: {
+                    channel: true,
+                },
+            });
+            if (!msg)
+                throw new Error('Message not found');
+            const channdlUser = await this.channelUser.getChannelUserById(msg.channelId);
+            if (!channdlUser)
+                throw new Error('Channel User not found');
+            const user = await this.prisma.user.findUnique({
+                where: { id: channdlUser.userId },
+            });
+            return user.username;
+        } catch (e) {
+            console.error(e);
+        }
     }
 }

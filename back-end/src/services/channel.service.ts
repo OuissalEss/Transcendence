@@ -1,4 +1,4 @@
-import {ForbiddenException, Inject, Injectable, Logger, forwardRef} from '@nestjs/common';
+import {ConsoleLogger, ForbiddenException, Inject, Injectable, Logger, forwardRef} from '@nestjs/common';
 
 import { Channel } from 'src/entities/channel.entity'
 import {PrismaService} from "src/services/prisma.service";
@@ -58,15 +58,20 @@ export class ChannelService {
     }
 
     async getChannelOwner(cid: string): Promise<User> {
-        const channelUser = await this.channelUserService.getChannelUserByChannelId(cid);
-        let ownerId: string;
-        for (let i = 0; i < channelUser.length; i++)
-            if (channelUser[i].type == UserType.OWNER)
-                ownerId = channelUser[i].userId;
-        return await this.prisma.user.findUnique({
-            where: {id: ownerId}
-        });
-        }
+        try {
+            const channelUser = await this.channelUserService.getChannelUserByChannelId(cid);
+            let ownerId: string;
+            for (let i = 0; i < channelUser.length; i++)
+                if (channelUser[i].type === UserType.OWNER)
+                    ownerId = channelUser[i].userId;
+            return await this.prisma.user.findFirst({
+                where: {id: ownerId}
+            });
+        } catch (e) {
+            this.logger.error(`Unable to get Channel Owner: ${e.message} cid: ${cid}`);
+        }            
+    }
+ 
 
     async getChannelAdmins(cid: string): Promise<User[]> {
         const channelUser = await this.channelUserService.getChannelUserByChannelId(cid);
@@ -150,39 +155,66 @@ export class ChannelService {
 
     async addAdmin(cid: string, uid: string) {
         // check permissions
-        const channelUser = await this.channelUserService.getChannelUser(cid, uid);
-        return this.prisma.channelUser.update({
-            where: {id: channelUser.id},
-            data: {type: UserType.ADMIN},
-        });
+        try {
+            const channelUser = await this.channelUserService.getChannelUser(cid, uid);
+            if (channelUser) {
+                return this.prisma.channelUser.update({
+                    where: {id: channelUser.id},
+                    data: {type: UserType.ADMIN},
+                });                  
+            }
+            else {
+                return this.channelUserService.createChannelUser({
+                    userId: uid, channelId: cid, type: UserType.ADMIN,
+                    id: '',
+                    message: []
+                });
+            }
+        } catch (e) {
+            this.logger.error(`Unable to add Admin to Channel: ${e.message} cid: ${cid} uid: ${uid}`);
+        }
+
     }
 
     async removeMember(cid: string, uid: string) {
-        // check permissions
-        // remove muted relations
-        const channelUser = await this.channelUserService.getChannelUser(cid, uid);
-        if (channelUser.type == UserType.OWNER)
-            throw new ForbiddenException("Cannot remove owner from channel.");
-        return this.channelUserService.deleteChannelUser(channelUser.id);
+        try {
+            const channelUser = await this.channelUserService.getChannelUser(cid, uid);
+            if (!channelUser)
+                throw new ForbiddenException("User is not in channel");
+            await this.channelUserService.deleteChannelUser(channelUser.id);
+            return await this.prisma.user.findUnique({
+                where: {id: uid}
+            });
+        } catch (e) {
+            this.logger.error(`Unable to remove Member from Channel: ${e.message} cid: ${cid} uid: ${uid}`);
+        }
+
     }
 
     async addMember(cid: string, uid: string) {
-        // check permissions
-        return await this.prisma.channelUser.create({
-            data: {
-                type: UserType.USER,
-                channel: {
-                    connect: {
-                        id: cid,
+        try {
+            await this.prisma.channelUser.create({
+                data: {
+                    type: UserType.USER,
+                    channel: {
+                        connect: {
+                            id: cid,
+                        },
+                    },
+                    user: {
+                        connect: {
+                            id: uid,
+                        },
                     },
                 },
-                user: {
-                    connect: {
-                        id: uid,
-                    },
-                },
-            },
-        });
+            });
+            return await this.prisma.user.findUnique({
+                where: {id: uid}
+            });
+        } catch (e) {
+            this.logger.error(`Unable to add Member to Channel: ${e.message} cid: ${cid} uid: ${uid}`);
+        }
+
     }
 
     async deleteChannel(id: string) {
@@ -204,14 +236,29 @@ export class ChannelService {
     
     async createChannel(createChannelInput: CreateChannelInput): Promise<Channel> {
         try {
-            return this.prisma.channel.create({
+            const channel = await this.prisma.channel.create({
                 data: {
                     title: createChannelInput.title,
                     type: createChannelInput.type,
-                    password: createChannelInput.password,
                 },
                 include: channelIncludes
             });
+            if (createChannelInput.description)
+                this.updateChannelDescription(channel.id, createChannelInput.description);
+            if (createChannelInput.profileImage)
+                this.updateChannelProfileImage(channel.id, createChannelInput.profileImage);
+            if (createChannelInput.password)
+                this.updateChannelPassword(channel.id, createChannelInput.password);
+            if (createChannelInput.ownerId) {
+                const user = await this.channelUserService.createChannelUser({
+                    userId: createChannelInput.ownerId, channelId: channel.id, type: UserType.OWNER,
+                    id: '',
+                    message: []
+                });
+                // connect channel with user
+                
+            }
+            return channel;
         } catch (e) {
             throw new ForbiddenException("Unable to create Channel.");
         }

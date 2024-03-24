@@ -85,8 +85,9 @@ export class Channel {
 
   @Field(() => User, {
     description: 'Owner of the channel',
-  })
-  @IsNotEmpty({ message: 'Owner of the channel cannot be empty' })
+    nullable: true
+  })  
+  @IsOptional()
   owner?: User;
 
   /**

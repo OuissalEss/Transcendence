@@ -3,45 +3,42 @@ import './chat.css';
 import { IoLockClosed } from "react-icons/io5";
 import { HiUserCircle } from "react-icons/hi";
 import { FaRegClock } from "react-icons/fa";
+import { channelType, DiscussionsProps } from '../../interfaces/props';
+import { json } from 'react-router-dom';
+import { Key } from 'react';
 
-
-interface discussionItems {
-	title: string;
-	icon: string;
-	type: string;
-	text: string;
-	read: boolean;
-	time: Date;
-	unread: number;
-	status?: string;
-	sender?: string;
-}
-
-interface DiscussionsProps {
-	setDisplay: React.Dispatch<React.SetStateAction<string>>;
-	setIndex: React.Dispatch<React.SetStateAction<number>>;
-	setDiscussion: React.Dispatch<React.SetStateAction<discussionItems[]>>;
-	discussionItems: discussionItems[];
-}
+// the discussions should be ordered by the most recntly updated
 
 const Discussions: React.FC<DiscussionsProps> = ({
     setDisplay,
-	setIndex,
-	setDiscussion,
-    discussionItems,
+	setId,
 }) => {
-
-    const handleButtonClick = (componentId: string) => {
-        setDisplay(componentId);
-    };
-
+	// filter only channels that the user is a member of
+	const user = JSON.parse(localStorage.getItem('user') || '{}');
+	const discussions = JSON.parse(localStorage.getItem('channels') || '[]').filter((channel: channelType) => {
+			return channel.members.some((member) => member.id === user.id);
+	});
 	function handleDiscussionClick(index: number): void {
-		setIndex(index);
+		// update read and unread based on the channel id 
+
+		localStorage.setItem('channels', JSON.stringify(
+			JSON.parse(localStorage.getItem('channels') || '[]').map((channel: channelType) => {
+				if (channel.id === discussions[index].id) {
+					channel.messages.forEach((message: { sender: string, text: string, read: boolean }) => {
+						if (message.sender !== user.username && !message.read) {
+							message.read = true;
+							// message.unread = 0;
+						}
+					});
+					
+					return channel; // Return the updated channel object
+				} else {
+					return channel; // Return the unchanged channel if not found
+				}
+			})
+		));		
+		setId(discussions[index].id);
 		setDisplay("Chat");
-		discussionItems[index].unread = 0;
-		discussionItems[index].read = true;
-		setDiscussion([...discussionItems]);
-		console.log("index :", index);
 	}
 
     return (
@@ -50,52 +47,52 @@ const Discussions: React.FC<DiscussionsProps> = ({
                 <p className="text-1">Discussions</p>
             </div>
             <div className='button-container'>
-                <button className="transparent-button ml-3" onClick={() => handleButtonClick('JoinRoom')}>Join room</button>
-                <button className="transparent-button mr-3" onClick={() => handleButtonClick('NewRoom')}>New room</button>
+                <button className="transparent-button ml-7 mt-6" onClick={() => setDisplay('JoinRoom')}>Join room</button>
+                <button className="transparent-button mr-7 mt-6" onClick={() => setDisplay('NewRoom')}>New room</button>
             </div>
-            <span className="searchBarContainer">
-                <div className="searchImg">
-                    <img
-                        src={search}
-                        alt="search"
-                        style={{ width: '20px', height: "auto" }}
-                    />
-                </div>
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    className="searchInput"
-                />
-            </span>
             <div className="chat-list">
-			{discussionItems
-				.map((discussion, index) => (
-					<div key={index} className="chat-box" onClick={() => handleDiscussionClick(index)}>
-						<div className="img-box">
-							<img className="w-full h-full object-cover w-full h-full" src={discussion.icon}/>
+			{discussions.map((discussion: channelType, index: number) => (
+				<div key={index} className="chat-box" onClick={() => handleDiscussionClick(index)}>
+					<div className="img-box">
+					{discussion.type === 'DM' ? (
+						discussion.members.map((member) => (
+							member.name !== user.username && (
+								<img key={member.id} className="w-full h-full object-cover w-full h-full" src={member.icon} alt={member.name} />
+							)
+						))
+					) : (
+						<img className="w-full h-full object-cover w-full h-full" src={discussion.icon} alt={discussion.title} />
+					)}
+					</div>
+					<div className="chat-details">
+						<div className="text-head">
+							{discussion.type === 'DM' ? (
+								discussion.members.map((member) => (
+									member.name !== user.username && (
+										<h4 key={member.id} className="name">{member.name}</h4>
+									)
+								))
+							) : (
+								<h4 className="name">{discussion.title}</h4>
+							)}
+							<p className="time unread">{new Date(discussion.updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
 						</div>
-						{/* <span className={`status-indicator-1 ${getStatusColor(discussion.status)}`} /> */}
-						<div className="chat-details">
-							<div className="text-head">
-								<h4>{discussion.title}</h4>
-								<p className="time unread">{discussion.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
-							</div>
 						<div className="text-message">
-							<p className={discussion.read ? "" : "unread"}>
-								{discussion.sender ? (
-									`${discussion.sender}: ${discussion.text.length > 30 ? discussion.text.slice(0, 30) + "..." : discussion.text}`
+							<p className={discussion.messages.length > 0 && discussion.messages[discussion.messages.length - 1].read ? "" : "unread"}>
+								{discussion.messages.length > 0 ? (
+									`${discussion.messages[discussion.messages.length - 1].sender}: ${discussion.messages[discussion.messages.length - 1].text.length > 30 ? discussion.messages[discussion.messages.length - 1].text.slice(0, 30) + "..." : discussion.messages[discussion.messages.length - 1].text}`
 								) : (
-									discussion.text.length > 30 ? discussion.text.slice(0, 30) + "..." : discussion.text
-								)}								
+									discussion.type === 'DM' ? "Say hi to your friend" : "Say hi to your friends"
+								)}
 							</p>
-
-						{discussion.unread > 0 && (
-                            <b>{discussion.unread}</b>
-                        )}
+							{discussion.messages.length > 0 && discussion.messages[discussion.messages.length - 1].unread > 0 && (
+								<b>{discussion.messages[discussion.messages.length - 1].unread}</b>
+							)}
 						</div>
 					</div>
 				</div>
-                ))}
+			))}
+
             </div>
         </div>
     );

@@ -5,6 +5,13 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { User } from '@prisma/client';
 import { mute } from 'src/entities/mute.entity';
 
+type MuteWhereUniqueInput = {
+    userId_channelId: {
+        userId: string;
+        channelId: string;
+    };
+};
+
 @Injectable()
 export class MuteService {
 	constructor(
@@ -58,7 +65,7 @@ export class MuteService {
         }));
     }
 
-	@Cron(CronExpression.EVERY_5_MINUTES)
+	@Cron(CronExpression.EVERY_7_HOURS)
     async removeExpiredMutes() {
         const mutes = await this.prisma.mute.findMany();
         for (let i = 0; i < mutes.length; i++) {
@@ -79,27 +86,71 @@ export class MuteService {
         });
     }
 
+    
+
 	async muteUser(cid: string, uid: string, duration: Date, permanent: boolean) {
-        const mute = await this.prisma.mute.create({
-            data: {
-                userId: uid,
-                channelId: cid,
-                duration: duration,
-                finished: false,
-                permanent: permanent,
-            },
-        });
-        await this.prisma.user.update({
-            where: {id: uid},
-            data: {
-                muted: {
-                    connect: {
-                        id: mute.id,
-                    },
+        try {
+            // const mute = await this.prisma.mute.upsert({
+            //     where: {
+            //         userId_channelId: {
+            //             userId: uid,
+            //             channelId: cid,
+            //         },
+            //     },
+            //     create: {
+            //         userId: uid,
+            //         channelId: cid,
+            //         duration: duration,
+            //         finished: false,
+            //         permanent: permanent,
+            //     },
+            //     update: {
+            //         duration: duration,
+            //         finished: false,
+            //         permanent: permanent,
+            //     },
+            //     include: {
+            //         user: true, // Include the user in the result
+            //     },
+            // });
+
+            // Check if the mute record already exists
+            const existingMute = await this.prisma.mute.findFirst({
+                where: {
+                    userId: uid,
+                    channelId: cid,
                 },
-            },
-        });
-        return mute;
+            });
+
+            if (existingMute) {
+                // If the mute record exists, update it
+                const updatedMute = await this.prisma.mute.update({
+                    where: {
+                        id: existingMute.id, // Use the unique ID to update
+                    },
+                    data: {
+                        duration: duration,
+                        finished: false,
+                        permanent: permanent,
+                    },
+                });
+                return updatedMute;
+            } else {
+                // If the mute record doesn't exist, create a new one
+                const newMute = await this.prisma.mute.create({
+                    data: {
+                        userId: uid,
+                        channelId: cid,
+                        duration: duration,
+                        finished: false,
+                        permanent: permanent,
+                    },
+                });
+                return newMute;
+            }
+        } catch (e) {
+            this.logger.error(e);
+        }
     }
 
     async unmuteUser(cid: string, uid: string) {

@@ -97,7 +97,7 @@ export class User {
     description: 'User status'
   })
   @IsNotEmpty({ message: 'Status must not be empty' })
-  status?: Status;
+  status: Status;
 
   /**
    * The associated connection entity.
@@ -258,26 +258,6 @@ export class User {
     description: 'Date the user was last updated'
   })
   updatedAt: Date;
-
-  // /**
-  //  * The channels where the user is banned.
-  //  * @type {ban[]}
-  //  */
-  // @Field(() => [Channel], {
-  //   description: 'User banned channels',
-  //   defaultValue: [],
-  // })
-  // banned?: Channel[];
-
-  //   /**
-  //  * The channels where the user is muted.
-  //  * @type {mute[]}
-  //  */
-  //   @Field(() => [mute], {
-  //     description: 'User muted channels',
-  //     defaultValue: [],
-  //   })
-  //   muted?: mute[];
 }
 
 

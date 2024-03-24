@@ -209,4 +209,17 @@ export class UserService {
              throw new ForbiddenException("Unable to delete Friend.");
          }
     }
+
+    // test
+    async SignIn(email: string, username: string): Promise <User | null> {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                email: email,
+                username: username,
+            }
+        })
+        // if (user)
+        // console.log(user);
+            return user;
+    }
 }
