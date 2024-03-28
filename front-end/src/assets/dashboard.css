@@ -213,7 +213,7 @@
   
   .TopFivePlayers{
     position: absolute;
-    right: 460px;
+    left: 760px;
     top: 140px;
     color: rgba(62, 18, 86, 1);
     font-family: 'Manrope', sans-serif;
@@ -429,8 +429,8 @@
 
 .Top1{
     position: absolute;
-    top: 100px;
-    right: 130px;
+    top: 20px;
+    left: 25px;
     height: 65px;
     border-radius: 15px;
     z-index: 1;
@@ -438,8 +438,8 @@
 
 .Top2{
     position: absolute;
-    top: 220px;
-    right: 130px;
+    top: 20px;
+    left: 25px;
     height: 65px;
     border-radius: 15px;
     z-index: 1;
@@ -447,8 +447,8 @@
 
 .Top3{
     position: absolute;
-    top: 340px;
-    right: 130px;
+    top: 20px;
+    left: 25px;
     height: 65px;
     border-radius: 15px;
     z-index: 1;
@@ -456,8 +456,8 @@
 
 .Top4{
     position: absolute;
-    top: 460px;
-    right: 130px;
+    top: 20px;
+    left: 25px;
     height: 65px;
     border-radius: 15px;
     z-index: 1;
@@ -465,8 +465,8 @@
 
 .Top5{
     position: absolute;
-    top: 580px;
-    right: 130px;
+    top: 20px;
+    left: 25px;
     height: 65px;
     border-radius: 15px;
     z-index: 1;
@@ -474,8 +474,7 @@
 
 .AvatarContainer1 {
     position: absolute;
-    top: 222px;
-    right: 180px;
+    top: 70px;
     width: 490px;
     height: 100px;
     background-color: rgba(114, 196, 255, 0.2);
@@ -505,8 +504,7 @@
 
 .AvatarContainer2 {
     position: absolute;
-    top: 342px;
-    right: 180px;
+    top: 185px;
     width: 490px;
     height: 100px;
     background-color: rgba(114, 196, 255, 0.2);
@@ -536,8 +534,7 @@
 
 .AvatarContainer3 {
     position: absolute;
-    top: 462px;
-    right: 180px;
+    top: 300px;
     width: 490px;
     height: 100px;
     background-color: rgba(114, 196, 255, 0.2);
@@ -566,8 +563,7 @@
 
 .AvatarContainer4 {
     position: absolute;
-    top: 582px;
-    right: 180px;
+    top: 415px;
     width: 490px;
     height: 100px;
     background-color: rgba(114, 196, 255, 0.2);
@@ -598,8 +594,7 @@
 
 .AvatarContainer5 {
     position: absolute;
-    top: 702px;
-    right: 180px;
+    top: 530px;
     width: 490px;
     height: 100px;
     background-color: rgba(114, 196, 255, 0.2);
@@ -629,35 +624,35 @@
 
 .Leaderboard1{
     position: absolute;
-    top: 212px;
-    right: 170px;
+    top: -5px;
+    right: 10px;
     height: 120px;
 }
 
 .Leaderboard2{
     position: absolute;
-    top: 332px;
-    right: 170px;
+    top: -5px;
+    right: 10px;
     height: 120px;
 }
 
 .Leaderboard3{
     position: absolute;
-    top: 452px;
-    right: 170px;
+    top: -5px;
+    right: 10px;
     height: 120px;
 }
 
 .Leaderboard4{
     position: absolute;
-    top: 572px;
-    right: 170px;
+    top: -5px;
+    right: 10px;
     height: 120px;
 }
 
 .Leaderboard5{
     position: absolute;
-    top: 692px;
-    right: 170px;
+    top: -5px;
+    right: 10px;
     height: 120px;
 }

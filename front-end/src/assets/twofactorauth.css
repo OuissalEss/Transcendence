@@ -1,0 +1,105 @@
+.tfa{
+    height: 90vh;
+    width: 99vw;
+}
+.tfa h1{
+    font-size: 30px;
+    margin-top: 70px;
+    margin-left: 40px;
+    margin-bottom: 20px;
+}
+
+.tfaPage{
+    /* background-color: rgba(254, 254, 254, 0.2); */
+    display: flex;
+    height: 70vh;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-height: 700px) {
+    .tfa{
+        /* width: auto; */
+        height: auto;
+    }
+}
+@media (max-height: 700px) {
+    .tfa{
+        width: auto;
+    }
+    .tfa h1{
+        margin-top: 30px;
+    }
+    .tfaPage{
+        align-items: normal;
+        height: auto;
+    }
+    .tfa h1{
+        margin-left: 2px;
+    }
+}
+.tfaContainer{
+    background-color: rgba(114, 196, 255, 0.2);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    border-radius: 40px;
+}
+
+/* --- Verification --- */
+    .verify{
+        margin: 50px 100px;
+    }
+    .verify h1{
+        font-size: 26px;
+        font-weight: 300;
+        align-items: center;
+        justify-content: center;
+        margin-left: 22%;
+    }
+    .verify img{
+        width: 90px;
+        align-items: center;
+        justify-content: center;
+        margin-left: 38%;
+    }
+    .code{
+        margin: 5% 0%;
+    }
+    .inputs{
+        height: 90px;
+        width: 50px;
+        background-color: transparent;
+        border: solid 1px #3e125672;
+        margin: 10px;
+        padding: 17px;
+        border-radius: 10px;
+        color: #3E1256;
+        font-size: 22px;
+    }
+    @media (max-width: 670px) {
+        .verify{
+            margin: 40px 30px;
+        }
+        .inputs{
+            height: 80px;
+            width: 43px;
+            margin: 10px;
+            padding: 15px;
+            font-size: 19px;
+        }
+    }
+    .inputs:focus-visible {
+        outline: none;
+    }
+    .verifyBtn{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .verifyBtn span{
+        background-color: #3e1256d8;
+        padding: 10px 20px;
+        border-radius: 40px;
+        color: #fff;
+    }

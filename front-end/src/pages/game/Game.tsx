@@ -1,19 +1,17 @@
 "use client"
-import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 
 
 import '../../assets/game.css'
-import DashboardLayout from "../../layouts/LayoutDefault.tsx";
 import SearchBar from "../../components/SearchBar";
 import Notifications from "../../components/Notifications";
 
 
 const liveMatches = [
     {
-        host: "Player6",
-        guest: "Player2",
+        host: "OuissalEs",
+        guest: "OuissalEss",
         href: "#",
     },
     {
@@ -81,12 +79,11 @@ const liveMatches = [
         guest: "Player9",
         href: "#",
     },
-    ];
+];
 
 
 export default function Game() {
     return (
-        <DashboardLayout>
             <div className="main-game-page">
                 <div className="grid grid-cols-3 header">
                     <div className='col-span-1 t'>
@@ -167,21 +164,23 @@ export default function Game() {
                                 <div className="mode-img live">
 
                                     <ol className="matches">
-                                        {liveMatches.map(({ host, guest }) => {
+                                        {liveMatches.map(({ host, guest }, index) => {
                                             return (
-                                                <li key={host + guest} className="match grid grid-cols-3">
+                                                <li key={index} className="match grid grid-cols-3">
                                                     <div className="players col-span-2">
-                                                        <span>{host}</span>
+                                                        <span className="text-white">{host}</span>
                                                         <span> vs </span>
-                                                        <span>{guest} </span>
+                                                        <span className="text-white">{guest} </span>
                                                     </div>
                                                     <div>
                                                         <Link to="" className="live-btn transition-all">
-                                                            <span> Watch </span>
+                                                            <span title="watch">
+                                                                <img className="eyesIcon" src="/Icons/eyes2.png" alt="character" />
+                                                            </span>
                                                         </Link>
                                                     </div>
                                                 </li>
-                                                );
+                                            );
                                         })}
                                     </ol>
 
@@ -201,7 +200,5 @@ export default function Game() {
                 {/* {isLoading && <LoadingSpinner />}
       {selectedMode && !isLoading && <Pong mode={selectedMode} />} */}
             </div>
-        </DashboardLayout>
-
-        );
+    );
 }

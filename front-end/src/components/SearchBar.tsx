@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLazyQuery, gql } from "@apollo/client";
 import User from '../types/user-interface';
+import { Link } from "react-router-dom";
 
 const SEARCH_USERS = gql`
     query SearchUsers($searchQuery: String!) {
@@ -13,13 +14,12 @@ const SEARCH_USERS = gql`
 `;
 
 const SearchBar = () => {
-    const [searchTerm, setSearchTerm] = useState<string>("");
     const [searchResults, setSearchResults] = useState<User[]>([]);
     const searchResultsRef = useRef<HTMLDivElement>(null);
     const [query, setQuery] = useState('');
     const [inputFocused, setInputFocused] = useState<boolean>(false);
 
-    const [searchUsers, { loading, data }] = useLazyQuery(SEARCH_USERS);
+    const [searchUsers, { data }] = useLazyQuery(SEARCH_USERS);
 
     useEffect(() => {
         if (data) {
@@ -65,7 +65,9 @@ const SearchBar = () => {
     };
 
     const handleInputBlur = () => {
-        setInputFocused(false);
+        setTimeout(() => {
+            setInputFocused(false);
+        }, 200);
     };
 
     return (
@@ -95,8 +97,10 @@ const SearchBar = () => {
                     <ul>
                         {searchResults.map((user: User) => (
                             <li key={user.id}>
-                                <img src={user.avatar.filename} alt="search" />
-                                <span> {user.username}</span>
+                                <Link to={`/profiles?id=${user.id}`}>
+                                    <img src={user.avatar.filename} alt="search" />
+                                    <span> {user.username}</span>
+                                </Link>
                             </li>
                         ))}
                     </ul>

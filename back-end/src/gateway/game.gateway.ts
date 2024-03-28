@@ -25,10 +25,15 @@ export class GameGateway {
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
 
-    if (!client.handshake.query || !client.handshake.query.gameType)
-      return;
+  }
+
+  @SubscribeMessage('startMatch')
+  startMatch(client: Socket, mode: string) {
+    console.log(`Client starting a match: ${client.id}`);
+
     // Check if the client wants to play online
-    const wantsToPlayOnline = client.handshake.query && client.handshake.query.gameType === 'online';
+    const wantsToPlayOnline = mode === 'online';
+    console.log("Mode = ", mode);
 
     if (wantsToPlayOnline) {
       // Create a new game instance for the client
@@ -64,14 +69,14 @@ export class GameGateway {
         // Join the players to a room (you may need to customize room names)
         player1.join(`onlineRoom_${player1.id}${player2.id}`);
         player1.join(`onlineRoom_${player1.id}${player2.id}`);
-
+        console.log("Player 1 = ", player1.id);
         const data: CreateMatchInput = {
           host_score_m: 0,
           guest_score_m: 0,
           hostId: '',
           guestId: '',
         }
-        this.matchService.createMatch(data);
+        // this.matchService.createMatch(data);
 
         // Broadcast the initial game state
         this.broadcastGameState();
@@ -82,17 +87,18 @@ export class GameGateway {
 
 
       // Create a new game instance for the client
-      const game = new GameState(width, height, `${client.handshake.query.gameType}`);
+      const game = new GameState(width, height, `${mode}`);
       this.games.set(client.id, game);
+      console.log("Player 1 = ", client.id);
 
       // Perform necessary setup for offline or AI games
-      if (client.handshake.query.gameType === 'offline') {
+      if (mode === 'offline') {
         game.initLeftPaddle(client.id);
         game.initRightPaddle(client.id);
         this.broadcastGameState();
         client.join('offlineRoom'); // Join an offline room
         console.log(`Player ${client.id} joined the offline room.`);
-      } else if (client.handshake.query.gameType === 'ai') {
+      } else if (mode === 'ai') {
         game.initLeftPaddle(client.id);
         game.initRightPaddle(client.id);
         this.broadcastGameState();

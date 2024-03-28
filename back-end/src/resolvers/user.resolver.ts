@@ -151,5 +151,17 @@ export class UserResolver {
 
     return this.userService.updateAvatarfileName(userId, newAvatar);
   }
+
+  @Mutation(() => User)
+  async desactivate2Fa(@Context() context: { req }): Promise<boolean> {
+    const payload: Payload = context.req['user'];
+    const userId = payload.sub;
+    
+    const userObject = await this.userService.getUserById(userId);
+    if (!userObject) {
+      throw new NotFoundException("User doesn't exist");
+    }
+    return this.userService.activate2Fa(userId, false);
+  }
 }
 

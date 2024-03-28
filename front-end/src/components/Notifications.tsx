@@ -1,58 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import User from '../types/user-interface';
+import { Link } from "react-router-dom";
+import { useQuery, gql } from "@apollo/client";
+import {useSocket} from "../App.tsx";
+import Leaderboard1 from "*.png";
 
-import { jwtDecode } from 'jwt-decode';
-import Cookies from "js-cookie";
-import { useQuery, gql, OperationVariables } from "@apollo/client";
 
 
 const Notifications = () => {
     const [showDropdown, setShowDropdown] = useState(false);
-    const [notifications, setNotifications] = useState<string[]>([]);
+    const [notifications, setNotifications] = useState<{id: string, type: string, isRead: boolean, notif: string}[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const [notifs, setNotifs] = useState<User[] | null>(null);
 
-        const [notifs, setNotifs] = useState<User[]>();
-        const [isLoading, setLoading] = useState(true);
 
-        const token: string | undefined = Cookies.get('token');
-        const decodedToken = jwtDecode(token || '');
-        const id = decodedToken.sub;
+    const { users } = useSocket();
 
-        const USER_DATA = gql`
-            query { 
-                getAllUsers {
-                    id
-                    username
-                    status
-                    avatar{filename}
-                }
-            }
-        `;
-
-        const resutls = useQuery(USER_DATA, {
-            variables: { user_id: id }
-        });
-
-        useEffect(() => {
-            try {
-
-                const { data, loading, error } = resutls;
-
-                if (loading) setLoading(true);
-                if (error) {
-                    throw new Error('Failed to fetch user data');
-                }
-                if (data) {
-                    setNotifs(data.getAllUsers);
-                    setLoading(false);
-                }
-            } catch (error) {
-                console.error(error);
-                setLoading(false);
-            }
-
-        }, [resutls]);
-
+    useEffect(() => {
+        setNotifs(users);
+    }, [users]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -68,33 +34,22 @@ const Notifications = () => {
         };
     }, []);
 
-
-        if (isLoading) return <p>loadings</p>
-        if (!notifs) return <p>pppp</p>
-
     const updateNotifications = () => {
 
-        console.log("NOTIFS = :(");
-        
+        let notifications1: {
+            id: string;
+            type: string;
+            isRead: boolean;
+            notif: string;
+        }[] = [];
 
-        // let notifications1 = [
-        //     { time: '', type: '', isRead: false, senderUserName: '' },
-        // ];
-
-        const notifications1 = notifs.map(notif => {
-            // if()
-            if (notif.status == 'ONLINE'){
-                return `'${notif.username}' sent you friend request`;
-            }
-            else{
-                return '';
-            }
-        });
-        // console.log("NOTIFS = ", notifications1);
-        // const not = getNotifications();
-        // console.log("NOTIFS = ", notifications1);
-
-        // let notifications1 = ['aa'];
+        notifications1 = notifs.map(n => ({
+            id: n.id,
+            type: "",
+            isRead: false,
+            notif: `'${n.username}' sent you friend request`
+        }));
+        notifications1[1].isRead = true;
         setNotifications(notifications1);
     }
     const toggleDropdown = () => {
@@ -117,8 +72,16 @@ const Notifications = () => {
                     {/* Display notifications */}
                     <ul className="notificationList">
                         {notifications.map((notification, index) => (
-                            notification != '' ?(
-                                <li className="notif" key={index}>{notification}</li>
+                            notification ?(
+                                notification.isRead ? (
+                                    <Link key={index} to={`/profiles?id=${notification.id}`}>
+                                        <li className="notif" key={index}>222{notification.notif}</li>
+                                    </Link>
+                                ) : (
+                                    <Link key={index} to={`/profiles?id=${notification.id}`}>
+                                        <li className="notif" key={index}>1111{notification.notif}</li>
+                                    </Link>
+                                )
                             ) : null
                         ))}
                     </ul>

@@ -9,13 +9,17 @@ import { CreateUserInput } from './dto/create-user.input';
 import { User } from "src/entities/user.entity";
 
 import { userIncludes } from "../includes/user.includes";
+import { AchievementService } from './user_achievement.service';
 
 
 
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService
+        // private achievementService: AchievementService
+    ) { }
 
     /**
      * Retrieves all users.
@@ -48,28 +52,28 @@ export class UserService {
      * @param {string} query - Query
      * @returns {Promise<User[]>}
      */
-	async searchUsers(query: string): Promise<User[]> {
-		try {
-			const users = await this.prisma.user.findMany({
-				where: {
-					OR: [
-						{
-							username: {
-								contains: query, // Search for users whose name contains the query string
-								mode: 'insensitive', // Case-insensitive search
-							},
-						},
-						// You can add more search criteria here based on your user model
-					],
-				},
+    async searchUsers(query: string): Promise<User[]> {
+        try {
+            const users = await this.prisma.user.findMany({
+                where: {
+                    OR: [
+                        {
+                            username: {
+                                contains: query, // Search for users whose name contains the query string
+                                mode: 'insensitive', // Case-insensitive search
+                            },
+                        },
+                        // You can add more search criteria here based on your user model
+                    ],
+                },
                 include: userIncludes,
-			});
-			return users;
-		} catch (error) {
-			console.error('Error searching users:', error);
-			throw error;
-		}
-	}
+            });
+            return users;
+        } catch (error) {
+            console.error('Error searching users:', error);
+            throw error;
+        }
+    }
 
     /**
      * Updates a user's information.
@@ -79,7 +83,7 @@ export class UserService {
      */
     async updateUsername(userId: string, updatedUsername: string): Promise<User> {
         // Check if the provided userId is a valid id
-        let userObject: Promise<User> = this.getUserById(userId);
+        let userObject: User = await this.getUserById(userId);
 
         if (!userObject) throw new NotFoundException("User does't exist");
 
@@ -204,6 +208,28 @@ export class UserService {
     }
 
     /**
+     * Updates a user's status.
+     * @param {number} userId - User ID
+     * @param {number} xptoadd - User status
+     * @returns {Promise<User>}
+     */
+    async addXp(userId: string, xptoadd: number): Promise<User> {
+        let userObject: Promise<User> = this.getUserById(userId);
+        if (!userObject) throw new NotFoundException("User does't exist");
+
+        try {
+            return this.prisma.user.update({
+                where: { id: userId },
+                data: {
+                    xp: (await userObject).xp + xptoadd,
+                }
+            });
+        } catch (e) {
+            throw new ForbiddenException("Unable to update Status");
+        }
+    }
+
+    /**
      * Updates a user's character.
      * @param {number} userId - User ID
      * @param {Character} character - User character
@@ -243,17 +269,68 @@ export class UserService {
         let userObject: User = await this.getUserById(userId);
         if (!userObject) throw new NotFoundException("User does't exist");
 
-            console.log("USER = ", userObject);
+        console.log("USER = ", userObject);
         try {
             await this.prisma.avatar.update({
-				where: { id: userObject.avatar.id },
-				data: {
-					filename: newAvatar
-				},
-			});
+                where: { id: userObject.avatar.id },
+                data: {
+                    filename: newAvatar
+                },
+            });
             return this.updateCharacter(userId, userObject.character);
         } catch (e) {
             throw new ForbiddenException("Unable to update Avatar");
+        }
+    }
+
+    /**
+  * Updates user Otp Secret.
+  * @param {number} userId - User ID
+  * @param {string} otpSecret - User OptSercret
+  * @returns {Promise<User>}
+  */
+    async updateOtp(userId: string, otpSecret: string): Promise<User> {
+        // Check if the provided userId is a valid id
+        let userObject: User = await this.getUserById(userId);
+        if (!userObject) throw new NotFoundException("User does't exist");
+
+        try {
+            await this.prisma.connection.update({
+                where: { userId: userObject.id },
+                data: {
+                    otp: otpSecret,
+                    otpCreatedAt: new Date()
+                },
+            });
+            return userObject;
+        } catch (e) {
+            console.log(e);
+            throw new ForbiddenException("Unable to update Otp");
+        }
+    }
+
+    /**
+* Activate user 2fa.
+* @param {number} userId - User ID
+* @param {string} otpSecret - 2fa Status
+* @returns {Promise<User>}
+*/
+    async activate2Fa(userId: string, status: boolean): Promise<boolean> {
+        // Check if the provided userId is a valid id
+        let userObject: User = await this.getUserById(userId);
+
+        if (!userObject) throw new NotFoundException("User does't exist");
+
+        try {
+            await this.prisma.connection.update({
+                where: { userId: userObject.id },
+                data: {
+                    is2faEnabled: status
+                },
+            });
+            return true;
+        } catch (e) {
+            throw new ForbiddenException("Unable to activate 2Fa");
         }
     }
 

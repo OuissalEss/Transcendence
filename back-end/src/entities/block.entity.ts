@@ -19,7 +19,7 @@ export class Block {
    * The user who initiated the block.
    * @type {User}
    */
-  @Field(() => User, { description: 'User who blocked another user' })
+  @Field(() => String, { description: 'User who blocked another user' })
   @IsString({ message: 'Blocker ID must be a string' })
   @IsNotEmpty({ message: 'Blocker ID cannot be empty' })
   blockerId: String;
@@ -28,11 +28,17 @@ export class Block {
    * The user who is blocked.
    * @type {User}
    */
-  @Field(() => User, { description: 'User who is blocked' })
+  @Field(() => String, { description: 'User who is blocked' })
   @IsString({ message: 'Blocked User ID must be a string' })
   @IsNotEmpty({ message: 'Blocker User ID cannot be empty' })
   blockedUserId: String;
   
+  @Field(() => User, { description: 'User who blocked' })
+  blocker?: User;
+
+  @Field(() => User, { description: 'User who get blocked' })
+  blockedUser?: User;
+
   /**
    * The date when the block relationship was created.
    * @type {Date}

@@ -2,6 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""The type of the user-achievement Achievements."""
+enum Achievement {
+  loyal
+  robot
+  social
+  team
+  welcome
+  winning
+}
+
 type Avatar {
   """The date when the avatar was created"""
   createdAt: DateTime!
@@ -23,11 +33,17 @@ type Avatar {
 }
 
 type Block {
+  """User who get blocked"""
+  blockedUser: User!
+
   """User who is blocked"""
-  blockedUserId: User!
+  blockedUserId: String!
+
+  """User who blocked"""
+  blocker: User!
 
   """User who blocked another user"""
-  blockerId: User!
+  blockerId: String!
 
   """Date the block relationship was created"""
   createdAt: DateTime!
@@ -97,6 +113,7 @@ enum Character {
   Aurora
   Lumina
   Luna
+  None
   Nova
   Starlight
 }
@@ -252,11 +269,24 @@ type Message {
 }
 
 type Mutation {
+  """create friend with their associated id"""
+  createFriend(receiverId: String!, senderId: String!): Friend!
+
   """Creates a new match."""
   createMatch(createMatchInput: CreateMatchInput!): Match!
   createMessage(input: CreateMessageInput!): Message!
   createNotification(input: CreateNotificationInput!): Notification!
   deleteChannelUser(id: String!): ChannelUser!
+
+  """Delete friend with their associated id"""
+  deleteFriend(friendId: String!): Friend!
+  desactivate2Fa: User!
+
+  """Delete block with their associated id"""
+  unBlock(blockId: String!): Block!
+
+  """update friend with their associated id"""
+  updateAccept(friendId: String!): Friend!
   updateChannelTypeUser(id: String!, type: String!): ChannelUser!
   updateFirstName(firstname: String!): User!
 
@@ -307,6 +337,8 @@ enum NotificationType {
 }
 
 type Query {
+  """Retrieves all blocks with their associated data"""
+  getAllBlocks: [Block!]!
   getAllChannelUsers: [ChannelUser!]!
 
   """Get all channels"""
@@ -323,23 +355,35 @@ type Query {
   """Retrieves all users with their associated data"""
   getAllUsers: [User!]!
 
+  """Retrieves block with their associated id"""
+  getBlockById(blockId: String!): Block!
+
   """Get a channel by ID"""
   getChannelById(id: String!): Channel!
   getChannelUserById(id: String!): ChannelUser!
 
   """Retrieves friend with their associated id"""
-  getFriendById: Friend!
+  getFriendById(friendId: String!): Friend!
 
   """Retrieves a specific match by its ID."""
   getMatchById(id: String!): Match!
   getMessageById(id: String!): Message!
   getNotificationById(id: String!): Notification!
 
+  """Retrieves all blocks with their associated data"""
+  getUserBlocked: [Block!]!
+
   """Retrieves a specific user with it's id"""
   getUserById(id: String!): User!
 
   """Retrieves all friends with their associated data"""
   getUserFriends: [User!]!
+
+  """Retrieves all friends where the user is the receiver"""
+  getUserFriendsReceiver: [Friend!]!
+
+  """Retrieves all friends where the user is the sender"""
+  getUserFriendsSender: [Friend!]!
 
   """Retrieves authenticated user information"""
   getUserInfo: User!
@@ -425,22 +469,18 @@ type User {
 }
 
 type UserAchievement {
-  """Date the user achievement was achieved"""
-  achievedAt: DateTime
-  achievementId: String!
+  """User character"""
+  achievement: Achievement!
 
   """Date the user achievement was created"""
   createdAt: DateTime!
   id: String!
 
-  """Whether the user achievement is achieved"""
-  isAchieved: Boolean!
-
   """Date the user achievement was updated"""
   updatedAt: DateTime!
 
   """User associated with this achievement"""
-  userId: User!
+  userId: String!
 }
 
 """The type of the user"""

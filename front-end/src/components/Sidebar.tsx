@@ -1,7 +1,21 @@
 'use client'
-import React from "react";
-import { Link } from "react-router-dom";
+import {Link, Navigate} from "react-router-dom";
+import { redirect } from 'react-router-dom';
+
 //import {deleteCookie} from "cookies-next";
+import Cookies from "js-cookie";
+import {useEffect} from "react";
+import { useQuery, gql } from "@apollo/client";
+import { useMutation } from '@apollo/react-hooks'
+
+const UPDATE_USER_STATUS = gql`
+    mutation($new_status: String!) { 
+      updateUserStatus(status: $new_status) {
+        id
+        username
+      }
+    }
+`;
 
 const sidebarItems = [
   {
@@ -29,7 +43,7 @@ const sidebarItems = [
     href: "/about",
     icon: "/Icons/About.png",
   },
-  ];
+];
 
 const logoutItem = {
   name: "Logout",
@@ -38,13 +52,22 @@ const logoutItem = {
 };
 
 const Sidebar = () => {
-//  const router = useRouter();
   const pathname = "asd";
 
-//  function LogOut() {
-//   deleteCookie('token');
-//   router.push('/');
-//  }
+  const [updateUserStatus] = useMutation(UPDATE_USER_STATUS);
+
+  async function LogOut() {
+    try {
+        await updateUserStatus({ variables: { new_status: "OFFLINE" } });
+        console.log("Username updated successfully!");
+      } catch (error) {
+        console.error("Error updating Username:", error.message);
+      }
+    Cookies.remove('token');
+
+    // Redirect to '/' after removing token
+    window.location.reload();
+  }
 
   return (
     <div>
@@ -62,49 +85,48 @@ const Sidebar = () => {
                 height={200}
               />
             </div>
-              <ul className="sidebar__list">
-                  {sidebarItems.map(({ name, href, icon }, index) => {
-                      return (
-                          <li className="sidebar__item" key={index} title={name}>
-                              <Link
-                                  className={`sidebar__link ${
-                                  pathname === href
-                          ? "sidebar__link--active"
-                          : ""
-                              }`}
-                                  to={href}
-                                  >
-                                  <span className="sidebar__icon">
-                                      <img
-                                          src={icon}
-                                          alt={`${name} icon`}
-                                          style={{ width: "100%", height: "auto" }}
-                                          width={10}
-                                          height={10}
-                                      />
-                                  </span>
-                              </Link>
-                          </li>
-                          );
-                  })}
-              </ul>
-              {/* Logout item outside the mapping loop */}
-              <div className="sidebar__bottom">
-                  <button className="sidebar__icon" title={logoutItem.name}>
-                      <img
-                          src={logoutItem.icon}
-                          alt={`${logoutItem.name} icon`}
+            <ul className="sidebar__list">
+              {sidebarItems.map(({ name, href, icon }, index) => {
+                return (
+                  <li className="sidebar__item" key={index} title={name}>
+                    <Link
+                      className={`sidebar__link ${pathname === href
+                        ? "sidebar__link--active"
+                        : ""
+                        }`}
+                      to={href}
+                    >
+                      <span className="sidebar__icon">
+                        <img
+                          src={icon}
+                          alt={`${name} icon`}
                           style={{ width: "100%", height: "auto" }}
-                          width={500}
-                          height={500}
-                      />
-                  </button>
-              </div>
+                          width={10}
+                          height={10}
+                        />
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            {/* Logout item outside the mapping loop */}
+            <div className="sidebar__bottom">
+              <button className="sidebar__icon" title={logoutItem.name} onClick={LogOut}>
+                <img
+                  src={logoutItem.icon}
+                  alt={`${logoutItem.name} icon`}
+                  style={{ width: "100%", height: "auto" }}
+                  width={500}
+                  height={500}
+                />
+              </button>
+            </div>
           </aside>
         </div>
       </menu>
     </div>
-    );
+  );
 };
 
 export default Sidebar;

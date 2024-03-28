@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 import { Connection } from './connection.entity';
-import { UserAchievement } from './achievements-user.entity';
+import { UserAchievement } from './user_achievement.entity';
 import { Friend } from 'src/entities/friend.entity';
 import { Block } from 'src/entities/block.entity';
 import { Match } from 'src/entities/match.entity';
@@ -25,12 +25,12 @@ import { Status, Character } from '@prisma/client'; // Import the Prisma-generat
 export class User {
   /**
    * The unique identifier of the user.
-   * @type {number}
+   * @type {string}
    */
   @Field(() => ID)
   @IsString({ message: 'ID must be string' })
   @IsNotEmpty({ message: 'ID cannot be empty' })
-  id: String;
+  id: string;
 
   /**
    * User email address.

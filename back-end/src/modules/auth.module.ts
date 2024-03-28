@@ -15,6 +15,7 @@ import { GoogleOauthGuard } from 'src/guards/google.guard';
 
 import { jwtConstants } from 'src/auth/constants';
 import { AuthController } from 'src/controllers/auth.controller';
+import { AchievementService } from 'src/services/user_achievement.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AuthController } from 'src/controllers/auth.controller';
     GoogleStrategy,
     GoogleOauthGuard,
     UserService,
+    AchievementService,
     PrismaService
   ],
 })

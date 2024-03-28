@@ -4,14 +4,15 @@ import { ProtectedRoute } from "./ProtectedRoute";
 
 import Home from '../pages/Dashboard';
 import Login from "../pages/Login";
-import Start from '../Start';
 import About from '../pages/About';
 import Chat from "../pages/Chat";
 import Game from "../pages/game/Game";
 import Pong from "../pages/game/pong/Pong";
 import GetStarted from '../pages/GetStarted';
 import Settings from "../pages/Settings";
-import Test from "../pages/test";
+import MyProfile from "../pages/MyProfile";
+import Profiles from "../pages/Profiles";
+import React from "react";
 
 
 const Routes = () => {
@@ -57,17 +58,17 @@ const Routes = () => {
                     element: <Pong />
                 },
                 {
-                    path: "/start",
-                    element: <Start />,
-                },
-                {
                     path: "/settings",
                     element: <Settings />,
                 },
                 {
-					path: "/test",
-					element: <Test />,
-				},
+                    path: "/myprofile",
+                    element: <MyProfile />,
+                },
+                {
+                    path: "/profiles",
+                    element: <Profiles />,
+                },
             ],
         },
     ];

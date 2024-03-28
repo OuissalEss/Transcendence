@@ -1,0 +1,215 @@
+.PlayerProfile{
+    position: absolute;
+    color: #3E1256;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: 'Manrope', sans-serif;
+    top: 120px;
+    left: 250px;
+}
+
+.PlayerBar{
+    position: absolute;
+    top: 180px;
+    left: 220px;
+    width: 1000px;
+    height: 250px;
+    background-color: rgba(114, 196, 255, 0.2);
+    border-radius: 10px;
+}
+
+.Riri{
+    position: absolute;
+    top: 225px;
+    left: 250px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #3E1256;
+}
+
+.PlayerName{
+    position: absolute;
+    top: 390px;
+    left: 305px;
+    color: #3E1256;
+    font-size: 20px;
+    font-weight: 400;
+    font-family: 'Manrope', sans-serif;
+}
+
+.AddFriend{
+    position: absolute;
+    top: 270px;
+    left: 450px;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: 'Manrope', sans-serif;
+    background-color: rgba(61, 55, 133, 0.34);
+    height: 50px;
+    width: 150px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.LB {
+    position: absolute;
+    top: 150px;
+    left: 830px;
+    height: 210px;
+}
+
+.PLevelTube {
+    position: absolute;
+    top: 350px;
+    left: 800px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .PLevelMarker {
+    font-size: 13px;
+    color: #3E1256;
+    font-family: 'Manrope', sans-serif;
+    margin: 0 20px;
+  }
+  
+  .PTube {
+    width: 270px;
+    height: 15px;
+    background-color: rgba(250, 231, 255, 0.60);
+    border-radius: 10px;
+    position: relative;
+  }
+  .PLevelProgress span{
+    color: #3E1257;
+    position: absolute;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 200px;
+    left: 130px;
+    top: -3px;
+    font-size: 14px;
+  }
+  .PLevelProgress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: rgba(213, 26, 183, 0.6);
+    min-width: 2%;
+    border-radius: 10px;
+  }
+  
+  .PStats {
+    position: absolute;
+    top: 370px;
+    left: 880px;
+  }
+  
+  .PStatText {
+    font-size: 17px;
+    color: #3E1257;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+    }
+
+    .PAchievements{
+        position: absolute;
+        color: #3E1256;
+        font-size: 30px;
+        font-weight: bold;
+        font-family: 'Manrope', sans-serif;
+        top: 460px;
+        left: 250px;
+    }
+
+    .PAchievementBar{
+        position: absolute;
+        top: 520px;
+        left: 220px;
+        width: 450px;
+        height: 250px;
+        background-color: rgba(114, 196, 255, 0.2);
+        border-radius: 10px;
+    }
+    .PAchievementContainer span {
+        position: absolute;
+        top: 92%;
+        font-size: 20px;
+        color: #fff;
+    }
+    .PAchievementContainer .Achievement {
+        max-height: 100%;
+        width: 190px;
+    }
+    .PAchievementContainer {
+        position: relative;
+        top: -7%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+.PChevLeft {
+    height: 40px;
+  }
+  .PChevLeftC {
+    cursor: pointer;
+    position: absolute;
+    top: 43%;
+    left: 15%;
+    z-index: 2;
+  }
+  .PChevRight {
+    height: 40px;
+  }
+  .PChevRightC {
+    cursor: pointer;
+    top: 43%;
+    right: 15%;
+    position: absolute;
+  }
+
+    .PPL{
+        position: absolute;
+        color: #3E1256;
+        font-size: 30px;
+        font-weight: bold;
+        font-family: 'Manrope', sans-serif;
+        top: 460px;
+        left: 770px;   
+    }
+
+    .PPLBar{
+        position: absolute;
+        top: 520px;
+        left: 750px;
+        width: 460px;
+        height: 250px;
+        background-color: rgba(114, 196, 255, 0.2);
+        border-radius: 10px;
+        overflow-y: auto;
+    }
+    .PPLBar .play{
+        position: relative;
+        height: 90px;
+      }
+    @supports (-moz-appearance:none) {
+        .PPLBar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(62, 18, 86, 0.5) rgba(0, 0, 0, 0);
+        }
+      }
+      
+      .PPLBar::-webkit-scrollbar {
+        width: 4px;
+        height: 0px;
+      }
+      .PPLBar::-webkit-scrollbar-thumb {
+        background-color: rgb(62 18 86 / 50%);
+        border-radius: 6px;
+      }

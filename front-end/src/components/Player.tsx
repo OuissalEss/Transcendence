@@ -30,8 +30,7 @@ const Players = ({ username, leftScore, rightScore }: { username: string, leftSc
                 <div className="col-span-1 center score-rounds">
                     <div className="rounds">Round 1</div>
                     <div className="score">
-                        {/* <span title="Left player score">{leftScore}</span> */}
-                        <span title="Left player score">0</span>
+                        <span title="Left player score">{leftScore}</span>
                         <span> - </span>
                         <span title="Right player score">{rightScore}</span>
                     </div>

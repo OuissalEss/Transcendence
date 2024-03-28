@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { JwtResponse, Payload } from "./types/auth.service"
 import { User } from "@prisma/client";
+import { UserService } from './user.service';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly jwtService: JwtService) {}
+    constructor(private readonly jwtService: JwtService, private readonly userService: UserService) { }
 
     /**
      * Generates JwT token for given user.
@@ -14,14 +15,20 @@ export class AuthService {
      * @returns {Promise<JwtResponse>} Jwt Token
      * @param user
      */
-    async getJwttoken(data: any): Promise<JwtResponse> {
-        const user: User = data.user;
+    async getJwttoken(userId: string, isTwoFaAuthenticated: boolean, isFirstTime: boolean): Promise<JwtResponse> {
+        const user = await this.userService.getUserById(userId);
+
+        if (!user) throw new NotFoundException("User does't exist");
+
         const payload: Payload = {
             sub: user.id,
             username: user.username,
+            isFirstTime: isFirstTime,
+            isTwoFaAuthenticated: isTwoFaAuthenticated,
+            isTwoFactorEnable: user.connection.is2faEnabled,
             createdAt: user.createdAt,
-            firstLogIn: data.firstLogIn,
         };
+
         return {
             access_token: await this.jwtService.signAsync(payload)
         }

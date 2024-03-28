@@ -20,7 +20,6 @@
 /* --------------- Body --------------- */
 
 body {
-  /* position: relative; */
   background: url('/bg01.png') center/cover no-repeat;
   padding: 0px;
   display: flex;
@@ -41,7 +40,7 @@ body::-webkit-scrollbar {
 
 body::-webkit-scrollbar-thumb {
   background-color: rgb(62 18 86 / 50%);
-  background-size: contain;
+  /* background-size: contain; */
   border-radius: 6px;
 }
 
@@ -51,13 +50,13 @@ body::-webkit-scrollbar-track {
 }
 
 /* Firefox */
-body {
+/* body {
   scrollbar-width: none;
 }
 
 body {
   scrollbar-color: rgba(62, 18, 86, 0.5) #ffa3bf;
-}
+} */
 
 
 
@@ -144,4 +143,54 @@ body {
 
 .TextLine {
   margin: 0;
+}
+
+
+/* ---------- Alert ---------- */
+
+.alertContainer{
+  position: absolute;
+  z-index: 9;
+  backdrop-filter: blur(2px);
+  width: 100vw;
+  height: 100vh;
+  top: 0%;
+  left: 0%;
+}
+.alert {
+  display: flex;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #f98181;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 700px;
+  min-height: 100px;
+  align-items: center;
+  border: solid 1px #fff;
+}
+
+.alert img {
+  width: 40px;
+  height: 40px;
+}
+
+.alert p {
+  font-family: "Manrope", sans-serif;
+  font-size: 18px;
+  margin: 0px 10px;
+  width: 400px;
+}
+
+.alert button {
+  font-family: "Manrope", sans-serif;
+  font-size: 18px;
+  background-color: transparent;
+  color: #fff;
+  border: none;
+  cursor: pointer;
 }

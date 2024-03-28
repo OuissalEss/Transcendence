@@ -1,11 +1,9 @@
 import './assets/Start.css';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-import Cookies from "js-cookie";
+
 
 import LogoImage from '/logo.png';
-import Avatar1 from '/Avatars/06.png';
 import ChevronLeft from '/Icons/ChevronLeft.png';
 import ChevronRight from '/Icons/ChevronRight.png';
 // Characters
@@ -24,8 +22,9 @@ import StarlightInfos from '/Characters/Starlight/Infos.png';
 import AegonInfos from '/Characters/Aegon/Infos.png';
 
 import User from './types/user-interface';
-import { gql, OperationVariables, ApolloClient } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { useQuery, useMutation } from '@apollo/react-hooks'
+import Alert from './components/Alert';
 
 const characters = [
   { name: 'Aurora', image: Aurora, infos: AuroraInfos },
@@ -35,6 +34,10 @@ const characters = [
   { name: 'Starlight', image: Starlight, infos: StarlightInfos },
   { name: 'Aegon', image: Aegon, infos: AegonInfos },
 ];
+
+import Cookies from "js-cookie";
+import { useAuth } from './provider/authProvider';
+
 
 const getProfile = () => {
   const [userData, setUserData] = useState<User>();
@@ -59,7 +62,6 @@ const getProfile = () => {
 
 
   const resutls = useQuery(USER_DATA);
-  console.log("var = ", resutls)
 
   useEffect(() => {
     try {
@@ -97,6 +99,8 @@ mutation($user_name: String!, $char_name: String!) {
 `;
 
 function Start() {
+  const [alertMessage, setAlertMessage] = useState('');
+  const [isShowAlert, setIsShowAlert] = useState(false);
 
   const [showUsernameInput, setShowUsernameInput] = useState(false);
   const [username, setUsername] = useState("");
@@ -104,7 +108,7 @@ function Start() {
   const [isCharacterSelected, setIsCharacterSelected] = useState(false);
   const navigate = useNavigate();
   const currentCharacter = characters[currentCharacterIndex];
-
+  const { token } = useAuth();
   const userData = getProfile();
   const [updateUser] = useMutation(UPDATE_USER);
 
@@ -143,29 +147,59 @@ function Start() {
     setIsCharacterSelected(true);
   };
 
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setIsShowAlert(true);
+  };
+  const closeAlert = () => {
+    setIsShowAlert(false);
+  };
+
   function handleStartButtonClick() {
-    if (username && isCharacterSelected) {
-      console.log(username);
+    if (username && username.trim() != '' && isCharacterSelected) {
       updateUser({ variables: { user_name: username, char_name: currentCharacter.name } })
-        .then(response => {
-          console.log(response);
-          navigate('/');
+        .then(async (response) => {
+
+          const res = await fetch('http://localhost:3000/validateLogin', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (res.ok) {
+            const { accessToken } = await res.json();
+            Cookies.set('token', accessToken.access_token)
+            alert('User Updated successfully');
+            // Reload the page upon successful verification
+            window.location.reload();
+          } else {
+            showAlert('Select your character');
+          }
         })
         .catch(error => {
           console.error(error);
         });
     }
     else {
-      alert('you should set a username and select a character');
+      if (username && username.trim() != '')
+        showAlert('Select your character');
+      else {
+        if (isCharacterSelected)
+          showAlert('Set your username');
+        else
+          showAlert('Set your username and Select your character');
+      }
     }
   };
-
-  console.log("character == ", currentCharacter.name)
 
   return (
     <div className="Start">
       <header className="Start-header">
-        <div className="BlurryRectangle"></div>
+        <div className="Texto">
+          <p className="Line">Welcome, Champion!</p>
+        </div>
+        <img src={LogoImage} className="LogoImage" alt="LogoImage" />
+        <div className="BlurryRectangle">
         {showUsernameInput ? (
           <input
             type="text"
@@ -189,10 +223,6 @@ function Start() {
         <button className="CharacterRectangle" onClick={handleChooseCharacterClick}>
           <p className="CharacterText">Click to choose your character</p>
         </button>
-        <div className="Texto">
-          <p className="Line">Welcome, Champion!</p>
-        </div>
-        <img src={LogoImage} className="LogoImage" alt="LogoImage" />
         <img src={userData.avatar.filename} className="Avatar1" alt="Avatar1" />
         <div className="Name">
           <p className="CharacterName">{currentCharacter.name}</p>
@@ -205,17 +235,23 @@ function Start() {
         />
         <img
           src={ChevronLeft}
-          className="ChevronLeft"
-          alt="ChevronLeft"
+          className="ChevronLeftStart"
+          alt="ChevronLeftStart"
           onClick={handleLeftChevronClick}
         />
         <img
           src={ChevronRight}
-          className="ChevronRight"
-          alt="ChevronRight"
+          className="ChevronRightStart"
+          alt="ChevronRightStart"
           onClick={handleRightChevronClick}
         />
+        </div>
       </header>
+      {isShowAlert &&
+        <div className="alertContainer">
+          <Alert message={alertMessage} onClose={closeAlert} />
+        </div>
+      }
     </div>
   );
 }

@@ -11,4 +11,9 @@ export const userIncludes: object = {
     connection: true,
     avatar: true,
     send: true,
+    achievements: true,
+    blocking: true,
+    winner: true,
+    host: true,
+    guest: true,
 };

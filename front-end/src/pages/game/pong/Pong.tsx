@@ -1,19 +1,19 @@
 'use client'
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ReactP5Wrapper } from "@p5-wrapper/react";
 import { gameConfig } from './constants';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import Cookies from "js-cookie";
 
 import { Puck } from './objects/puck';
 import { Socket, io } from 'socket.io-client';
 import Player from '../../../components/Player';
-//import { getCookie } from 'cookies-next';
-//import jwt from 'jsonwebtoken';
+
 import { oPaddle } from './objects/opaddle';
-import User from "../../../types/user-interfac";
+import User from "../../../types/user-interface";
 import DashboardLayout from '../../../layouts/LayoutDefault';
 import "../../../assets/game.css"
+import { useSocket } from '../../../App';
 
 const opL = {
     x: gameConfig.canvasWidth / 2,
@@ -43,22 +43,6 @@ const opR = {
     ychange: 0,
 }
 
-function useSocket(url: string, gameType: string) {
-    const [socket, setSocket] = useState<Socket>();
-
-    useEffect(() => {
-        const socketIo = io(url, { reconnection: false, query: { gameType } },)
-
-        setSocket(socketIo)
-
-        function cleanup() {
-            socketIo.disconnect()
-        }
-        return cleanup
-    }, [gameType, url])
-
-    return socket
-}
 
 const calculatCanvasSize = () => {
     if (gameConfig.windowW >= 1300) {
@@ -76,18 +60,20 @@ const calculatCanvasSize = () => {
     }
 };
 
-const sketch = (p5: any, socket: any, updateScores: any) => {
+const sketch = (p5: any, socket: any, updateScores: any, mode) => {
     let puck: Puck;
     // let paddleLeft: Paddle;
     // let paddleRight: Paddle;
     let opaddleL: oPaddle;
     let opaddleR: oPaddle;
 
+
     // Initiate Window Configurations
     gameConfig.windowW = window.innerWidth;
     gameConfig.windowH = window.innerWidth;
 
     p5.setup = () => {
+
 
         // Calculate Canvas Size
         calculatCanvasSize();
@@ -115,7 +101,6 @@ const sketch = (p5: any, socket: any, updateScores: any) => {
         });
 
         p5.resizeCanvas(gameConfig.canvasWidth, gameConfig.canvasHeight);
-        console.log(gameConfig.windowH, gameConfig.windowW);
     };
 
     p5.draw = () => {
@@ -173,83 +158,59 @@ const sketch = (p5: any, socket: any, updateScores: any) => {
 
 
 
-
 const Pong = () => {
     const [leftScore, setLeftScore] = useState(0);
     const [rightScore, setRightScore] = useState(0);
-    const [userData, setUserData] = useState<User>();
-    const [isLoading, setLoading] = useState(true)
+    const { socket } = useSocket();
+
+    const {userData} = useSocket();
+
+    useEffect(() => {
+        if (!userData) return;
+    }, [userData]);
+
+    useEffect(() => {
+        if (socket) {
+            socket.emit('startMatch', mode);
+        }
+
+        return () => {
+            // Clean up socket listeners if component unmounts
+            if (socket) {
+                socket.off('userData');
+            }
+        };
+    }, [socket]);
 
     const urlParams = new URLSearchParams(window.location.search);
-    console.log("params = ", urlParams.get('mode'));
-
     let mode = urlParams.get('mode');
-    if (mode != "online" && mode != "offline" && mode != "ai"){
+
+    if (!["online", "offline", "ai"].includes(mode)) {
         mode = "400";
     }
-    console.log("MODE = ", mode);
 
     const updateScores = (newLeftScore: number, newRightScore: number) => {
         setLeftScore(newLeftScore);
         setRightScore(newRightScore);
     };
 
-    const socket = useSocket('http://127.0.0.1:3000', mode);
 
-    useEffect(() => {
-//        const token = getCookie('token');
-//        const decodedToken = jwt.decode(token ? token : "");
-//
-//        fetch('http://localhost:3000/graphql', {
-//            method: 'POST',
-//            body: JSON.stringify({
-//                query: `{ getUserById(id: "${decodedToken ? decodedToken.sub : ""}") {
-//                      id
-//                      email
-//                      username
-//                      connection {
-//                        provider
-//                        is2faEnabled
-//                      }
-//        }}`,
-//            }),
-//            headers: {
-//                'Content-Type': 'application/json',
-//                'Authorization': `Bearer ${token}`
-//            },
-//            next: { revalidate: 10 },
-//        }).then((res) => {
-//            if (!res.ok) {
-//                throw new Error('Failed to fetch toilet data in a city');
-//            }
-//            return res.json()
-//        }).then((data) => {
-//            setUserData(data.data['getUserById']);
-//            setLoading(false);
-//        });
-        function handleEvent(payload: any) {
-            console.log(payload)
-        }
-        if (socket) {
-            socket.on('connected', handleEvent)
-        }
-    }, [socket]);
-
-    // if (isLoading) return <p>Loading...</p>
-    // if (!userData) return <p>No profile data</p>
+    if (!socket) {
+        return (
+            <div>Socket not connected</div>
+        );
+    }
 
     return (
-        <DashboardLayout>
             <div className="game-modes">
-                <Player username='test' leftScore={leftScore} rightScore={rightScore} />
+                <Player username={userData?.username ? userData?.username : ''} leftScore={leftScore} rightScore={rightScore} />
                 <div className="board-container">
                     <div id="canvas-container" className="canvas-container">
-                        <ReactP5Wrapper sketch={(p5) => sketch(p5, socket, updateScores)} />
+                        <ReactP5Wrapper sketch={(p5) => sketch(p5, socket, updateScores, mode)} />
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
-        );
+    );
 };
 
 export default Pong;

@@ -1,22 +1,13 @@
-
-import { useState, useEffect } from 'react';
 import '../assets/loading.css';
+import '../App.css';
 
 const Loading = () => {
     return (
-        <div className="container p-6" >
-            <div className="grid gap-8">
-                <div className="col-span-1">
-                    <div className="gifL">
-                        <img
-                            width="400"
-                            height="400"
-                            className="image"
-                            src="/loading.gif"
-                            alt="Loading"
-                        />
-                        <h1 className="text-loading">Almost there, just a moment . . .</h1>
-                    </div>
+        <div className="containerL p-6" >
+            <div className="">
+                <div className="gifL">
+                    <img className="imageL" src="/loading.gif" alt="Loading" />
+                    <h1 className="text-loadingL">Almost there, just a moment . . .</h1>
                 </div>
             </div>
         </div>
@@ -24,3 +15,4 @@ const Loading = () => {
 }
 
 export default Loading;
+

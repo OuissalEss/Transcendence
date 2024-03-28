@@ -6,12 +6,15 @@ import { CreateFriendInput } from "./dto/create-friend.input";
 import { friendIncludes } from "src/includes/friend.includes";
 import { User } from "src/entities/user.entity";
 import { UserService } from "./user.service";
+import { AchievementService } from "./user_achievement.service";
+import { Achievement } from "@prisma/client";
 
 @Injectable()
 export class FriendService {
   constructor(
     private prisma: PrismaService,
-    private userService: UserService
+    private userService: UserService,
+    private achievementService: AchievementService,
   ) { }
 
   /**
@@ -38,12 +41,12 @@ export class FriendService {
 
   async getFriendList(userId): Promise<User[]> {
     // Check if the provided userId is a valid id
-    let userObject: Promise<User> = this.userService.getUserById(userId);
+    let userObject: User = await this.userService.getUserById(userId);
 
     if (!userObject) throw new NotFoundException("User does't exist");
 
     try {
-      const friends: Promise<Friend[]> = this.getAllFriends();
+      const friends: Friend[] = await this.getAllFriends();
       const friendList: User[] = [];
 
       (await friends).map((value: Friend, index: number) => {
@@ -60,6 +63,42 @@ export class FriendService {
     }
   }
 
+  async getFriendSender(userId): Promise<Friend[]> {
+    // Check if the provided userId is a valid id
+    let userObject: User = await this.userService.getUserById(userId);
+    if (!userObject) throw new NotFoundException("User does't exist");
+    try {
+      const friendSender: Friend[] = await this.prisma.friend.findMany({
+        where: {
+          senderId: userObject.id
+        },
+        include: friendIncludes
+      });
+
+      return friendSender
+    } catch (e) {
+      throw new ForbiddenException("Unable to retreive Friend list where the user is the sender.");
+    }
+  }
+
+  async getFriendReceiver(userId): Promise<Friend[]> {
+    // Check if the provided userId is a valid id
+    let userObject: User = await this.userService.getUserById(userId);
+    if (!userObject) throw new NotFoundException("User does't exist");
+    try {
+      const friendReceiver: Friend[] = await this.prisma.friend.findMany({
+        where: {
+          receiverId: userObject.id
+        },
+        include: friendIncludes
+      });
+
+      return friendReceiver
+    } catch (e) {
+      throw new ForbiddenException("Unable to retreive Friend list where the user is the receiver.");
+    }
+  }
+
   async createFriend(createFriendInput: CreateFriendInput): Promise<Friend> {
     return this.prisma.friend.create({
       data: {
@@ -71,34 +110,62 @@ export class FriendService {
     });
   }
 
-  async updateAccept(friendId: string, isAccepted: boolean): Promise<Friend> {
+  async updateAccept(userId: string, friendId: string): Promise<Friend> {
     // Check if the provided friendId is a valid id
-    let friendObject: Promise<Friend> = this.getFriendById(friendId);
+    let userObject: User = await this.userService.getUserById(userId);
+    if (!userObject) throw new NotFoundException("User doesn't exist");
 
+    // Check if the provided friendId is a valid id
+    let friendObject: Friend = await this.getFriendById(friendId);
     if (!friendObject) throw new NotFoundException("Friend doesn't exist");
-
     try {
-      return this.prisma.friend.update({
-        where: { id: friendId },
+      const friendship = this.prisma.friend.update({
+        where: {
+          id: friendId,
+          receiverId: (await userObject).id,
+        },
         data: {
-          isAccepted: isAccepted
+          isAccepted: true
         },
         include: friendIncludes
-      })
+      });
+          const id_receiver = (await friendship).receiverId;
+          const id_sender = (await friendship).senderId;
+      this.userService.addXp(id_receiver, 100);
+      this.userService.addXp(id_sender, 100);
+      let friendsOfReceiver = await this.getFriendList(id_receiver);
+      let friendsOfSender = await this.getFriendList(id_sender);
+      if (friendsOfReceiver.length == 1){
+        await this.achievementService.createAchievement(id_receiver, Achievement.social);
+      }
+      if (friendsOfSender.length == 1){
+          await this.achievementService.createAchievement(id_sender, Achievement.social);
+      }
+      return friendship;
     } catch (e) {
       throw new ForbiddenException("Unable to delete Friend.");
     }
   }
 
-  async deleteFriend(friendId: string): Promise<Friend> {
+  async deleteFriend(userId: string, friendId: string): Promise<Friend> {
     // Check if the provided friendId is a valid id
-    let friendObject: Promise<Friend> = this.getFriendById(friendId);
+    let userObject: User = await this.userService.getUserById(userId);
+    if (!userObject) throw new NotFoundException("User doesn't exist");
 
+    // Check if the provided friendId is a valid id
+    let friendObject: Friend = await this.getFriendById(friendId);
     if (!friendObject) throw new NotFoundException("Friend doesn't exist");
 
+    console.log(userId, friendId);
     try {
       return this.prisma.friend.delete({
-        where: { id: friendId },
+        where: {
+          id: friendId,
+          OR: [
+            { senderId: userId },
+            { receiverId: userId }
+          ]
+        },
         include: friendIncludes
       });
     } catch (e) {

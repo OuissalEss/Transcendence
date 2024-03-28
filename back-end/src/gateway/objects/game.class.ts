@@ -83,9 +83,13 @@ export class GameState {
       this.leftPaddle.updateMovement(movement);
     } else if (side === 'L' && this.rightPaddle.getPaddle().id == playerId && this.mode === 'online') {
       this.rightPaddle.updateMovement(movement);
-    } else if (side == 'L' && this.mode != "online"){
+    } else if (side == 'R' && this.mode == "offline"){
         this.leftPaddle.updateMovement(movement);
-    } else if (side == 'R' && this.mode != 'online'){
+    } else if (side == 'L' && this.mode == 'offline'){
+        this.rightPaddle.updateMovement(movement);
+    } else if (side == 'L' && this.mode == "ai"){
+        this.leftPaddle.updateMovement(movement);
+    } else if (side == 'R' && this.mode == 'ai'){
         this.rightPaddle.updateMovement(movement);
     }
   }

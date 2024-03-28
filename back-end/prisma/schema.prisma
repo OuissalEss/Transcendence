@@ -16,19 +16,13 @@ enum Status {
   INGAME       // User is in a game
 }
 
-model Achievement {
-  id	          	String				@id @default(uuid())
-
-  title	       		String
-  description		String
-
-  xp	          	Int
-  userachievement 	UserAchievement[] 	@relation("userachievement")
-
-  createdAt 		DateTime 			@default(now())
-  updatedAt 		DateTime 			@updatedAt
-
-  @@map("achievements")
+enum Achievement {
+	welcome
+	robot
+	social
+	winning
+	loyal
+	team
 }
 
 model UserAchievement {
@@ -36,16 +30,11 @@ model UserAchievement {
 
 	userId			String
 
-	achievementId	String
-
-	isAchieved		Boolean   		@default(false)
-	achievedAt    	DateTime?		@default(now())
-
   	createdAt 		DateTime 		@default(now())
   	updatedAt 		DateTime 		@updatedAt
 
 	user			User			@relation(name: "userachievements", fields: [userId], references: [id])
-	achievement		Achievement		@relation(name: "userachievement", fields: [achievementId], references: [id])
+	achievement		Achievement?	@default(welcome)
 
  	@@map("user_achievements")
 }
@@ -57,6 +46,7 @@ enum Character {
 	Nova
 	Starlight
 	Aegon
+	None
 }
 
 model User {
@@ -71,7 +61,7 @@ model User {
 	xp				Int?
 	avatar			Avatar?
 
-	character		Character?			@default(Aurora)
+	character		Character?			@default(None)
 
 	status			Status?				@default(ONLINE)
 	connection  	Connection?

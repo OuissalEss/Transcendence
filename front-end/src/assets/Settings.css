@@ -64,7 +64,7 @@
 
 .ChevronLeftSettings {
   position: absolute;
-  top: 50%;
+  top: 410px;
   left: 530px;
   width: 50px;
   height: 50px;
@@ -74,7 +74,7 @@
 
 .ChevronRightSettings {
   position: absolute;
-  top: 50%;
+  top: 410px;
   left: 850px;
   width: 50px;
   height: 50px;
@@ -87,7 +87,6 @@
   top: 600px;
   left: 670px;
   color: #3E1256;
-  z-index: 3;
   font-size: 40px;
   text-align: center;
   justify-content: center;
@@ -184,7 +183,7 @@
   height: 110px;
   background-color: rgba(62, 55, 133, 0.446);
   border-radius: 50%;
-  z-index: 7;
+  z-index: 1;
 }
 
 .AvatarEditCircle:hover {
@@ -206,7 +205,7 @@
   transform: scale(1);
 }
 
-.Profile {
+.ProfileS {
   position: absolute;
   top: 410px;
   left: 220px;
@@ -284,8 +283,8 @@
   position: absolute;
   width: 25px;
   height: 25px;
-  left: 200px;
-  top: 503px;
+  left: 15px;
+  top: 12px;
 }
 
 .SaveTheChangesRectangle{
@@ -306,4 +305,14 @@
   color: #fff;
   font-family: 'Manrope', sans-serif;
   font-size: 15px;
+}
+
+.tfaContaine{
+  position: absolute;
+  z-index: 5;
+  backdrop-filter: blur(5px);
+  width: 100vw;
+  height: 100vh;
+  top: 0%;
+  left: 0%;
 }

@@ -95,34 +95,38 @@
     background-color: rgb(62 18 86 / 5%);
     border-radius: 15px;
     height: 150px;
-    margin: 20px 0px 0px -5px;
-    padding: 10px 0px 10px 10px;
-    font-size: 14px;
+    margin: 20px 0px 0px -10px;
+    padding: 10px 0px 10px 5px;
+    font-size: 12px;
+    width: 200px;
 
 }
     .live-btn{
     background-color: rgb(62 18 86 / 65%);
     backdrop-filter: blur(10px);
     color: #fff;
-    width: 70%;
-    padding: 2px 6px;
+    /* width: 70%; */
+    padding: 0px 3px 3px 3px;
     border-radius: 10px;
-    margin-left: 2px;
+    margin-left: 37px;
     font-weight: 400;
 }
 
-    .match{
+.match{
     margin: 1px 0px 15px 0px;
     font-weight: 600;
     /* width: 180px; */
 }
-    .match .players{
-    /* width: 180px; */
-
+.match .players{
+    width: 170px;
 }
-    .matches{
+.matches{
     overflow-y: auto; /* Enable vertical scrolling */
         height: 130px;
+}
+.eyesIcon{
+    display: inline;
+    width: 20px;
 }
 
     .matches::-webkit-scrollbar {

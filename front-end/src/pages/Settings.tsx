@@ -1,18 +1,16 @@
-import { KeyboardEvent, useEffect } from 'react';
-import React, { ChangeEvent } from 'react';
+import { useEffect } from 'react';
+import { ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import '../assets/Settings.css';
 import SearchBar from '../components/SearchBar';
 import Notifications from '../components/Notifications';
-import axios from 'axios';
 
 import ImageCompressor from 'image-compressor.js';
 
-import User from './types/user-interface';
-import { gql, OperationVariables, ApolloClient } from "@apollo/client";
-import { useQuery, useMutation } from '@apollo/react-hooks'
-
+import User from '../types/user-interface';
+import { useQuery, gql } from "@apollo/client";
+import { useMutation } from '@apollo/react-hooks'
 
 // Characters
 import Aurora from '/Characters/Aurora/01.png';
@@ -35,27 +33,7 @@ import Edit from '/Icons/Edit.png';
 import UserIcon from '/Icons/User.png';
 import TFAicon from '/Icons/TFA.png';
 import Unblock from '/Icons/Unblock.png';
-// avatar
-import Sophia from '/Avatars/02.jpeg';
-import Avatar from '/Avatars/01.jpeg';
-import Avatar2 from '/Avatars/01.jpeg';
-import Avatar3 from '/Avatars/01.jpeg';
-import Avatar4 from '/Avatars/01.jpeg';
-import Avatar5 from '/Avatars/01.jpeg';
-import Avatar6 from '/Avatars/01.jpeg';
-import AvatarBackground from '/Avatars/01.jpeg';
-import DashboardLayout from '../layouts/LayoutDefault';
 
-//
-import LogoImage from '/logo.png';
-import HomeIcon from '/Icons/Edit.png';
-import GameIcon from '/Icons/Edit.png';
-import SettingsIcon from '/Icons/Edit.png';
-import LogoutIcon from '/Icons/Edit.png';
-import InfosIcon from '/Icons/Edit.png';
-import ChatIcon from '/Icons/Edit.png';
-import NotificationIcon from '/Icons/Edit.png';
-import SearchIcon from '/Icons/Edit.png';
 
 const characters = [
     { name: 'Aurora', image: Aurora, infos: AuroraInfos },
@@ -66,62 +44,26 @@ const characters = [
     { name: 'Aegon', image: Aegon, infos: AegonInfos },
 ];
 
-// import { Cloudinary } from 'cloudinary-core';
-// const cloudinary = new Cloudinary({
-//     cloud_name: 'dupbnyzw7',
-//     api_key: '984415362569689',
-//     api_secret: 'IqKyztO9et4W6mAigZvuGWw9i24'
-// });
-
 import { Cloudinary } from "@cloudinary/url-gen";
+import Alert from '../components/Alert';
+import TwoFactorAuthActivation from '../components/TwoFactorAuthActivation';
+import { useSocket } from '../App';
+import Block from '../types/block-interface';
 
-const getProfile = () => {
-    const [userData, setUserData] = useState<User>();
-    // const [isLoading, setLoading] = useState(true);
-
-    const USER_DATA = gql`
+const USER_BLOCKED = gql`
     query {
-    getUserInfo {
+        getUserBlocked{
             id
-            email
-            username
-            character
-            connection {
-                provider
-                is2faEnabled
-            }
-            avatar {
-              filename
+            blockedUser{
+                id
+                username
+                avatar {
+                    filename
+                }
             }
         }
-      }
-    `;
-
-
-    const resutls = useQuery(USER_DATA);
-    console.log("var = ", resutls)
-
-    useEffect(() => {
-        try {
-
-            const { data, error } = resutls;
-
-            if (error) {
-                throw new Error('Failed to fetch user data');
-            }
-            if (data) {
-                setUserData(data.getUserInfo);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-
-    }, [resutls]);
-
-    if (!userData) return '';
-
-    return userData;
-}
+    }
+`;
 
 const UPDATE_USER_NAME = gql`
 mutation($user_name: String!) { 
@@ -133,57 +75,99 @@ mutation($user_name: String!) {
 `;
 
 const UPDATE_USER_CHARACTER = gql`
-mutation($char_name: String!) { 
-    updateUserCharacter(character: $char_name) {
-        id
-        username
+    mutation($char_name: String!) { 
+        updateUserCharacter(character: $char_name) {
+            id
+            username
+        }
     }
-}
 `;
 
 const UPDATE_USER_AVATAR = gql`
-mutation($avatar_name: String!) { 
-    updateUserAvatar(newAvatar: $avatar_name) {
-        id
-        username
+    mutation($avatar_name: String!) { 
+        updateUserAvatar(newAvatar: $avatar_name) {
+            id
+            username
+        }
     }
-}
 `;
 
+const UPDATE_USER_BLOCK = gql`
+    mutation($block_id: String!) {
+        unBlock (blockId: $block_id){
+            id
+        }
+    }
+`;
 
-const ImageUploader = () => {
-    const [selectedFile, setSelectedFile] = useState(null);
-
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-    };
-
-
-};
-
-
+const UPDATE_TFA = gql`
+    mutation { 
+        desactivate2Fa{
+            id
+        }
+    }
+`;
 
 function Settings() {
+    const [alertMessage, setAlertMessage] = useState('');
+    const [isShowAlert, setIsShowAlert] = useState(false);
+    const [isShowTFA, setIsShowTFA] = useState(false);
+
     const navigate = useNavigate();
-    const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
     const [characterChanged, setCharacterChanged] = useState(false);
     const [editedUsername, setEditedUsername] = useState('');
-    const [avatarImage, setAvatarImage] = useState(null);
+    const [avatarImage, setAvatarImage] = useState<string | ArrayBuffer | null>(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [loading1, setLoading1] = useState(false);
 
     const [uploadUrl, setUploadUrl] = useState("");
 
     const [updateUserName] = useMutation(UPDATE_USER_NAME);
-    const [updateUserCharracter] = useMutation(UPDATE_USER_CHARACTER);
+    const [updateUserCharacter] = useMutation(UPDATE_USER_CHARACTER);
     const [updateUserAvatar] = useMutation(UPDATE_USER_AVATAR);
+    const [unblockUser] = useMutation(UPDATE_USER_BLOCK);
 
-    const userData = getProfile();
-    if (!userData) return '';
-    const userAvatar = userData.avatar.filename;
-    const index = characters.findIndex(character => character.name === userData.character);
+    const [desactivate2Fa] = useMutation(UPDATE_TFA);
 
+    const [blocked, setBlocked] = useState<Block[]>();
+
+    const { userData } = useSocket();
+
+    useEffect(() => {
+        if ( !userData) return;
+
+        // setBlocked2(blocked);
+    }, [ userData]);
+
+
+  const { data, loading, error } = useQuery(USER_BLOCKED, { variables: { } });
+
+  useEffect(() => {
+    try {
+      if (error) {
+        throw new Error('Failed to fetch user data');
+      }
+      if (data) {
+        setBlocked(data.getUserBlocked);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, [data, loading, error]);
+
+    console.log("Blocked = ", blocked);
+    const blockedList = blocked?.map((b: Block) => ({
+        b_id: b.id,
+        id: b.blockedUser.id,
+        username: b.blockedUser.username,
+        image: b.blockedUser.avatar ? b.blockedUser.avatar.filename : ''
+    }));
+
+    const userAvatar = userData?.avatar?.filename;
+    const index = characters.findIndex(character => character.name === userData?.character);
+    const [currentCharacterIndex, setCurrentCharacterIndex] = useState(index);
+    
     const handleLeftChevronClick = () => {
         setCurrentCharacterIndex((prevIndex) => (prevIndex - 1 + characters.length) % characters.length);
         setCharacterChanged(true);
@@ -207,9 +191,8 @@ function Settings() {
     };
 
     const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files[0];
-        setSelectedFile(event.target.files[0]);
-        console.log("-------------- ", file)
+        const file = event.target.files ? event.target.files[0] : null;
+        setSelectedFile(file);
         const reader = new FileReader();
         reader.onload = () => {
             setAvatarImage(reader.result);
@@ -229,7 +212,6 @@ function Settings() {
     });
 
     const uploadAvatar = async () => {
-        console.log("BEFORE");
         const imageCompressor = new ImageCompressor(); // Instantiate ImageCompressor
         const compressedFile = await imageCompressor.compress(selectedFile, { // Use compress method
             maxWidth: 150,
@@ -258,9 +240,6 @@ function Settings() {
             );
             const res = await response.json();
             setUploadUrl(res.public_id);
-            console.log("++++++++++++++++++++");
-            console.log("res = ", res.public_id);
-            console.log("++++++++++++++++++++");
             return (cld.image(res.public_id).toURL());
         } catch (error) {
             console.log("ERROR");
@@ -268,161 +247,221 @@ function Settings() {
         }
     };
 
-    async function handleSaveButtonClick() {
-        setLoading(true);
-        if (isEditing && editedUsername.trim() === '') {
-            alert('You should set a username');
-            return;
-        }
-        if (editedUsername) {
-            updateUserName({ variables: { user_name: editedUsername } })
-                .then(response => {
-                    console.log(response);
-                    navigate('/');
-                })
-                .catch(error => { console.error(error); });
-        }
-        if (characterChanged) {
-            updateUserCharracter({ variables: { char_name: currentCharacter.name } })
-                .then(response => {
-                    console.log(response);
-                    navigate('/');
-                })
-                .catch(error => { console.error(error); });
-        }
-        if (avatarImage) {
-            const Url = await uploadAvatar();
-            console.log("********URL = ", Url);
-            updateUserAvatar({ variables: { avatar_name: Url } })
-                .then(response => {
-                    console.log(response);
-                    navigate('/');
-                })
-                .catch(error => { console.error(error); });
-        }
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+        setIsShowAlert(true);
     };
 
+    const closeAlert = () => {
+        setIsShowAlert(false);
+    };
+
+    const showTFA = () => {
+        setIsShowTFA(true);
+    };
+
+    const closeTFA = () => {
+        setIsShowTFA(false);
+    };
+
+    const handleDesactivate = async () => {
+        try {
+            await desactivate2Fa({ variables: { } });
+            console.log("2fa updated successfully!");
+        } catch (error) {
+            console.error("Error updating Username:", error.message);
+        }
+        alert('2FA desactivated successful');
+        window.location.reload();
+    };
+
+    async function handleSaveButtonClick() {
+        setLoading1(true);
+        if (isEditing && editedUsername.trim() === '') {
+            showAlert('Set your username');
+            setLoading1(false);
+            return;
+        }
+        else {
+            if (characterChanged) {
+                try {
+                    await updateUserCharacter({ variables: { char_name: currentCharacter.name } });
+                    console.log("Character updated successfully!");
+                  } catch (error) {
+                    console.error("Error updating character:", error.message);
+                  }
+            }
+            if (avatarImage) {
+                const Url = await uploadAvatar();
+                try {
+                    await updateUserAvatar({ variables: { avatar_name: Url } });
+                    console.log("Avatar updated successfully!");
+                  } catch (error) {
+                    console.error("Error updating Avatar:", error.message);
+                  }
+                
+            }
+            if (editedUsername) {
+                try {
+                    await updateUserName({ variables: { user_name: editedUsername } });
+                    console.log("Username updated successfully!");
+                  } catch (error) {
+                    console.error("Error updating Username:", error.message);
+                  }
+            }
+            window.location.reload();
+        }
+    };
+    async function handleUnblock(id: string) {
+        try {
+            await unblockUser({ variables: { block_id: id } });
+            console.log("Username updated successfully!");
+        } catch (error) {
+             console.error("Error updating Username:", error.message);
+        }
+        window.location.reload();
+    }
     return (
-        <DashboardLayout>
-            <div className="Login">
-                <header className="Login-header">
-                    <div className="SearchBarS">
-                        <SearchBar />
-                    </div>
-                    <div className="NotificationBarS">
-                        <Notifications />
-                    </div>
-                    <div className="Settings">
-                        <h1>Settings</h1>
-                    </div>
-                    <div className="SettingsBar"> </div>
-                    <div className="Profile">
-                        {isEditing ? (
-                            <input type="text" value={editedUsername}
-                                onChange={handleUsernameChange}
-                                autoFocus className="EditInput" />
-                        ) : (
-                            <input type="text" value={userData.username}
-                                onChange={handleUsernameChange}
-                                autoFocus className="EditInput" />
-                        )}
+        <div className="Login">
+            <header className="Login-header">
+                <div className="SearchBarS">
+                    <SearchBar />
+                </div>
+                <div className="NotificationBarS">
+                    <Notifications />
+                </div>
+                <div className="Settings">
+                    <h1>Settings</h1>
+                </div>
+                <div className="SettingsBar"> </div>
+                <div className="ProfileS">
+                    {isEditing ? (
+                        <input type="text" value={editedUsername}
+                            onChange={handleUsernameChange}
+                            autoFocus className="EditInput" />
+                    ) : (
+                        <input type="text" value={userData?.username}
+                            onChange={handleUsernameChange}
+                            autoFocus className="EditInput" />
+                    )}
 
-                        <img src={UserIcon} alt="User Icon" className="UserIcon" />
-                        <img src={Edit} alt="Edit Icon" className="EditIcon" />
-                    </div>
+                    <img src={UserIcon} alt="User Icon" className="UserIcon" />
+                    <img src={Edit} alt="Edit Icon" className="EditIcon" />
+                </div>
 
-                    <div className="AvatarEditCircle" >
-                        <label htmlFor="avatarInput" className="AvatarEditText">
-                            &nbsp; Edit <br /> Avatar
-                        </label>
-                        <input
-                            type="file"
-                            id="avatarInput"
-                            style={{ display: 'none' }}
-                            accept="image/*"
-                            onChange={handleAvatarChange}
+                <div className="AvatarEditCircle" >
+                    <label htmlFor="avatarInput" className="AvatarEditText">
+                        &nbsp; Edit <br /> Avatar
+                    </label>
+                    <input
+                        type="file"
+                        id="avatarInput"
+                        style={{ display: 'none' }}
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                    />
+                </div>
+                {avatarImage ? (
+                    <img src={avatarImage} className="AvatarBackground" alt="Avatar" />
+                ) : (
+                    <img src={userAvatar} className="AvatarBackground" alt="AvatarBackground" />
+                )}
+                <div className="BlockedList">
+                    <div className="BlockedListTitle">
+                        <h1>Blocked List</h1>
+                    </div>
+                    <ul>
+                        {blockedList?.map((b, index) => {
+                            return (
+                                <li key={index} className="BlockedItem">
+                                    <img src={b.image} alt="Blocked Avatar" className="BlockedAvatar" />
+                                    <p className="BlockedName">{b.username}</p>
+                                    <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" onClick={() => handleUnblock(b.b_id)} />
+                                </li>
+                            );
+                        })}
+                    </ul>
+
+                </div>
+                <button className="CharacterRectangleSettings" onClick={handleChangeCharacterClick}>
+                    <p className="CharacterTextSettings">Change your character</p>
+                </button>
+
+
+
+                {characterChanged ? (
+                    <div>
+                        <div className="NameS">
+                            <p className="CharacterNameSettings">{currentCharacter.name}</p>
+                        </div>
+                        <img src={currentCharacter.image} className="CharacterImageSettings" alt={currentCharacter.name} />
+                        <img
+                            src={currentCharacter.infos}
+                            className="CharacterInfosSettings"
+                            alt={`${currentCharacter.name} Infos`}
                         />
                     </div>
-                    {avatarImage ? (
-                        <img src={avatarImage} className="AvatarBackground" alt="Avatar" />
-                    ) : (
-                        <img src={userAvatar} className="AvatarBackground" alt="AvatarBackground" />
-                    )}
-                    <div className="BlockedList">
-                        <div className="BlockedListTitle">
-                            <h1>Blocked List</h1>
+                ) : (
+                    <div>
+                        <div className="NameS">
+                            <p className="CharacterNameSettings">{myCharacter.name}</p>
                         </div>
-                        <div className="BlockedItem">
-                            <img src={Sophia} alt="Blocked Avatar" className="BlockedAvatar" />
-                            <p className="BlockedName">Sophia</p>
-                            <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" />
-                        </div>
+                        <img src={myCharacter.image} className="CharacterImageSettings" alt={myCharacter.name} />
+                        <img
+                            src={myCharacter.infos}
+                            className="CharacterInfosSettings"
+                            alt={`${myCharacter.name} Infos`}
+                        />
                     </div>
-                    <button className="CharacterRectangleSettings" onClick={handleChangeCharacterClick}>
-                        <p className="CharacterTextSettings">Change your character</p>
+                )}
+
+
+                <img
+                    src={ChevronLeft}
+                    className="ChevronLeftSettings"
+                    alt="ChevronLeft"
+                    onClick={handleLeftChevronClick}
+                />
+                <img
+                    src={ChevronRight}
+                    className="ChevronRightSettings"
+                    alt="ChevronRight"
+                    onClick={handleRightChevronClick}
+                />
+
+                {!userData.connection.is2faEnabled ?(
+                    <div className="TFA" onClick={showTFA}>
+                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" /><h1>Activate Two-factor authentication</h1>
+                    </div>
+                ) : (
+                    <div className="TFA" onClick={handleDesactivate}>
+                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" /><h1>Desactivate Two-factor authentication</h1>
+                    </div>
+                )}
+
+                <div className="SaveTheChanges">
+                    <button className="SaveTheChangesRectangle" onClick={handleSaveButtonClick}>
+                        {loading1 ? (
+                            <div className="Processing">
+                                <div className="border-t-transparent border-solid animate-spin rounded-full border-blue-400 border-4 h-6 w-6"></div>
+                            </div>
+                        ) : (<span></span>)}
+                        <p className="SaveTheChangesText">Save the changes!</p>
                     </button>
+                </div>
 
-
-
-                    {characterChanged ? (
-                        <div>
-                            <div className="NameS">
-                                <p className="CharacterNameSettings">{currentCharacter.name}</p>
-                            </div>
-                            <img src={currentCharacter.image} className="CharacterImageSettings" alt={currentCharacter.name} />
-                            <img
-                                src={currentCharacter.infos}
-                                className="CharacterInfosSettings"
-                                alt={`${currentCharacter.name} Infos`}
-                            />
-                        </div>
-                    ) : (
-                        <div>
-                            <div className="NameS">
-                                <p className="CharacterNameSettings">{myCharacter.name}</p>
-                            </div>
-                            <img src={myCharacter.image} className="CharacterImageSettings" alt={myCharacter.name} />
-                            <img
-                                src={myCharacter.infos}
-                                className="CharacterInfosSettings"
-                                alt={`${myCharacter.name} Infos`}
-                            />
-                        </div>
-                    )}
-
-
-
-                    <img
-                        src={ChevronLeft}
-                        className="ChevronLeftSettings"
-                        alt="ChevronLeft"
-                        onClick={handleLeftChevronClick}
-                    />
-                    <img
-                        src={ChevronRight}
-                        className="ChevronRightSettings"
-                        alt="ChevronRight"
-                        onClick={handleRightChevronClick}
-                    />
-                    <div className="TFA">
-                        <h1>Set the two-factor authentication</h1>
-                    </div>
-                    <img src={TFAicon} alt="TFA Icon" className="TFAIcon" />
-
-                    <div className="SaveTheChanges">
-                        <button className="SaveTheChangesRectangle" onClick={handleSaveButtonClick}>
-                            {loading ? (
-                                <div className="Processing">
-                                    <div className="border-t-transparent border-solid animate-spin rounded-full border-blue-400 border-4 h-6 w-6"></div>
-                                </div>
-                            ) : (<span></span>)}
-                            <p className="SaveTheChangesText">Save the changes!</p>
-                        </button>
-                    </div>
-
-                </header>
-            </div>
-        </DashboardLayout>
+            </header>
+            {isShowAlert &&
+                <div className="alertContainer">
+                    <Alert message={alertMessage} onClose={closeAlert} />
+                </div>
+            }
+            {isShowTFA &&
+                <div className="tfaContaine">
+                    <TwoFactorAuthActivation onClose={closeTFA} />
+                </div>
+            }
+        </div>
     );
 }
 

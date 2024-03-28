@@ -67,16 +67,16 @@ export class oPaddle {
         this.x = this.isLeft ? this.w + 2: gameConfig.canvasWidth - this.w - 2;
 
         if (this.isLeft) {
-            if (this.p.keyIsDown(this.p.UP_ARROW)) {
-                this.socket.emit('updatePaddleMovement', 'L', 'up');
-            } else if (this.p.keyIsDown(this.p.DOWN_ARROW)) {
-                this.socket.emit('updatePaddleMovement', 'L', 'down');
-            }
-        } else {
             if (this.p.keyIsDown(87)) { // 'W' key
                 this.socket.emit('updatePaddleMovement', 'R', 'up');
             } else if (this.p.keyIsDown(83)) { // 'S' key
                 this.socket.emit('updatePaddleMovement', 'R', 'down');
+            }
+        } else {
+            if (this.p.keyIsDown(this.p.UP_ARROW)) {
+                this.socket.emit('updatePaddleMovement', 'L', 'up');
+            } else if (this.p.keyIsDown(this.p.DOWN_ARROW)) {
+                this.socket.emit('updatePaddleMovement', 'L', 'down');
             }
         }
 

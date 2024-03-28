@@ -1,0 +1,409 @@
+.Profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(5px + 1vmin);
+  color: white;
+  z-index: 1;
+
+}
+
+.Profile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  filter: blur(5px);
+  z-index: 0;
+}
+.SearchBarP {
+  position: absolute;
+  top: 25px; /* Adjust the top position as needed */
+  right: 20px; /* Position in the center */
+  transform: translateX(-50%);
+  width: 550px; /* Adjust the width as needed */
+  display: flex;
+  align-items: center;
+  padding: 0 50px; /* Adjust padding as needed */
+  z-index: 4;
+}
+  
+.NotificationBarP {
+  position: absolute;
+  width: 60px; 
+  height: 60px; 
+  top: 25px; 
+  right: 360px;
+  transform: translateX(50%, 50%);
+  cursor: pointer;
+}
+
+.ProfileTitle h1{
+  font-family: 'Manrope', sans-serif;
+  font-size: 35px;
+}
+
+.ProfileTitle {
+  position: absolute;
+  left: 180px;
+  top: 130px;
+  color: #3E1256;
+  font-weight: 600;
+}
+
+.ProfileBar {
+  position: absolute;
+  top: 80px;
+  width: 320px;
+  height: 220px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 10px;
+}
+
+.AchievementsTitle h1{
+  position: absolute;
+  left: 75%;
+  font-size: 30px;
+}
+.AchievementsTitle {
+  position: absolute;
+  top: 130px;
+  left: 950px;
+  color: #3E1256;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+}
+
+.AchievementsBar span {
+  position: absolute;
+  top: 90%;
+  font-size: 25px;
+  color: #fff;
+}
+.AchievementsBar {
+  position: absolute;
+  top: 79px;
+  width: 320px;
+  height: 220px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 10px;
+}
+
+.AchievementContainer {
+  position: relative;
+  top: -7%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Achievement {
+  max-height: 100%;
+  width: 190px;
+}
+
+.ChevLeft {
+  height: 40px;
+}
+.ChevLeftC {
+  cursor: pointer;
+  position: absolute;
+  top: 42%;
+  left: 1%;
+  z-index: 2;
+}
+.ChevRight {
+  height: 40px;
+}
+.ChevRightC {
+  cursor: pointer;
+  top: 42%;
+  right: 2%;
+  position: absolute;
+}
+
+.FrLiTitle h1 {
+  font-size: 30px;
+  font-weight: 600;
+}
+.FrLiTitle {
+  position: absolute;
+  left: 630px;
+  top: 130px;
+  color: #3E1256;
+  font-family: 'Manrope', sans-serif;
+}
+
+.FrLiBar {
+  font-size: 20px;
+  position: absolute;
+  top: 80px;
+  width: 340px;
+  left: -70px;
+  height: 530px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 10px;
+}
+
+.AvatarPro {
+  position: absolute;
+  top: 5%;
+  left: 15%;
+  width: 70px;
+  border-radius: 50px;
+}
+
+.ProfileName {
+  position: absolute;
+  top: 10%;
+  left: 43%;
+  font-size: 25px;
+  color: #3E1256;
+  font-weight: 300;
+}
+
+.LeaderboardPro {
+  position: absolute;
+  top: 28%;
+  left: 25%;
+  width: 130px;
+}
+
+.LevelTube {
+  position: absolute;
+  top: 70%;
+  left: -5px;
+  display: flex;
+  align-items: center;
+}
+
+.LevelMarker {
+  font-size: 13px;
+  color: #3E1256;
+  font-family: 'Manrope', sans-serif;
+  margin: 0 20px;
+}
+
+.Tube {
+  width: 200px;
+  height: 15px;
+  background-color: rgba(250, 231, 255, 0.60);
+  border-radius: 10px;
+  position: relative;
+}
+
+.LevelProgress span{
+  position: absolute;
+  /* color: #fff; */
+  font-family: 'Manrope', sans-serif;
+  font-weight: 200px;
+  left: 85px;
+  top: -3px;
+  font-size: 14px;
+}
+.LevelProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  min-width: 2%;
+  background-color: rgba(213, 26, 183, 0.6);
+  border-radius: 10px;
+}
+
+.Stats {
+  position: absolute;
+  top: 83%;
+  left: 23%;
+}
+
+.StatText {
+  font-size: 15px;
+  color: #3E1257;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 300;
+}
+
+.FriendsList {
+  padding: 10px;
+  list-style-type: none;
+}
+
+.FriendsList li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.FriendAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.FriendName {
+  flex: 1;
+}
+
+.CircleSettings {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.Separator {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 5px 0;
+}
+
+.PTtitle h1{
+  font-size: 30px;
+  font-weight: 600;
+}
+.PTtitle {
+  position: absolute;
+  left: 950px;
+  top: 450px;
+  font-size: 30px;
+  color: #3E1256;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+}
+
+@supports (-moz-appearance:none) {
+  .PTBar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(62, 18, 86, 0.5) rgba(0, 0, 0, 0);
+  }
+}
+
+.PTBar::-webkit-scrollbar {
+  width: 4px;
+  height: 0px;
+}
+.PTBar::-webkit-scrollbar-thumb {
+  background-color: rgb(62 18 86 / 50%);
+  border-radius: 6px;
+}
+.PTBar {
+  position: absolute;
+  top: 70px;
+  width: 320px;
+  height: 220px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 10px;
+  overflow-y: auto;
+}
+.PTBar .play{
+  position: relative;
+  height: 90px;
+  font-size: 20px;
+}
+.PlayerLeft img{
+  width: 100%;
+  border-radius: 40px;
+}
+.PlayerLeft{
+  position: absolute;
+  top: 7%;
+  left: 10%;
+  align-items: center;
+}
+
+.LeftPlayer {
+  height: 50px;
+  align-items: center;
+}
+
+.PlayerLeft p {
+  position: absolute;
+  top: 105%;
+  left: 2%;
+  font-family: 'Manrope', sans-serif;
+  margin-right: 20px;
+}
+
+.ScoreP {
+  position: absolute;
+  top: 22%;
+  left: 37%;
+  transform: translateX(50%, 50%);
+  /* font-size: 20px; */
+  color: #3E1256;
+  font-family: 'Manrope', sans-serif;
+  margin: 0 20px;
+}
+.PlayerRight img{
+  width: 100%;
+  border-radius: 40px;
+}
+.PlayerRight{
+  position: absolute;
+  top: 7%;
+  right: 10%;
+}
+.RightPlayer {
+  height: 50px;
+}
+
+.PlayerRight p {
+  position: absolute;
+  top: 105%;
+  left: 9%;
+  font-family: 'Manrope', sans-serif;
+  margin-right: 20px;
+}
+
+
+.CurrTitle {
+  position: absolute;
+  left: 180px;
+  top: 450px;
+  font-size: 30px;
+  color: #3E1256;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+}
+
+@supports (-moz-appearance:none) {
+  .CurrBar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(62, 18, 86, 0.5) rgba(0, 0, 0, 0);
+  }
+}
+.CurrBar::-webkit-scrollbar {
+  width: 4px;
+  height: 0px;
+}
+.CurrBar::-webkit-scrollbar-thumb {
+  background-color: rgb(62 18 86 / 50%);
+  border-radius: 6px;
+}
+.CurrBar {
+  position: absolute;
+  top: 70px;
+  width: 320px;
+  height: 220px;
+  background-color: rgba(114, 196, 255, 0.2);
+  border-radius: 10px;
+  overflow-y: auto;
+}
+
+.InterplaysList {
+  padding: 10px;
+  list-style-type: none;
+  font-size: 14px;
+  color: #3E1256;
+  font-family: 'Manrope', sans-serif;
+}
+
+.InterplaysList li {
+  margin-bottom: 10px;
+}

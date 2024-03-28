@@ -1,17 +1,15 @@
-import React from 'react';
+// Alert.js
 import '../assets/alert.css';
 
-interface AlertProps {
-  message: string;
-  type: 'success' | 'error' | 'info';
-}
-
-const Alert: React.FC<AlertProps> = ({ message, type }) => {
-  const alertClass = `alert ${type}`;
-
+const Alert = ({ message, onClose }: {message: any, onClose: any}) => {
   return (
-    <div className={alertClass}>
+    <div className="alert">
+      <img
+          src="/Icons/About.png"
+          alt="alert"
+      />
       <p>{message}</p>
+      <button onClick={onClose}> X</button>
     </div>
   );
 };
