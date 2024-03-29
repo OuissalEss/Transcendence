@@ -23,12 +23,14 @@ function FriendsBar() {
     // console.log('All users:', data.getAllUsers);
     friendsItems = data.getAllUsers
     .filter((u: { username: string }) => u.username !== user.username)
-    .map((user: { id: string, username: string, avatarTest: string, status: string, xp: number }) => ({
+    .map((user: { id: string, username: string, avatarTest: string, status: string, xp: number, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[] }) => ({
       id: user.id,
       name: user.username,
       icon: user.avatarTest, // Assuming avatarTest is the avatar URL
       status: user.status,
       xp: user.xp,
+      blocked: user.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+      blocken: user.blocking.map((blocker: { blockerId: string }) => blocker.blockerId)
     }));
     // console.log('All friends:', friendsItems);
     // save the friends in local storage

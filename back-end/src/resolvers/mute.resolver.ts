@@ -55,7 +55,7 @@ export class MuteResolver {
 		return this.muteService.isPermanentlyMuted(cid, uid);
 	}
 
-	@Mutation(() => mute, {
+	@Mutation(() => User, {
 		name: "muteUser",
 		description: "mute user",
 	})
@@ -64,18 +64,18 @@ export class MuteResolver {
 		@Args('cid', {type: () => String}) cid: string,
 		@Args('duration', {type: () => Date}) duration: Date,
 		@Args('permanent', {type: () => Boolean}) permanent: boolean
-	): Promise<mute> {
+	): Promise<User> {
 		return this.muteService.muteUser(cid,uid,duration,permanent);
 	}
 
-	@Mutation(() => mute, {
+	@Mutation(() => User, {
 		name: "unmuteUser",
 		description: "unmute user",
 	})
 	async unmuteUser(
 		@Args('uid', {type: () => String}) uid: string,
 		@Args('cid', {type: () => String}) cid: string,
-	): Promise<mute> {
+	): Promise<User> {
 		return this.muteService.unmuteUser(cid,uid);
 	}
 }

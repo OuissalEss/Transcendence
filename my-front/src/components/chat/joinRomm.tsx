@@ -58,11 +58,13 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 			  icon: admin.avatarTest
 			})),
 			members: channel.members
-			.map((member: { id: string, username: string, avatarTest: string, status: string }) => ({
+			.map((member: { id: string, username: string, avatarTest: string, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
 			  id: member.id,
 			  name: member.username,
 			  icon: member.avatarTest,
 			  status: member.status,
+			  blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+			  blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
 			})),
 			banned: channel.banned.map((banned: { id: string, username: string, avatarTest: string }) => ({
 			  id: banned.id,
@@ -106,6 +108,8 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 				name: user.username,
 				icon: user.avatarTest,
 				status: user.status,
+				blocked: [],
+				blocken: [],
 			});
 			if (newChannel) newChannels.push(newChannel);
 			newChannels.sort((a: channelType, b: channelType) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -151,7 +155,9 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 	return (
 		<div className="channels-container">
 			<div className="channel-list">
-				{Channels.map((ch: channelType, index: number) => (
+				{Channels
+				.filter((ch: channelType) => !ch.banned.some((member: { id: string }) => member.id === user.id))
+				.map((ch: channelType, index: number) => (
 					(ch.type !== 'dm' && ch.type !== 'private') && (
 						<div key={index} className="channel-box">
 							{!ch.icon ? (

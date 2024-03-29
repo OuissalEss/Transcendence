@@ -341,21 +341,13 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 							<div className="username-box">{`@${member.name}`}</div>
 							<div className="level-indicator">{`Level ${Math.floor(Math.random() * 50)}`}</div>
 							<div className="settings">
-								{/* {(admins?.some(admin => admin.name === user.username) || owner?.name === user.username) ? ( */}
 									<Dropdown
 										channel={channel}
 										socket={socket}
 										admins={admins}
 										owner={owner}
 										memeberId={member.id}
-									/>														
-								{/* // ) : (
-									<div className="dropdown hidden">
-										<ul className="dropdown-content">
-											<li className="text-white border border-transparent hover:border-white">dm</li>
-										</ul>
-									</div>	
-								)} */}
+									/>
 							</div>
 						</div>
 					))}
@@ -462,7 +454,7 @@ const ChannelSettings_2 = ({
 								<div className="role-tags-container">
 									<div
 										className="action-box bg-action c-action border-action"
-										onClick={() => socket?.emit('unmuteUser', { room: channel.id, user: mute.id })}
+										onClick={() => socket?.emit('UnmuteUser', { room: channel.id, user: mute.id })}
 									>
 										<p >unmute</p>
 									</div>
@@ -500,7 +492,10 @@ const ChannelSettings_2 = ({
 				<div className="members-list">
 				<h2 className="section-title">Friend List</h2>
 					{JSON.parse(localStorage.getItem('friends') || '[]')
-					.filter((friend: { name: string }) => !members.some((member: { name: string }) => member.name === friend.name))
+					.filter((friend: any) => 
+						!members.some((member: { name: string }) => member.name === friend.name) &&
+						!(friend.blocken.includes(user.id) || friend.blocked.includes(user.id))
+					)
 					.map((friend: {id: string; name: string; icon: string; }, index: number) => (
 						<div key={index} title={`@${friend.name}`} className="member-box">
 							<div className="member-profile" style={{ backgroundImage: `url(${friend.icon})` }}></div>
@@ -585,22 +580,26 @@ const Dropdown = ({
 	  setIsOpen(!isOpen);
 	  setIsDoubleOpen(false);
 	};
+	useEffect(() => {
+		setIsDoubleOpen(false);
+		setIsOpen(false);
+	}, [memeberId]);
 	const handleMute = ({hours}: {hours: number}) => {
 		if (hours === 0)
-			socket?.emit('muteUser', { room: channel.id, user: memeberId, duration: 0, permanent: true });
+			socket?.emit('muteUser', { room: channel.id, user: memeberId, duration: null, permanent: true });
 		else
 			socket?.emit('muteUser', { room: channel.id, user: memeberId, duration: setHoursDuration({ hours }), permanent: false });
 	};
 
 	return (
-	  <div className="relative" style={{zIndex: 30}}>
+	  <div className="relative">
 		<button className="settings-button" id="multiLevelDropdownButton" data-dropdown-toggle="multi-dropdown" onClick={toggleDropdown}>
 			<HiDotsHorizontal className="moderator-icon" />
 		</button>
 		{/* Dropdown menu */}
 		<div
 		  id="multi-dropdown"
-		  className={`z-10 ${isOpen ? '' : 'hidden'} dropdown`}
+		  className={`${isOpen ? '' : 'hidden'} dropdown`}
 		>
 		  <ul className="dropdown-content" aria-labelledby="multiLevelDropdownButton">
 			<li onClick={() => socket?.emit('DM', {id1: memeberId, id2: user.id})}>
@@ -838,10 +837,31 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			name: string;
 			icon: string;
 	}, opt: number) => {
-		if (opt === 1)
+		if (opt === 1) {
 			setMuteList((prevMembers: any) => [...prevMembers, data]);
-		else if (opt === 0)
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.muted = [...channel.muted, data];
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
+		else if (opt === 0) {
 			setMuteList((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.muted = channel.muted.filter((muted: { id: string; }) => muted.id !== data.id);
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
+			
 	}
 
 	const messageListner = (data: {sender:string; text:string; time: Date; senderId: string;}) => {
@@ -926,6 +946,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		socket?.on('userBanned', bannedListner);
 		socket?.on('userUnbanned', bannedListner);
 		socket?.on('mutedAdded', mutedListner);
+		socket?.on('mutedRemoved', mutedListner);
 		socket?.on('dmCreated', handleSendDm);
 		socket?.on('userBlocked', handleBlock);
 		return () => {
@@ -937,6 +958,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			socket?.off('userBanned', bannedListner);
 			socket?.off('userUnbanned', bannedListner);
 			socket?.off('mutedAdded', mutedListner);
+			socket?.off('mutedRemoved', mutedListner);
 			socket?.off('dmCreated', handleSendDm);
 			socket?.off('userBlocked', handleBlock);
 		}

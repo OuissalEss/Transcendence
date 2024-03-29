@@ -95,7 +95,7 @@ export class MuteService {
             //         userId_channelId: {
             //             userId: uid,
             //             channelId: cid,
-            //         },
+            //         },fqhwad
             //     },
             //     create: {
             //         userId: uid,
@@ -121,6 +121,11 @@ export class MuteService {
                     channelId: cid,
                 },
             });
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    id: uid,
+                },
+            });
 
             if (existingMute) {
                 // If the mute record exists, update it
@@ -134,7 +139,6 @@ export class MuteService {
                         permanent: permanent,
                     },
                 });
-                return updatedMute;
             } else {
                 // If the mute record doesn't exist, create a new one
                 const newMute = await this.prisma.mute.create({
@@ -146,26 +150,34 @@ export class MuteService {
                         permanent: permanent,
                     },
                 });
-                return newMute;
             }
+            return user;
         } catch (e) {
             this.logger.error(e);
         }
     }
 
     async unmuteUser(cid: string, uid: string) {
-        const muted = await this.prisma.mute.findFirst({
-            where: {
-                AND: [{ userId: uid }, { channelId: cid }],
-            }
-        });
-
-        await this.prisma.mute.delete({
-            where: {
-                id: muted.id,
-            }
-        })
-        return muted;
+        try {
+            const muted = await this.prisma.mute.findFirst({
+                where: {
+                    AND: [{ userId: uid }, { channelId: cid }],
+                }
+            });
+    
+            await this.prisma.mute.delete({
+                where: {
+                    id: muted.id,
+                }
+            })
+            return await this.prisma.user.findUnique({
+                where: {
+                    id: uid,
+                },
+            });
+        } catch (e) {
+            this.logger.error(e);
+        }
     }
 
     async isUserMuted(cid: string, uid: string): Promise<boolean> {

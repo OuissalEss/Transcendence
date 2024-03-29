@@ -207,6 +207,12 @@ export const ALL_USERS = gql`
       avatarTest
       status
       xp
+      blocked {
+        blockedUserId
+      }
+      blocking {
+        blockerId
+      }
     }
   }
 `;

@@ -27,6 +27,12 @@ export const ADD_MEMBER = gql`
       username
       avatarTest
       status
+      blocked {
+        blockedUserId
+      }
+      blocking {
+        blockerId
+      }
     }
   }
 `;
@@ -54,6 +60,13 @@ export const CREATE_CHANNEL = gql`
         id
         username
         avatarTest
+        status
+        blocked {
+          blockedUserId
+        }
+        blocking {
+          blockerId
+        }
       }
       banned {
         id

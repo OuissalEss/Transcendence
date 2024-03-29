@@ -66,6 +66,16 @@ export class ChannelUserService {
     
     async deleteChannelUser(id: string): Promise<ChannelUser> {
         try {
+            const messages = await this.prisma.message.findMany({
+                where: {
+                    channelId: id,
+                },
+            });
+            for (let i = 0; i < messages.length; i++) {
+                await this.prisma.message.delete({
+                    where: { id: messages[i].id },
+                });
+            }
             return this.prisma.channelUser.delete({
                 where: { id: id },
             });

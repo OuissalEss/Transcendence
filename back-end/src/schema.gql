@@ -307,7 +307,7 @@ type Mutation {
   leaveChannel(cid: String!, uid: String!): User!
 
   """mute user"""
-  muteUser(cid: String!, duration: DateTime!, permanent: Boolean!, uid: String!): mute!
+  muteUser(cid: String!, duration: DateTime!, permanent: Boolean!, uid: String!): User!
 
   """Remove an admin from a channel"""
   removeAdmin(cid: String!, uid: String!): Channel!
@@ -316,7 +316,7 @@ type Mutation {
   removeMember(cid: String!, uid: String!): Channel!
 
   """unmute user"""
-  unmuteUser(cid: String!, uid: String!): mute!
+  unmuteUser(cid: String!, uid: String!): User!
   updateAvatar(avatar: String!, uid: String!): User!
 
   """Update a channel description"""

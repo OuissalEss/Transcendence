@@ -128,7 +128,9 @@ export class ChatGateway {
         try {
             const { room, user, duration, permanent } = data;
             this.logger.log(`Client is muting user: ${user} in room: ${room}`);
-            await this.mute.muteUser(room, user, duration, permanent);
+            const User = await this.mute.muteUser(room, user, duration, permanent);
+            this.server.to(room).emit('mutedAdded', { id: user, name: User.username, icon: User.avatarTest }, 1);
+
         } catch (e) {
             this.logger.error(e);
         }
@@ -139,7 +141,8 @@ export class ChatGateway {
         try {
             const { room, user } = data;
             this.logger.log(`Client is unmuting user: ${user} in room: ${room}`);
-            await this.mute.unmuteUser(room, user);
+            const User = await this.mute.unmuteUser(room, user);
+            this.server.to(room).emit('mutedRemoved', { id: user, name: User.username, icon: User.avatarTest }, 0);
         } catch (e) {
             this.logger.error(e);
         }

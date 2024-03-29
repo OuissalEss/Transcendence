@@ -909,7 +909,7 @@
 	display: inline-block;
 	right: 57%;
 	top: 65%;
-	z-index: 10;
+	z-index: 50;
 }
 
 .dropdown-icon {

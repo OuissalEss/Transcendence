@@ -26,7 +26,7 @@ const NewRoom: React.FC<NewRoomProps>= ({
   const [showPasswordContainer, setShowPasswordContainer] = useState(false);
   const friendsItems = JSON.parse(localStorage.getItem('friends') || '{}');
   const admins: { id: string; name: string; icon: string; }[] = [];
-  const members: { id: string; name: string; icon: string; status: string; }[] = [];
+  const members: { id: string; name: string; icon: string; status: string; blocked: string[]; blocken: string[];}[] = [];
 
   const toggleLock = () => {
     setLock((prevState: any) => !prevState);
@@ -83,11 +83,13 @@ const NewRoom: React.FC<NewRoomProps>= ({
           name: admin.username,
           icon: admin.avatarTest
         })),
-        members: data.createChannel.members.map((member: { id: string, username: string, avatarTest: string, status: string }) => ({
+        members: data.createChannel.members.map((member: { id: string, username: string, avatarTest: string, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
           id: member.id,
           name: member.username,
           icon: member.avatarTest,
           status: member.status,
+          blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+          blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
         })),
         banned: data.createChannel.banned.map((banned: { id: string, username: string, avatarTest: string }) => ({
           id: banned.id,
@@ -145,7 +147,9 @@ const NewRoom: React.FC<NewRoomProps>= ({
               id: result.data.addMember.id,
               name: result.data.addMember.username,
               icon: result.data.addMember.avatarTest,
-              status: result.data.addMember.status
+              status: result.data.addMember.status,
+              blocked: result.data.addMember.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+              blocken: result.data.addMember.blocking.map((blocking: { blockerId: string }) => blocking.blockerId),
             });
           });
         });
