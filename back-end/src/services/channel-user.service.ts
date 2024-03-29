@@ -27,6 +27,9 @@ export class ChannelUserService {
     async getChannelUserByUserId(userId: string): Promise<ChannelUser[]> {
         return this.prisma.channelUser.findMany({
             where: { userId: userId },
+            include: {
+                channel: true,
+            }
         });
     }
 

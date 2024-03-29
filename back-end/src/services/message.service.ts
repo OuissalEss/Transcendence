@@ -83,7 +83,7 @@ export class MessageService {
         })
     }
 
-    async getMessageSender(mid: string): Promise<string> {
+    async getMessageSender(mid: string): Promise<User> {
         try {
             const msg = await this.prisma.message.findUnique({
                 where: { id: mid },
@@ -99,7 +99,7 @@ export class MessageService {
             const user = await this.prisma.user.findUnique({
                 where: { id: channdlUser.userId },
             });
-            return user.username;
+            return user;
         } catch (e) {
             console.error(e);
         }

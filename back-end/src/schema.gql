@@ -24,10 +24,10 @@ type Avatar {
 
 type Block {
   """User who is blocked"""
-  blockedUserId: User!
+  blockedUserId: String!
 
   """User who blocked another user"""
-  blockerId: User!
+  blockerId: String!
 
   """Date the block relationship was created"""
   createdAt: DateTime!
@@ -92,6 +92,9 @@ enum ChannelType {
 }
 
 type ChannelUser {
+  """channel"""
+  channel: Channel!
+
   """Channel ID"""
   channelId: String!
 
@@ -263,6 +266,9 @@ type Message {
   """User who sent the message"""
   sender: String!
 
+  """id of the user who sent the message"""
+  senderId: String!
+
   """Content of the message"""
   text: String!
 
@@ -275,10 +281,10 @@ type Message {
 
 type Mutation {
   """Add an admin to a channel"""
-  addAdmin(cid: String!, uid: String!): Channel!
+  addAdmin(cid: String!, uid: String!): User!
 
   """Add a member to a channel"""
-  addMember(cid: String!, uid: String!): Channel!
+  addMember(cid: String!, uid: String!): User!
 
   """Create a new channel"""
   createChannel(createChannelInput: CreateChannelInput!): Channel!
@@ -298,7 +304,7 @@ type Mutation {
   joinChannel(cid: String!, uid: String!): Channel!
 
   """Leave a channel"""
-  leaveChannel(cid: String!, uid: String!): Channel!
+  leaveChannel(cid: String!, uid: String!): User!
 
   """mute user"""
   muteUser(cid: String!, duration: DateTime!, permanent: Boolean!, uid: String!): mute!
@@ -401,6 +407,9 @@ type Query {
 
   """Get the duration of a mute"""
   duration(cid: String!, uid: String!): DateTime!
+
+  """Retrieves all blocks with their associated data"""
+  getAllBlocks: [Block!]!
   getAllChannelUsers: [ChannelUser!]!
 
   """Retrieves all friends with their associated data"""
@@ -410,12 +419,18 @@ type Query {
 
   """Retrieves all users with their associated data"""
   getAllUsers: [User!]!
+
+  """Retrieves block with their associated id"""
+  getBlockById(blockId: String!): Block!
   getChannelUserById(id: String!): ChannelUser!
 
   """Retrieves friend with their associated id"""
   getFriendById: Friend!
   getMessageById(id: String!): Message!
   getNotificationById(id: String!): Notification!
+
+  """Retrieves all blocks with their associated data"""
+  getUserBlocked: [Block!]!
 
   """Retrieves a specific user with it's id"""
   getUserById(id: String!): User!
@@ -445,10 +460,10 @@ type User {
   """avatar test file"""
   avatarTest: String
 
-  """Users who blocked the user"""
+  """Get members blocked by a user"""
   blocked: [Block!]!
 
-  """User blocked users"""
+  """Get members blocked by a user"""
   blocking: [Block!]!
 
   """User connection"""

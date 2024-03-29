@@ -51,6 +51,11 @@ export class Message {
   @IsString({ message: 'Sender must be a string' })
   sender?: string;
 
+  @Field(() => String, { description: 'id of the user who sent the message' })
+  @IsNotEmpty({ message: 'Sender cannot be empty' })
+  @IsString({ message: 'Sender must be a string' })
+  senderId?: string;
+
   @Field(() => Channel, { description: 'Channel where the message belongs' })
   @IsNotEmpty({ message: 'Channel cannot be empty' })
   @IsString({ message: 'Channel must be a string' })

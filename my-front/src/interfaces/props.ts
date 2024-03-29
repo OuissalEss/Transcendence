@@ -1,54 +1,6 @@
 import { ChangeEvent } from "react";
 import { Socket } from "socket.io-client";
 
-export interface channelItems {
-	messages: messageItems[];
-	admins?: {
-	  name: string;
-	  icon: string;
-	}[];
-	owner?: {
-	  name: string;
-	  icon: string;
-  };
-	password?: string;
-	description?: string;
-	type: string;
-	icon: string;
-	title: string;
-	members?: {
-	  name: string;
-	  icon: string;
-	}[];
-	banned?: {
-	  name: string;
-	  icon: string;
-	}[];
-	muted?: {
-	  name: string;
-	  icon: string;
-	  duration?: number; // 7h - 168h (week) - always (permanent = true)
-	  isMuted?: boolean;
-	  isPermanent?: boolean;
-	}[];
-	status?: string;
-}
-
-interface messageItems {
-	text: string;
-	sender: string;
-	time: Date;
-	read: boolean;
-}
-
-interface ChannelItem {
-	id: string;
-	title: string;
-	icon: string;
-	type: string;
-	description?: string;
-}
-
 export interface AvatarSelectionProps {
     currentCharacterIndex: number;
     handleLeftChevronClick: () => void;
@@ -67,6 +19,10 @@ export interface FormInputProps {
 
 export interface chatProps {
 	id : string;
+	channels: channelType[];
+	setChannels: React.Dispatch<React.SetStateAction<channelType[]>>;
+	setDisplay: React.Dispatch<React.SetStateAction<string>>;
+	setId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface FormInputProps {
@@ -78,32 +34,23 @@ export interface FormInputProps {
     handleEmailChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
-export interface discussionItems {
-	id: string;
-	title: string;
-	icon: string;
-	type: string;
-	text: string;
-	read: boolean;
-	time: Date;
-	unread: number;
-	status?: string;
-	sender?: string;
-}
-
 export interface DiscussionsProps {
 	setDisplay: React.Dispatch<React.SetStateAction<string>>;
 	setId: React.Dispatch<React.SetStateAction<string>>;
-	// setDiscussion: React.Dispatch<React.SetStateAction<never[]>>;
-	// discussions: any[];
+	channels: channelType[];
+	setChannels: React.Dispatch<React.SetStateAction<channelType[]>>;
 }
 
 export interface joinRoomProps {
-	channelsItems: ChannelItem[];
+	channels: channelType[];
+	setChannels: React.Dispatch<React.SetStateAction<channelType[]>>;
+	setDisplay: React.Dispatch<React.SetStateAction<string>>;
+	setId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface NewRoomProps {
 	setDisplay: React.Dispatch<React.SetStateAction<string>>;
+	setChannels: React.Dispatch<React.SetStateAction<channelType[]>>;
 }
 
 export interface PasswordSettingsProps {
@@ -179,6 +126,12 @@ export type channel = {
 	  username: string,
 	  avatarTest: string,
 	  status: string,
+	  blocked: {
+		blockedUserId: string;
+	  }[]
+	  blocking: {
+		blockerId: string;
+	  }[]
 	}[],
 	banned: {
 	  id: string,
@@ -193,6 +146,7 @@ export type channel = {
 	  text: string,
 	  time: Date,
 	  sender: string,
+	  senderId: string,
 	}[] 
 }
 
@@ -219,6 +173,8 @@ export type channelType = {
 	  name: string,
 	  icon: string,
 	  status: string,
+	  blocked: string[];
+	  blocken: string[];
 	}[],
 	banned: {
 	  id: string,
@@ -233,6 +189,7 @@ export type channelType = {
 	messages: {
 	  text: string,
 	  sender: string,
+	  senderId: string,
 	  time: Date,
 	  read: boolean,
 	  unread: number

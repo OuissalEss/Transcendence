@@ -37,6 +37,12 @@ export const ALL_CHANNELS = gql`
         username
         avatarTest
         status
+        blocked {
+          blockedUserId
+        }
+        blocking {
+          blockerId
+        }
       }
       banned {
         id
@@ -53,6 +59,7 @@ export const ALL_CHANNELS = gql`
         text
         time
 				sender
+        senderId
       }
     }
   }
@@ -70,6 +77,30 @@ export const CHANNEL_BY_ID = gql`
   query ChannelById($id: String!) {
     ChannelById(id: $id) {
       id
+      title
+      description
+      type
+      password
+      profileImage
+      updatedAt
+      members {
+        id
+        username
+        avatarTest
+        status
+      }
+      muted {
+        id
+        username
+        avatarTest
+      }
+      messages {
+        id
+        text
+        time
+        sender
+        senderId
+      }
     }
   }
 `;
@@ -226,5 +257,8 @@ export const OWNED_CHANNELS = gql`
   }
 `;
 
-
-
+export const IS_BLOCKED = gql`
+  query IsBlocked($blockerId: String!, $blockedUserId: String!) {
+    isBlocked(blockerId: $blockerId, blockedUserId: $blockedUserId)
+  }
+`;

@@ -3,12 +3,14 @@ import {SubscribeMessage, MessageBody, WebSocketGateway, WebSocketServer} from "
 import { subscribe } from "diagnostics_channel";
 import { Server, Socket } from 'socket.io';
 import { BanService } from "src/services/ban.service";
+import { BlockService } from "src/services/block.service";
 import { ChannelService } from "src/services/channel.service";
 import { CreateChannelInput } from "src/services/dto/create-channel.input";
 import { CreateNotificationInput } from "src/services/dto/create-notification.input";
 import { MessageService } from "src/services/message.service";
 import { MuteService } from "src/services/mute.service";
 import { NotificationService } from "src/services/notification.service";
+import { UserService } from "src/services/user.service";
 
 @WebSocketGateway(3003, {namespace: 'chat', cors: '*'})
 export class ChatGateway {
@@ -18,6 +20,7 @@ export class ChatGateway {
         private readonly ban: BanService,
         private readonly channel: ChannelService,
         private readonly notif: NotificationService,
+        private readonly block: BlockService,
     ) {}
 
     @WebSocketServer() server: Server;
@@ -45,7 +48,7 @@ export class ChatGateway {
             const ssender = await this.message.getMessageSender(message.id as string);
             console.log(message);
             console.log(ssender);
-            this.server.to(room).emit('sendMessage', { sender : ssender, text: message.text, time : message.time});
+            this.server.to(room).emit('sendMessage', { sender : ssender.username, text: message.text, time : message.time, senderId: ssender.id});
 
         } catch (e) {
             this.logger.error(e);
@@ -62,11 +65,48 @@ export class ChatGateway {
     }
 
     @SubscribeMessage('leaveRoom')
-    handleLeaveRoom(@MessageBody() room: string): void {
-        // Remove the client from the room
-        this.server.socketsLeave(room);
-        // Notify other participants that a user has left
-        this.server.to(room).emit('userLeft', 'A user has left the room');
+    async handleLeaveRoom(@MessageBody() data: { room: string; user: string }) {
+        try {
+            const { room, user } = data;
+            this.server.to(room).emit('userLeft');
+            const User = await this.channel.leaveChannel(room, user);
+            this.logger.log(`Client left room: ${room} User: ${User.id}`);
+            // this.server.socketsLeave(room);
+        } catch (e) {
+            this.logger.error(e.message);
+        }
+
+    }
+
+    @SubscribeMessage('DM')
+    async handleDirectMessage(@MessageBody() data: {id1: string, id2: string}) {      
+        try {
+           const  {id1, id2} = data;
+        //    console.log(id1);
+        //    console.log(id2);
+           let room = await this.channel.checkDM(id1, id2);
+
+            // check if there's not an already existing conversation with the two
+            if (room) {
+                console.log(room)
+                this.server.socketsJoin(room);
+                this.logger.log(`Client joined room: ${room}`);   
+                this.server.to(room).emit('dmCreated', room);
+            } else {
+                let room = await this.channel.createChannel({
+                    title: "",
+                    type: "DM",
+                    ownerId: id2,
+                });
+                await this.channel.addMember(room.id as string, id1);
+                this.server.socketsJoin(room.id  as string);
+                this.logger.log(`Client joined room: ${room.id}`);   
+                this.server.to(room.id as string).emit('dmCreated', room.id);          
+            }
+        } catch (e) {
+            this.logger.error(e.message);
+        }
+
     }
 
 
@@ -109,8 +149,9 @@ export class ChatGateway {
     async handleBanUser(@MessageBody() data: { room: string; user: string }) {
         try {
             const { room, user } = data;
-            this.logger.log(`Client is banned user: ${user} in room: ${room}`);
-            await this.ban.banUser(room, user);
+            this.logger.log(`Client is banning user: ${user} in room: ${room}`);
+            const User = await this.ban.banUser(room, user);
+            this.server.to(room).emit('userBanned', { id: User.id, name: User.username, icon: User.avatarTest }, 1);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -120,8 +161,9 @@ export class ChatGateway {
     async handleUnbanUser(@MessageBody() data: { room: string; user: string }) {
         try {
             const { room, user } = data;
-            this.logger.log(`Client is banned user: ${user} in room: ${room}`);
-            await this.ban.unbanUser(room, user);
+            this.logger.log(`Client is unbanning user: ${user} in room: ${room}`);
+            const User = await this.ban.unbanUser(room, user);
+            this.server.to(room).emit('userUnbanned', { id: User.id, name: User.username, icon: User.avatarTest }, 0);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -156,7 +198,8 @@ export class ChatGateway {
         try {
             const { room, user } = data;
             this.logger.log(`Client is adding user: ${user} as a mod in room: ${room}`);
-            await this.channel.addAdmin(room, user);
+            const User = await this.channel.addAdmin(room, user);
+            this.server.to(room).emit('adminAdded', {id: User.id, name: User.username, icon: User.avatarTest}, 1);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -167,7 +210,8 @@ export class ChatGateway {
         try {
             const { room, user } = data;
             this.logger.log(`Client is removing user: ${user} as a mod in room: ${room}`);
-            await this.channel.removeAdmin(room, user);
+            const User = await this.channel.removeAdmin(room, user);
+            this.server.to(room).emit('adminRemoved', {id: User.id, name: User.username, icon: User.avatarTest}, 0);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -184,6 +228,16 @@ export class ChatGateway {
         } 
     }
 
+    @SubscribeMessage('blockUser')
+    async handleBlockUser(@MessageBody() data: { blockerId: string, blockedUserId: string }) {
+        try {
+            const { blockerId, blockedUserId } = data;
+            this.logger.log(`Client is blocking user: ${blockedUserId}`);
+            await this.block.blockUser(blockerId, blockedUserId);
+            this.server.emit('userBlocked', data);
+        } catch (e) {
+            this.logger.error(e);
+        }
+    }
     
-
 }

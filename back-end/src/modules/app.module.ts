@@ -1,3 +1,4 @@
+import { BlockModule } from './block.module';
 import { MuteModule } from './mute.module';
 import { BanModule } from './ban.module';
 
@@ -51,6 +52,7 @@ import { GameModule } from "./game.module";
     GameModule,
     BanModule,
     MuteModule,
+    BlockModule,
   ],
   controllers: [AppController],
   providers: [

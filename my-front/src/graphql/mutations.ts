@@ -14,6 +14,8 @@ export const ADD_ADMIN = gql`
   mutation AddAdmin($cid: String!, $uid: String!) {
     addAdmin(cid: $cid, uid: $uid) {
       id
+      username
+      avatarTest
     }
   }
 `;
@@ -22,6 +24,9 @@ export const ADD_MEMBER = gql`
   mutation AddMember($cid: String!, $uid: String!) {
     addMember(cid: $cid, uid: $uid) {
       id
+      username
+      avatarTest
+      status
     }
   }
 `;
@@ -30,6 +35,42 @@ export const CREATE_CHANNEL = gql`
   mutation CreateChannel($createChannelInput: CreateChannelInput!) {
     createChannel(createChannelInput: $createChannelInput) {
       id
+      title
+      type
+      password
+      profileImage
+      updatedAt
+      owner {
+        id
+        username
+        avatarTest
+      }
+      admins {
+        id
+        username
+        avatarTest
+      }
+      members {
+        id
+        username
+        avatarTest
+      }
+      banned {
+        id
+        username
+        avatarTest
+      }
+      muted {
+        id
+        username
+        avatarTest
+      }
+      messages {
+        id
+        text
+        time
+        sender
+			}
     }
   }
 `;

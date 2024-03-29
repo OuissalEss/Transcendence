@@ -10,6 +10,7 @@ import {User} from "src/entities/user.entity";
 
 import {userIncludes} from "../includes/user.includes";
 import { CreateUserTestInput } from './dto/create-user-test.input';
+import { Block } from 'src/entities/block.entity';
 
 
 
@@ -27,7 +28,7 @@ export class UserService {
         include: userIncludes,
     });
   }
-    
+
   /**
    * Retrieves a specific user by ID.
    * @param {number} id - User ID
@@ -187,39 +188,39 @@ export class UserService {
    * @throws {ForbiddenException} If the user cannot be deleted.
    */
    async deleteUser(userId: string): Promise<User> {
-         try {
-             const [
-                 ,
-                 ,
-                 deletedUser,
-             ] = await this.prisma.$transaction([
-                    this.prisma.avatar.deleteMany({
-                        where: {userId: userId}
-                    }),
-                    this.prisma.connection.deleteMany({
-                        where: {userId: userId}
-                    }),
-                    this.prisma.user.delete({
-                        where: {id : userId},
-                        include: userIncludes
-                    })
-             ]);
-             return deletedUser;
-         }catch (e) {
-             throw new ForbiddenException("Unable to delete Friend.");
-         }
+    try {
+        const [
+            ,
+            ,
+            deletedUser,
+        ] = await this.prisma.$transaction([
+              this.prisma.avatar.deleteMany({
+                  where: {userId: userId}
+              }),
+              this.prisma.connection.deleteMany({
+                  where: {userId: userId}
+              }),
+              this.prisma.user.delete({
+                  where: {id : userId},
+                  include: userIncludes
+              })
+        ]);
+        return deletedUser;
+    }catch (e) {
+        throw new ForbiddenException("Unable to delete Friend.");
+    }
     }
 
     // test
     async SignIn(email: string, username: string): Promise <User | null> {
-        const user = await this.prisma.user.findUnique({
-            where: {
-                email: email,
-                username: username,
-            }
-        })
-        // if (user)
-        // console.log(user);
-            return user;
+      const user = await this.prisma.user.findUnique({
+          where: {
+              email: email,
+              username: username,
+          }
+      })
+      // if (user)
+      // console.log(user);
+          return user;
     }
 }

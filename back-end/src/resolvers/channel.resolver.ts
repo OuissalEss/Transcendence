@@ -145,7 +145,7 @@ export class ChannelResolver {
        return this.channelService.createChannel(createChannelInput);
  }
 
-  @Mutation(() => Channel, {
+  @Mutation(() => User, {
     name: "addAdmin",
     description: 'Add an admin to a channel'
   })
@@ -167,7 +167,7 @@ export class ChannelResolver {
         return this.channelService.removeAdmin(cid, uid);
   }
 
-  @Mutation(() => Channel, {
+  @Mutation(() => User, {
     name: "addMember",
     description: 'Add a member to a channel'
   })
@@ -265,7 +265,7 @@ export class ChannelResolver {
         return this.channelService.joinChannel(cid, uid);
   }
 
-  @Mutation(() => Channel, {
+  @Mutation(() => User, {
     name: "leaveChannel",
     description: 'Leave a channel'
   })

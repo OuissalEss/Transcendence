@@ -35,7 +35,14 @@ export class MessageResolver {
     }
 
     @ResolveField(() => String)
-  async sender(@Parent() message: Message): Promise<string> {
-        return this.messageService.getMessageSender(message.id as string);
+    async sender(@Parent() message: Message): Promise<String> {
+        const user = await this.messageService.getMessageSender(message.id as string);
+        return user.username;
+    }
+
+    @ResolveField(() => String)
+    async senderId(@Parent() message: Message): Promise<String> {
+        const user = await this.messageService.getMessageSender(message.id as string);
+        return user.id;
     }
 }

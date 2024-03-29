@@ -8,11 +8,14 @@ import {NotFoundException} from "@nestjs/common";
 
 import { Status } from '@prisma/client'; // Import the Prisma-generated Status enum
 import { CreateUserTestInput } from 'src/services/dto/create-user-test.input';
+import { BlockService } from 'src/services/block.service';
+import { Block } from 'src/entities/block.entity';
 
 @Resolver(of => User)
 export class UserResolver {
   constructor(
     private readonly userService: UserService,
+    private readonly block: BlockService
   ) {}
 
   @Query(() => [User], {
@@ -143,6 +146,26 @@ export class UserResolver {
     @Args('avatar') avatar: string,
   ): Promise<User>{
     return this.userService.updateAvatar(uid, avatar);
+  }
+
+  @ResolveField(() => [Block], {
+    name: "blocked",
+    description: 'Get members blocked by a user'
+  })
+  async getBlockedUser(
+    @Parent() user: User,
+  ) {
+    return await this.block.getBlockedListByUid(user.id as string);
+  }
+
+  @ResolveField(() => [Block], {
+    name: "blocking",
+    description: 'Get members blocked by a user'
+  })
+  async getBlockenUser(
+    @Parent() user: User,
+  ) {
+    return await this.block.getBlockenListByUid(user.id as string);
   }
 
 }

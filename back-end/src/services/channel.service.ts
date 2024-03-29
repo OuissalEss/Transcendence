@@ -9,6 +9,7 @@ import { ChannelUserService } from './channel-user.service';
 import { User } from 'src/entities/user.entity';
 import { MuteService } from './mute.service';
 import { BanService } from './ban.service';
+import { title } from 'process';
 
 @Injectable()
 export class ChannelService {
@@ -37,7 +38,7 @@ export class ChannelService {
     }
     
     async getChannelById(cid: string): Promise<Channel> {
-        return this.prisma.channel.findUnique({
+        return await this.prisma.channel.findUnique({
             where: {id: cid},
             include: channelIncludes
         })
@@ -72,7 +73,6 @@ export class ChannelService {
         }            
     }
  
-
     async getChannelAdmins(cid: string): Promise<User[]> {
         const channelUser = await this.channelUserService.getChannelUserByChannelId(cid);
         let admins: User[] = [];
@@ -140,6 +140,28 @@ export class ChannelService {
         return channelUser.type == UserType.OWNER;
     }
 
+    async checkDM(uid1: string, uid2: string): Promise<string | undefined> {
+        try {
+            const user1 = await this.channelUserService.getChannelUserByUserId(uid1);
+            const user2 = await this.channelUserService.getChannelUserByUserId(uid2);
+            const user = user1.find((usr1) => {
+                const usr = user2.find((usr2) => {
+                    if ((usr1.channelId == usr2.channelId) && usr1.channel.type === 'DM' && usr2.channel.type === 'DM')
+                        return usr2;
+                    return undefined;
+                });
+                if (usr)
+                    return usr;
+            });
+            return user? user.channelId as string:undefined;
+        } catch (e) {
+            console.log(uid1)
+            console.log(uid2)
+            this.logger.error(e.message);
+        }
+
+    }
+
     /**
      * Mutators
     */
@@ -147,28 +169,36 @@ export class ChannelService {
     async removeAdmin(cid: string, uid: string) {
         // check permissions
         const channelUser = await this.channelUserService.getChannelUser(cid, uid);
-        return this.prisma.channelUser.update({
+        await this.prisma.channelUser.update({
             where: {id: channelUser.id},
             data: {type: UserType.USER},
+        });
+        return await this.prisma.user.findUnique({
+            where: {id: uid}
         });
     }
 
     async addAdmin(cid: string, uid: string) {
         // check permissions
         try {
+            const user = await this.prisma.user.findUnique({
+                where: {id: uid}
+            });
             const channelUser = await this.channelUserService.getChannelUser(cid, uid);
             if (channelUser) {
-                return this.prisma.channelUser.update({
+                await this.prisma.channelUser.update({
                     where: {id: channelUser.id},
                     data: {type: UserType.ADMIN},
-                });                  
+                }); 
+                return user;                 
             }
             else {
-                return this.channelUserService.createChannelUser({
+                await this.channelUserService.createChannelUser({
                     userId: uid, channelId: cid, type: UserType.ADMIN,
                     id: '',
                     message: []
                 });
+                return user;
             }
         } catch (e) {
             this.logger.error(`Unable to add Admin to Channel: ${e.message} cid: ${cid} uid: ${uid}`);
@@ -233,34 +263,54 @@ export class ChannelService {
             throw new ForbiddenException("Unable to delete Channel.");
         }
     }
+
+    // random title generator
+    generaterandomTitle() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
     
     async createChannel(createChannelInput: CreateChannelInput): Promise<Channel> {
         try {
+            console.log(createChannelInput)
+            if (createChannelInput.title === undefined || createChannelInput.title === null || createChannelInput.title === '') {
+
+                createChannelInput.title = this.generaterandomTitle();
+                let test = await this.prisma.channel.findUnique({
+                    where: {title: createChannelInput.title}
+                });
+                while (test) {
+                    createChannelInput.title = this.generaterandomTitle();
+                    test = await this.prisma.channel.findUnique({
+                        where: {title: createChannelInput.title}
+                    });
+                }
+            }
+            console.log(createChannelInput)
             const channel = await this.prisma.channel.create({
                 data: {
                     title: createChannelInput.title,
-                    type: createChannelInput.type,
+                    type: ChannelType[createChannelInput.type],
                 },
-                include: channelIncludes
+                include: channelIncludes,
             });
+            console.log(1)
             if (createChannelInput.description)
-                this.updateChannelDescription(channel.id, createChannelInput.description);
+                await this.updateChannelDescription(channel.id, createChannelInput.description);
             if (createChannelInput.profileImage)
-                this.updateChannelProfileImage(channel.id, createChannelInput.profileImage);
+                await this.updateChannelProfileImage(channel.id, createChannelInput.profileImage);
             if (createChannelInput.password)
-                this.updateChannelPassword(channel.id, createChannelInput.password);
+                await this.updateChannelPassword(channel.id, createChannelInput.password);
             if (createChannelInput.ownerId) {
-                const user = await this.channelUserService.createChannelUser({
-                    userId: createChannelInput.ownerId, channelId: channel.id, type: UserType.OWNER,
-                    id: '',
-                    message: []
+                console.log(0.5)
+                await this.channelUserService.createChannelUser({
+                    userId: createChannelInput.ownerId,
+                    channelId: channel.id, type: (createChannelInput.type === 'DM')? UserType.USER : UserType.OWNER,
                 });
-                // connect channel with user
-                
+                console.log(2)
             }
             return channel;
         } catch (e) {
-            throw new ForbiddenException("Unable to create Channel.");
+            this.logger.error(e.message);
         }
     }
     
@@ -372,7 +422,19 @@ export class ChannelService {
     }
 
     async leaveChannel(cid: string, uid: string) {
-        const channelUser = await this.channelUserService.getChannelUser(cid, uid);
-        return this.channelUserService.deleteChannelUser(channelUser.id);
+        try {
+            const channelUser = await this.channelUserService.getChannelUser(cid, uid);
+            if (!channelUser)
+                throw new ForbiddenException("User is not in channel");
+            await this.channelUserService.deleteChannelUser(channelUser.id);
+            
+
+            return await this.prisma.user.findUnique({
+                where: {id: uid}
+            });
+        } catch (e) {
+            this.logger.error(`Unable to leave Channel: ${e.message} cid: ${cid} uid: ${uid}`);
+        }
+
     }
 }

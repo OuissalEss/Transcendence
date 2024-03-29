@@ -83,7 +83,7 @@ export class BanService {
         });
     }
 	
-    async banUser(cid: string, uid: string) {
+    async banUser(cid: string, uid: string): Promise<User> {
         // check permissions
         this.channelService.removeMember(cid, uid);
         const ban = await this.prisma.ban.create({
@@ -92,7 +92,7 @@ export class BanService {
                 channelId: cid,
             },
         });
-        await this.prisma.user.update({
+        return await this.prisma.user.update({
             where: {id: uid},
             data: {
                 banned: {
@@ -104,10 +104,15 @@ export class BanService {
         });
     }
 
-    async unbanUser(cid: string, uid: string) {
-        return this.prisma.ban.deleteMany({
+    async unbanUser(cid: string, uid: string): Promise<User> {
+        await this.prisma.ban.deleteMany({
             where: {
                 AND: [{ userId: uid }, { channelId: cid }],
+            },
+        });
+        return await this.prisma.user.findFirst({
+            where: {
+                id: uid,
             },
         });
     }

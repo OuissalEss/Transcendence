@@ -9,9 +9,13 @@ import { CiCamera, CiLock, CiUnlock } from "react-icons/ci";
 import { FaAngleDown, FaAngleUp, FaChevronLeft, FaChevronRight, FaPen } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { MdBlock } from "react-icons/md";
-import { chatProps, PasswordSettingsProps, ChannelSettingsProps } from "../../interfaces/props";
+import { chatProps, PasswordSettingsProps, ChannelSettingsProps, channel } from "../../interfaces/props";
 import {channelType} from "../../interfaces/props";
 import io, { Socket } from 'socket.io-client';
+import { useMutation, useQuery } from "@apollo/client";
+import { UPDATE_CHANNEL_DESCRIPTION, UPDATE_CHANNEL_PASSWORD, UPDATE_CHANNEL_PROFILE_IMAGE, UPDATE_CHANNEL_TITLE, UPDATE_CHANNEL_TYPE, UPDATE_CHANNEL_TYPE_USER } from "../../graphql/mutations";
+import client from "../../apolloClient";
+import { CHANNEL_BY_ID, IS_BLOCKED } from "../../graphql/queries";
 
 // admins cant be muted but can mute ban and kick others except the owner
 // owner can do anything but can't be muted banned or kicked
@@ -26,11 +30,13 @@ import io, { Socket } from 'socket.io-client';
  * unable members to access the second page of the setting page where they can see the muted, banned and mod list without being 
  * able to change anything they shouldnt have the setting option displayed either in the first page
  * if a channel owner left the channel the oldest admin should be promoted to owner
+ * if a user is blocked or blocken by someone they shouldnt be able to see each others messages in a room
+ * in a dm if a user is blocked or blocken by someone they can't send messages to each other
+ * check the owner of the channels queried ( dm channels have no owner )
  */
 
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
-const friendsList = JSON.parse(localStorage.getItem('friends') || '[]');
 
 function getStatusColor(status: string) {
 	switch (status) {
@@ -179,6 +185,11 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 	owner,
 }) => {
 
+	const [updateTitle] = useMutation(UPDATE_CHANNEL_TITLE);
+	const [updateDescription] = useMutation(UPDATE_CHANNEL_DESCRIPTION);
+	const [updatePassword] = useMutation(UPDATE_CHANNEL_PASSWORD);
+	const [updtaeProfile] = useMutation(UPDATE_CHANNEL_PROFILE_IMAGE);
+	const [updateType] = useMutation(UPDATE_CHANNEL_TYPE);
 	function loadFile(event: ChangeEvent<HTMLInputElement>): void {
 		const image = document.getElementById('output') as HTMLImageElement;
 		if (image && event.target.files) {
@@ -202,7 +213,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 						<img src={channel.icon} id="output" width="200" />
 						<div className="lock-icon">
 							<button 
-							onClick={() => { 
+							onClick={async () => { 
 								if (owner?.name === user.username) {
 									setLock(prevState => !prevState);
 									if (!lock) {
@@ -211,6 +222,18 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 									} else if (lock) {
 										channel.type = "PUBLIC";
 										channel.password = null;
+										await updatePassword({
+											variables: {
+												cid: channel.id,
+												password: null,
+											}
+										});
+										await updateType({
+											variables: {
+												cid: channel.id,
+												type: channel.type
+											}
+										});
 									}}}}
 								className="p-2 rounded-full bg-pink-200 hover:bg-pink-300 transition duration-300">
 								{lock ? <CiLock className="text-pink-500" /> : <CiUnlock className="text-pink-500" />}
@@ -225,7 +248,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 						className="setTitleInput"
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
-						onKeyDown={(e) => {
+						onKeyDown={async (e) => {
 							if (e.key === "Enter")  {
 								setEditTitle(false);
 								// console.log(title);
@@ -234,6 +257,12 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 								// console.log("title : ", title);
 								if (title && title !== channel.title) {
 									channel.title = title;
+									await updateTitle({
+										variables: {
+											cid: channel.id,
+											title,
+										}										
+									});
 									// channels[index].title = title;
 									// setChannels([...channels]);
 									setTitle('');
@@ -261,13 +290,19 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 						className="descriptionInput"
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
-						onKeyDown={(e) => {
+						onKeyDown={async (e) => {
 							if (e.key === "Enter") {
 								setEditDescription(false);
 								if (description !== channel.description) {
 									if (description)
 										description.trim() !== '';
 									channel.description = description;
+									await updateDescription({
+										variables: {
+											cid: channel.id,
+											description
+										}
+									});
 									setDescription('');
 									// setChannels((prevState) => [...prevState]);
 								}
@@ -298,13 +333,15 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 				)}	
 			</div><div className="members-container">
 					<div className="friend-list">
-					{members && members.map((member, index) => (
+					{members && members
+					.filter((m) => m.id !== user.id )
+					.map((member, index) => (
 						<div key={index} className="friend-box">
 							<div className="friend-profile" style={{ backgroundImage: `url(${member.icon})` }}></div>
 							<div className="username-box">{`@${member.name}`}</div>
 							<div className="level-indicator">{`Level ${Math.floor(Math.random() * 50)}`}</div>
 							<div className="settings">
-								{(admins?.some(admin => admin.name === user.username) || owner?.name === user.username) ? (
+								{/* {(admins?.some(admin => admin.name === user.username) || owner?.name === user.username) ? ( */}
 									<Dropdown
 										channel={channel}
 										socket={socket}
@@ -312,13 +349,13 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 										owner={owner}
 										memeberId={member.id}
 									/>														
-								) : (
+								{/* // ) : (
 									<div className="dropdown hidden">
 										<ul className="dropdown-content">
 											<li className="text-white border border-transparent hover:border-white">dm</li>
 										</ul>
 									</div>	
-								)}
+								)} */}
 							</div>
 						</div>
 					))}
@@ -543,17 +580,17 @@ const Dropdown = ({
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isDoubleOpen, setIsDoubleOpen] = useState(false);
+	const [updateUserType] = useMutation(UPDATE_CHANNEL_TYPE_USER);
 	const toggleDropdown = () => {
 	  setIsOpen(!isOpen);
+	  setIsDoubleOpen(false);
 	};
 	const handleMute = ({hours}: {hours: number}) => {
-    if (socket) {
-			if (hours === 0)
-      	socket.emit('muteUser', { room: channel.id, user: memeberId, duration: 0, permanent: true });
-			else
-				socket.emit('muteUser', { room: channel.id, user: memeberId, duration: setHoursDuration({ hours }), permanent: false });
-    }
-  };
+		if (hours === 0)
+			socket?.emit('muteUser', { room: channel.id, user: memeberId, duration: 0, permanent: true });
+		else
+			socket?.emit('muteUser', { room: channel.id, user: memeberId, duration: setHoursDuration({ hours }), permanent: false });
+	};
 
 	return (
 	  <div className="relative" style={{zIndex: 30}}>
@@ -566,7 +603,7 @@ const Dropdown = ({
 		  className={`z-10 ${isOpen ? '' : 'hidden'} dropdown`}
 		>
 		  <ul className="dropdown-content" aria-labelledby="multiLevelDropdownButton">
-			<li>
+			<li onClick={() => socket?.emit('DM', {id1: memeberId, id2: user.id})}>
 			  <a className="block text-white border border-transparent rounded-tl-lg rounded-tr-lg hover:border-white">
 				DM
 			  </a>
@@ -627,12 +664,16 @@ const Dropdown = ({
 					</li>
 					{owner.name === user.username && (
 						<li>
-							{admins.some((admin: { name: string }) => admin.name === user.username) ? (
-								<a className="block text-white border border-transparent rounded-bl-lg rounded-br-lg hover:border-white" onClick={() => socket?.emit('removeMod', { room: channel.id, user: memeberId })}>
+							{admins.some((admin) => admin.id === memeberId) ? (
+								<a
+									className="block text-white border border-transparent rounded-bl-lg rounded-br-lg hover:border-white"
+									onClick={() => {socket?.emit('removeMod', { room: channel.id, user: memeberId })}}>
 									Remove mod
 								</a>
 							) : (
-								<a className="block text-white border border-transparent rounded-bl-lg rounded-br-lg hover:border-white" onClick={() => socket?.emit('addeMod', { room: channel.id, user: memeberId })}>
+								<a
+									className="block text-white border border-transparent rounded-bl-lg rounded-br-lg hover:border-white"
+									onClick={() => socket?.emit('addMod', { room: channel.id, user: memeberId })}>
 									Add mod
 								</a>
 							)}
@@ -646,7 +687,7 @@ const Dropdown = ({
 	);
   };
 
-const Chat: React.FC<chatProps> = ({ id }) => {
+const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setId }) => {
 	const [password, setPassword] = useState('');
 	const [lock, setLock] = useState(true);
 	const [editTitle, setEditTitle] = useState(false);
@@ -664,33 +705,64 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 	const [socket, setSocket] = useState<Socket>();
 	const [passwordMismatch, setPasswordMismatch] = useState(false);
 
-	const channel = JSON.parse(localStorage.getItem('channels') || '[]').find((channel: { id: string }) => channel.id === id);
-	const [messages, setMessages] = useState<{sender:string; text:string; time: Date;}[]>(channel.messages || []);
-	const [members, setMembers] = useState<{id: string, name: string, icon: string, status: string}[]>(channel.members || []);
-	const [banList, setBanList] = useState<{ id: string, name: string, icon: string }[]>(channel.ban || []);
-	const [muteList, setMuteList] = useState<{ id: string, name: string, icon: string }[]>(channel.mute || []);
+	console.log("channels : ", channels);
+	console.log("id : ", id);
+	const channel: channelType = channels.find((channel: { id: string; }) => channel.id === id) || channels[0];
+	console.log(channel)
+	console.log(channel.messages)
+	const [messages, setMessages] = useState<{text: string; sender: string; senderId: string; time: Date; read: boolean; unread: number;}[]>(channel.messages || []);
+	const [members, setMembers] = useState<{id: string, name: string, icon: string, status: string, blocked: string[], blocken: string[]}[]>(channel.members || []);
+	const [banList, setBanList] = useState<{ id: string, name: string, icon: string }[]>(channel.banned || []);
+	const [muteList, setMuteList] = useState<{ id: string, name: string, icon: string }[]>(channel.muted || []);
 	const [modList, setModList] = useState<{ id: string, name: string, icon: string }[]>(channel.admins	|| []);
 	const [owner, setOwner] = useState<{ id: string, name: string, icon: string }>(channel.owner || {});
 	console.log("user : ", user.username)
 	console.log("members : ", members)
+	/**
+	 * add two fialds to the user entity blocked and blocking to the quieried channels in channeltype and channel 
+	 * add a use sate to store the blocked and the setter the blocking qont change no need to handle
+	 * add a function to user service who takes uid and checks for 
+	 */
 	
 	// console.log("messages : " + messages);
 	let member = undefined;
 	if (channel.type === "DM")
 		member = channel.members.find((member: { name: string; }) => member.name !== user.username);
-
 	const memberListner = (data: {
 		id: string;
 		name: string;
 		icon: string;
 		status: string;
+		blocked: string[];
+		blocken: string[];
 	}, opt: number) => {
 		console.log("data : ", data);
 		console.log("opt : ", opt);
-		if (opt === 1)
+		if (opt === 1) {
 			setMembers((prevMembers: any) => [...prevMembers, data]);
-		else if (opt === 0)
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.members = [...channel.members, data];
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
+		else if (opt === 0) {
 			setMembers((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.members = channel.members.filter((member: { id: string; }) => member.id !== data.id);
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
+			
 		console.log("new members : ", members);
 	}
 
@@ -699,10 +771,32 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 			name: string;
 			icon: string;
 	}, opt: number) => {
-		if (opt === 1)
+		if (opt === 1) {
 			setModList((prevMembers: any) => [...prevMembers, data]);
-		else if (opt === 0)
+			// add the changes to channels
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.admins = [...channel.admins, data];
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
+		else if (opt === 0) {
 			setModList((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
+			// add the changes to channels
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.admins = channel.admins.filter((admin: { id: string; }) => admin.id !== data.id);
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
 	}
 
 	const bannedListner = (data: {
@@ -710,10 +804,33 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 			name: string;
 			icon: string;
 	}, opt: number) => {
-		if (opt === 1)
+		if (opt === 1) {
 			setBanList((prevMembers: any) => [...prevMembers, data]);
-		else if (opt === 0)
+			setMembers((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.banned = [...channel.banned, data];
+						channel.members = channel.members.filter((member: { id: string; }) => member.id !== data.id);
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
+		else if (opt === 0) {
 			setBanList((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
+			setChannels((prevChannels: any) => {
+				const updatedChannels = prevChannels.map((channel: channelType) => {
+					if (channel.id === id) {
+						channel.banned = channel.banned.filter((banned: { id: string; }) => banned.id !== data.id);
+					}
+					return channel;
+				});
+				return updatedChannels;
+			});
+		}
+			
 	}
 
 	const mutedListner = (data: {
@@ -727,9 +844,77 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 			setMuteList((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
 	}
 
-	const messageListner = (data: {sender:string; text:string; time: Date;}) => {
+	const messageListner = (data: {sender:string; text:string; time: Date; senderId: string;}) => {
 		console.log("data : ", data);
 		setMessages((prevMessages: any) => [...prevMessages, data]);
+	};
+
+	const handleSendDm = async (roomId: string) => {
+		if (channels.some((channel: { id: string; }) => channel.id === roomId)) {
+			setId(roomId);
+		} else {
+			const { data } = await client.query({
+				query: CHANNEL_BY_ID,
+				variables: { id: roomId }
+			});
+			console.log("data : ", data);
+			const newChannel = {
+				id: data.ChannelById.id,
+				title: data.ChannelById.title,
+				description: data.ChannelById.description,
+				type: data.ChannelById.type,
+				password: data.ChannelById.password,
+				icon: data.ChannelById.profileImage,
+				updatedAt: data.ChannelById.updatedAt,
+				members: data.ChannelById.members
+				.map((member: { id: string, username: string, avatarTest: string, status: string }) => ({
+				  id: member.id,
+				  name: member.username,
+				  icon: member.avatarTest,
+				  status: member.status,
+				})),
+				muted: data.ChannelById.muted.map((muted: { id: string, username: string, avatarTest: string }) => ({
+				  id: muted.id,
+				  name: muted.username,
+				  icon: muted.avatarTest
+				})),
+				messages: data.ChannelById.messages
+				.map((message: { id: string, text: string, time: Date, sender: string , senderId: string}) => ({
+				  text: message.text,
+				  sender: message.sender,
+				  senderId: message.senderId,
+				  time: message.time,
+				  read: true,
+				  unread: 0
+				})).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
+			};
+			// add new channel to the list of channels using setChannels and sort them by the most recently updated
+			setChannels((prevChannels: any) => {
+				const updatedChannels = [...prevChannels, newChannel];
+				// Sort the channels by the most recently updated
+				updatedChannels.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+				return updatedChannels;
+			  });
+			setId(roomId);
+		}
+				
+		
+	};
+
+	const handleBlock = (data: { blockerId: string, blockedUserId: string }) => {
+		// if a user1 blocked user2 update the user2 blocken list with the user1 id and update the user1 blocked list with the user2 id
+		setMembers((prevMembers: any) => {
+			const updatedMembers = prevMembers.map((member: { id: string, blocked: string[], blocken: string[] }) => {
+				if (member.id === data.blockerId) {
+					member.blocked = [...member.blocked, data.blockedUserId];
+				}
+				if (member.id === data.blockedUserId) {
+					member.blocken = [...member.blocken, data.blockerId];
+				}
+				return member;
+			});
+			return updatedMembers;
+		});
 	};
 
 	useEffect(() => {
@@ -737,17 +922,26 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 		socket?.on('userAdded', memberListner);
 		socket?.on('userRemoved', memberListner);
 		socket?.on('adminAdded', adminListner);
-		socket?.on('bannedAdded', bannedListner);
+		socket?.on('adminRemoved', adminListner);
+		socket?.on('userBanned', bannedListner);
+		socket?.on('userUnbanned', bannedListner);
 		socket?.on('mutedAdded', mutedListner);
-		
+		socket?.on('dmCreated', handleSendDm);
+		socket?.on('userBlocked', handleBlock);
 		return () => {
 			socket?.off('sendMessage', messageListner);
 			socket?.off('userAdded', memberListner);
 			socket?.off('adminAdded', adminListner);
-			socket?.off('bannedAdded', bannedListner);
+			socket?.on('adminRemoved', adminListner);
+			socket?.off('userRemoved', memberListner);
+			socket?.off('userBanned', bannedListner);
+			socket?.off('userUnbanned', bannedListner);
 			socket?.off('mutedAdded', mutedListner);
+			socket?.off('dmCreated', handleSendDm);
+			socket?.off('userBlocked', handleBlock);
 		}
-	}, [memberListner, adminListner, bannedListner, mutedListner, messageListner]);
+	}, [memberListner, adminListner, bannedListner, mutedListner, messageListner, handleSendDm, handleBlock]);
+
 	useEffect(() => {
 		// channel = channels[index];
 		setLock(channel.type !== "PUBLIC");
@@ -755,24 +949,29 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 		setNextPage(false);
 		setShowPasswordContainer(channel.type === "PROTECTED");
 		setMessages(channel.messages || []);
+		setMembers(channel.members || []);
+		setBanList(channel.banned || []);
+		setMuteList(channel.muted || []);
+		setModList(channel.admins || []);
+		setOwner(channel.owner || {});
 	}, [id]);
 	
 	useEffect(() => {
         const newSocket = io('ws://localhost:3003/chat');
         setSocket(newSocket);
 
-		if (newSocket && id) {
-			newSocket.emit('joinRoom', id);
+		if (newSocket && channel.id) {
+			newSocket.emit('joinRoom', channel.id);
 		}
 
         return () => {
             newSocket.disconnect();
         };
-    }, [setSocket, id]);
+    }, [setSocket]);
 
 	const handleSendMessage = () => {
         if (inputMessage.trim() !== '' && socket) {
-            socket.emit('sendMessage', { room: id, text: inputMessage, sender: user.id});
+            socket.emit('sendMessage', { room: channel.id, text: inputMessage, sender: user.id});
             setInputMessage('');
 			if (isTyping)
 				socket.emit('stopTyping', channel.id);
@@ -781,16 +980,16 @@ const Chat: React.FC<chatProps> = ({ id }) => {
     };
 
     useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
+		scrollToBottom();
     }, [messages]);
 
 	useEffect(() => {
 		socket?.on('userTyping', (data) => {
 			console.log("data : ", data);
-			if (data !== user.id)
+			if (data !== user.id) {
+				scrollToBottom();
 				setIsTyping(true);
+			}
 		});
 	
 		socket?.on('userStoppedTyping', () => {
@@ -810,6 +1009,16 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 		chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
 	}
 	};
+
+	const handleUserInput = () : boolean => {
+		let isBlocked = false;
+		if (channel.type === 'DM' && member) {
+			if (member.blocken.includes(user.id) || member.blocked.includes(user.id)) {
+				isBlocked = true;
+			}
+		}
+		return isBlocked;
+	}
 
 	return (
 		<>
@@ -836,8 +1045,8 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 									<div className="relative w-10 h-10">
 										{channel.type === "DM" ? (
 											<>
-												<img src={member.icon} className="rounded-full w-full h-full object-cover" />
-												<span className={`status ${getStatusColor(member.status || '')}`} />
+												<img src={member?.icon} className="rounded-full w-full h-full object-cover" />
+												<span className={`status ${getStatusColor(member?.status || '')}`} />
 											</>
 										) : (
 											<img src={channel.icon}  className="rounded-full w-full h-full object-cover" />
@@ -860,22 +1069,36 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 											<IoSettingsSharp className="w-10 h-10" />
 											</li>
 											<li>
-											<IoExit className="w-10 h-10"/>
+												<IoExit
+													className="w-10 h-10"
+													onClick={() => {
+														socket?.emit('leaveRoom', { room: channel.id, user: user.id });
+														setChannels((prevState) => prevState.filter((Ch: { id: string; }) => Ch.id !== channel.id));
+														setDisplay('');
+													}}
+												/>
 											</li>
 										</>
 									)}
-									{channel.type === "DM" && (
+									{channel.type === "DM" && !(member?.blocken.includes(user.id) || member?.blocked.includes(user.id)) && (
 										<>
-											<li ><IoVolumeMuteSharp className="w-10 h-10" /></li>
+											<li><IoVolumeMuteSharp className="w-10 h-10" /></li>
 											<li className="chat__details d-flex d-xl-none"><GiPingPongBat className="w-10 h-10" /></li>
-											<li className="chat__details d-none d-xl-flex"><MdBlock className="w-10 h-10" /></li>
+											<li
+												className="chat__details d-none d-xl-flex"
+												onClick={() => {
+													socket?.emit('blockUser', {blockerId: user.id, blockedUserId: member?.id});
+												}}
+											>
+												<MdBlock className="w-10 h-10" />
+											</li>
 										</>
 									)}
 								</ul>
 							</div>
 						</div>
 						<div className="flex-grow overflow-y-auto pt-4 px-3 scrollbar-thin scrollbar-thumb-transparent scrollbar-track-transparent" ref={chatContainerRef}>
-							{(showSettings && !nextPage) ? (
+							{(showSettings && !nextPage) && channel.type !== 'DM' ? (
 								<ChannelSettings_1
 									channel={channel}
 									socket={socket}
@@ -897,7 +1120,7 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 									admins={modList}
 									owner={owner}
 								/>
-							) : (showSettings && nextPage) ? (
+							) : (showSettings && nextPage) && channel.type !== 'DM' ? (
 								<ChannelSettings_2 
 										channel={channel}
 										setNextPage={setNextPage}
@@ -907,11 +1130,23 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 										members={members}
 										admins={modList}
 										owner={owner}
-								></ChannelSettings_2>
+								/>
 							) : (
 								<ul className="messages-list">
 								{messages
 								.sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime())
+								.filter((message: { senderId: string; }) => {
+									let bool = true;
+									if (channel.type !== 'DM' && message.senderId !== user.id) {
+										members.find((member) => {
+											if (member.id === user.id) {
+												if (member.blocken.includes(message.senderId) || member.blocked.includes(message.senderId))
+												bool = false;
+											}
+										});
+									}
+									return bool;
+								})
 								.map((message, index) => (
 									<li key={index}>
 									<div className="message-container">
@@ -949,6 +1184,11 @@ const Chat: React.FC<chatProps> = ({ id }) => {
 										<>
 											<span className="w-full pl-5 text-white">You are muted in this channel</span>
 											<IoBanSharp className="send-action" />
+										</>
+									) : handleUserInput() ? (
+										<>
+											<span className="w-full pl-5 text-white">You can't contact this user</span>
+											<IoBanSharp className="send-action" />							
 										</>
 									) : (
 										<>

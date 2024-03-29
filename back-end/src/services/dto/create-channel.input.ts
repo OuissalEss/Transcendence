@@ -36,5 +36,5 @@ export class CreateChannelInput {
 
   @Field({ description: 'Channel owner id' })
   @IsString()
-  ownerId: string;
+  ownerId?: string;
 }

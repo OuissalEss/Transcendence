@@ -1,15 +1,16 @@
-import { ChangeEvent, Key, useState } from "react";
+import { ChangeEvent, Key, useEffect, useState } from "react";
 import { CiCamera, CiLock, CiUnlock } from "react-icons/ci";
 import { HiUserGroup } from "react-icons/hi";
 import { IoIosAddCircleOutline, IoIosAddCircle } from "react-icons/io";
 import { MdOutlineAddModerator, MdOutlineCheckCircle, MdOutlineCancel, MdAddModerator } from "react-icons/md";
-import { NewRoomProps } from "../../interfaces/props";
+import { channelType, NewRoomProps } from "../../interfaces/props";
 import { useMutation } from '@apollo/client';
 import { CREATE_CHANNEL, ADD_MEMBER, ADD_ADMIN } from "../../graphql/mutations";
 
 
 const NewRoom: React.FC<NewRoomProps>= ({
   setDisplay,
+  setChannels,
 }) => {
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
@@ -24,6 +25,8 @@ const NewRoom: React.FC<NewRoomProps>= ({
   const [lock, setLock] = useState(true);
   const [showPasswordContainer, setShowPasswordContainer] = useState(false);
   const friendsItems = JSON.parse(localStorage.getItem('friends') || '{}');
+  const admins: { id: string; name: string; icon: string; }[] = [];
+  const members: { id: string; name: string; icon: string; status: string; }[] = [];
 
   const toggleLock = () => {
     setLock((prevState: any) => !prevState);
@@ -34,7 +37,7 @@ const NewRoom: React.FC<NewRoomProps>= ({
   const handlePasswordSubmit = () => {
     console.log('Password submitted:', password);
     if (password !== password2) {
-      console.log("unmatched password");
+      console.log("unmatcha ed password");
       setPasswordMismatch(true);
       return;
     }
@@ -62,8 +65,50 @@ const NewRoom: React.FC<NewRoomProps>= ({
       const { data } = await createChannelMutation({
         variables: { createChannelInput }
       });
-      let channelID = data.createChannel.id;
-      console.log("Channel created: ", channelID);
+      let channel: channelType = {
+        id: data.createChannel.id,
+        title: data.createChannel.title,
+        description: data.createChannel.description,
+        type: data.createChannel.type,
+        password: data.createChannel.password,
+        icon: data.createChannel.profileImage,
+        updatedAt: data.createChannel.updatedAt,
+        owner: {
+          id: data.createChannel.owner.id,
+          name: data.createChannel.owner.username,
+          icon: data.createChannel.owner.avatarTest
+        },
+        admins: data.createChannel.admins.map((admin: { id: string, username: string, avatarTest: string }) => ({
+          id: admin.id,
+          name: admin.username,
+          icon: admin.avatarTest
+        })),
+        members: data.createChannel.members.map((member: { id: string, username: string, avatarTest: string, status: string }) => ({
+          id: member.id,
+          name: member.username,
+          icon: member.avatarTest,
+          status: member.status,
+        })),
+        banned: data.createChannel.banned.map((banned: { id: string, username: string, avatarTest: string }) => ({
+          id: banned.id,
+          name: banned.username,
+          icon: banned.avatarTest
+        })),
+        muted: data.createChannel.muted.map((muted: { id: string, username: string, avatarTest: string }) => ({
+          id: muted.id,
+          name: muted.username,
+          icon: muted.avatarTest
+        })),
+        messages: data.createChannel.messages.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
+          text: message.text,
+          sender: message.sender,
+          senderId: message.senderId,
+          time: message.time,
+          read: true,
+        }))
+      };
+
+      console.log("Channel created: ", channel.id);
       console.log("Add moderator: ", addModerator);
       console.log("Add member: ", addMember);
       if (addModerator.length !== 0) {
@@ -73,9 +118,15 @@ const NewRoom: React.FC<NewRoomProps>= ({
           console.log("Adding moderator: ", id);
           addAdminMutation({
             variables: {
-                cid: channelID,
-                uid: id,
+              cid: channel.id,
+              uid: id,
             }
+          }).then((result) => {
+            admins.push({
+              id: result.data.addAdmin.id,
+              name: result.data.addAdmin.username,
+              icon: result.data.addAdmin.avatarTest,
+            });
           });
         });        
       }
@@ -86,12 +137,25 @@ const NewRoom: React.FC<NewRoomProps>= ({
           console.log("Adding member: ", id);
           addMemberMutation({
             variables: {
-                cid: channelID,
+                cid: channel.id,
                 uid: id,
             }
+          }).then((result) => {
+            members.push({
+              id: result.data.addMember.id,
+              name: result.data.addMember.username,
+              icon: result.data.addMember.avatarTest,
+              status: result.data.addMember.status
+            });
           });
         });
     }
+
+      channel.admins = admins;
+      channel.members = members;
+      if (channel.icon === null)
+        channel.icon = '../../../public/assets/chatBanner.png';
+      setChannels((prevChannels: any) => [channel, ...prevChannels]);
       setPassword('');
       setTitle('');
       setDescription('');

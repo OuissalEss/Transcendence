@@ -1,43 +1,43 @@
-import search from '../../../public/assets/Icons/Search.png';
-import './chat.css';
-import { IoLockClosed } from "react-icons/io5";
-import { HiUserCircle } from "react-icons/hi";
-import { FaRegClock } from "react-icons/fa";
+import { useEffect } from 'react';
 import { channelType, DiscussionsProps } from '../../interfaces/props';
-import { json } from 'react-router-dom';
-import { Key } from 'react';
+import './chat.css';
 
 // the discussions should be ordered by the most recntly updated
 
 const Discussions: React.FC<DiscussionsProps> = ({
     setDisplay,
 	setId,
+	channels,
+	setChannels,
 }) => {
 	// filter only channels that the user is a member of
 	const user = JSON.parse(localStorage.getItem('user') || '{}');
-	const discussions = JSON.parse(localStorage.getItem('channels') || '[]').filter((channel: channelType) => {
-			return channel.members.some((member) => member.id === user.id);
-	});
-	function handleDiscussionClick(index: number): void {
-		// update read and unread based on the channel id 
+	console.log(channels);
 
-		localStorage.setItem('channels', JSON.stringify(
-			JSON.parse(localStorage.getItem('channels') || '[]').map((channel: channelType) => {
-				if (channel.id === discussions[index].id) {
-					channel.messages.forEach((message: { sender: string, text: string, read: boolean }) => {
-						if (message.sender !== user.username && !message.read) {
-							message.read = true;
-							// message.unread = 0;
-						}
-					});
+	function handleDiscussionClick(index: number): void {
+		// update read and unread based on the channel id using setChannels
+
+
+
+		// localStorage.setItem('channels', JSON.stringify(
+		// 	JSON.parse(localStorage.getItem('channels') || '[]').map((channel: channelType) => {
+		// 		if (channel.id === discussions[index].id) {
+		// 			channel.messages.forEach((message: { sender: string, text: string, read: boolean }) => {
+		// 				if (message.sender !== user.username && !message.read) {
+		// 					message.read = true;
+		// 					// message.unread = 0;
+		// 				}
+		// 			});
 					
-					return channel; // Return the updated channel object
-				} else {
-					return channel; // Return the unchanged channel if not found
-				}
-			})
-		));		
-		setId(discussions[index].id);
+		// 			return channel; // Return the updated channel object
+		// 		} else {
+		// 			return channel; // Return the unchanged channel if not found
+		// 		}
+		// 	})
+		// ));
+
+
+		setId(channels[index].id);
 		setDisplay("Chat");
 	}
 
@@ -51,7 +51,7 @@ const Discussions: React.FC<DiscussionsProps> = ({
                 <button className="transparent-button mr-7 mt-6" onClick={() => setDisplay('NewRoom')}>New room</button>
             </div>
             <div className="chat-list">
-			{discussions.map((discussion: channelType, index: number) => (
+			{channels.map((discussion: channelType, index: number) => (
 				<div key={index} className="chat-box" onClick={() => handleDiscussionClick(index)}>
 					<div className="img-box">
 					{discussion.type === 'DM' ? (
