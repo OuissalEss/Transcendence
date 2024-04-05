@@ -717,6 +717,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const [owner, setOwner] = useState<{ id: string, name: string, icon: string }>(channel.owner || {});
 	console.log("user : ", user.username)
 	console.log("members : ", members)
+	console.log("admins : ", messages)
 	/**
 	 * add two fialds to the user entity blocked and blocking to the quieried channels in channeltype and channel 
 	 * add a use sate to store the blocked and the setter the blocking qont change no need to handle
@@ -976,7 +977,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		setMuteList(channel.muted || []);
 		setModList(channel.admins || []);
 		setOwner(channel.owner || {});
-	}, [id]);
+	}, [id, channels]);
 	
 	useEffect(() => {
         const newSocket = io('ws://localhost:3003/chat');

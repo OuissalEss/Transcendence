@@ -21,73 +21,93 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 	setDisplay,
 	setId,
 }) => {
-	const {loading, error, data} = useQuery(ALL_CHANNELS);
 	const [passwordInputs, setPasswordInputs] = useState<{ [key: string]: boolean }>({});
 	const [response, setResponse] = useState<{ [key: string]: boolean }>({});
 	const [addMember] = useMutation(ADD_MEMBER);
 	const [password, setPassword] = useState('');
 	const user = JSON.parse(localStorage.getItem('user') || '{}');
-	let Channels: channelType[] = [];
-	if (error) console.log('Channels : Error:', error.message);
-	else if (loading) console.log('Channels : Loading...');
-	else if (data) {
-		// extract the channels from the data and filter out the channels that the user is not a member of
-		Channels = data.AllChannels
-		.filter((channel: channelType) => 
-			!channel.members.some((member: { id: string }) => member.id === user.id) &&
-			channel.type !== "DM" &&
-			channel.type !== "PRIVATE"
-	  	)
-		.map((channel: channel) => ({
-			id: channel.id,
-			title: channel.title,
-			description: channel.description,
-			type: channel.type,
-			password: channel.password,
-			icon: channel.profileImage,
-			updatedAt: channel.updatedAt,
-			owner: {
-			  id: channel.owner.id,
-			  name: channel.owner.username,
-			  icon: channel.owner.avatarTest
-			},
-			admins: channel.admins
-			.map((admin: { id: string, username: string, avatarTest: string }) => ({
-			  id: admin.id,
-			  name: admin.username,
-			  icon: admin.avatarTest
-			})),
-			members: channel.members
-			.map((member: { id: string, username: string, avatarTest: string, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
-			  id: member.id,
-			  name: member.username,
-			  icon: member.avatarTest,
-			  status: member.status,
-			  blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
-			  blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
-			})),
-			banned: channel.banned.map((banned: { id: string, username: string, avatarTest: string }) => ({
-			  id: banned.id,
-			  name: banned.username,
-			  icon: banned.avatarTest
-			})),
-			muted: channel.muted.map((muted: { id: string, username: string, avatarTest: string }) => ({
-			  id: muted.id,
-			  name: muted.username,
-			  icon: muted.avatarTest
-			})),
-			messages: channel.messages
-			.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
-			  text: message.text,
-			  sender: message.sender,
-			  senderId: message.senderId,
-			  time: message.time,
-			  read: true,
-			  unread: 0
-			})).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
-	  })).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-	}
-	console.log('Channels:', Channels);
+	const {loading, error, data} = useQuery(ALL_CHANNELS);
+	const [Channels, updateChannels] =  useState<channelType[]>([]);
+	// let Channels: channelType[] = [];
+	const fetch_channels = async () => {
+		
+		if (error) console.log('Channels : Error:', error.message);
+		else if (loading) console.log('Channels : Loading...');
+		else if (data) {
+			// extract the channels from the data and filter out the channels that the user is not a member of
+			const All_Channels = data.AllChannels
+			.filter((channel: channelType) => 
+				!channel.members.some((member: { id: string }) => member.id === user.id) &&
+				channel.type !== "DM" &&
+				channel.type !== "PRIVATE"
+			  )
+			.map((channel: channel) => ({
+				id: channel.id,
+				title: channel.title,
+				description: channel.description,
+				type: channel.type,
+				password: channel.password,
+				icon: channel.profileImage,
+				updatedAt: channel.updatedAt,
+				owner: {
+				  id: channel.owner.id,
+				  name: channel.owner.username,
+				  icon: channel.owner.avatarTest
+				},
+				admins: channel.admins
+				.map((admin: { id: string, username: string, avatarTest: string }) => ({
+				  id: admin.id,
+				  name: admin.username,
+				  icon: admin.avatarTest
+				})),
+				members: channel.members
+				.map((member: { id: string, username: string, avatarTest: string, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
+				  id: member.id,
+				  name: member.username,
+				  icon: member.avatarTest,
+				  status: member.status,
+				  blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+				  blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
+				})),
+				banned: channel.banned.map((banned: { id: string, username: string, avatarTest: string }) => ({
+				  id: banned.id,
+				  name: banned.username,
+				  icon: banned.avatarTest
+				})),
+				muted: channel.muted.map((muted: { id: string, username: string, avatarTest: string }) => ({
+				  id: muted.id,
+				  name: muted.username,
+				  icon: muted.avatarTest
+				})),
+				messages: channel.messages
+				.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
+				  text: message.text,
+				  sender: message.sender,
+				  senderId: message.senderId,
+				  time: message.time,
+				  read: true,
+				  unread: 0
+				})).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
+		  })).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+		  updateChannels(All_Channels);
+		}
+		console.log('Channels:', Channels);
+	};
+	// fetch_channels();
+	useEffect(() => {
+		fetch_channels();
+	}, []);
+
+	// useEffect(() => {
+	// 	// const update = Channels.filter((channel: { id: string; }) => channel.id !== channelId);
+	// 	// filters
+	// 	let update: channelType[] = [];
+	// 	channels.forEach((channel: any) => {
+	// 		update = Channels.filter((ch: { id: string; }) => ch.id !== channel.id);
+	// 		console.log('lol ',  Channels.filter((ch: { id: string; }) => ch.id !== channel.id));
+	// 	})
+	// 	updateChannels(update);
+	// }, [channels])
 
 	const joinRoom = async (channelId: string) => {
 		const memeber = await addMember({
@@ -97,6 +117,9 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 			}
 		});
 		console.log('Member added:', memeber);
+		const update = Channels.filter((channel: { id: string; }) => channel.id !== channelId);
+		updateChannels([]);
+		console.log('hna 3', Channels);
 		setChannels((prevChannels: channelType[]) => {
 			const newChannels = [...prevChannels];
 			const newChannel = Channels.find((channel: channelType) => channel.id === channelId);
@@ -108,7 +131,7 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 				name: user.username,
 				icon: user.avatarTest,
 				status: user.status,
-				blocked: [],
+				blocked: [], // to handle later
 				blocken: [],
 			});
 			if (newChannel) newChannels.push(newChannel);
@@ -116,6 +139,10 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 			return newChannels;
 		});
 		console.log('Channels:', channels);
+		console.log('hna :', Channels);
+		console.log('hna 2:', Channels.filter((channel: { id: string; }) => channel.id !== channelId));
+		console.log('hna ' , update);
+		console.log(channelId);
 	};
 
 	const togglePasswordInput = (channelId: string) => {
@@ -156,7 +183,9 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 		<div className="channels-container">
 			<div className="channel-list">
 				{Channels
-				.filter((ch: channelType) => !ch.banned.some((member: { id: string }) => member.id === user.id))
+				.filter((ch: channelType) => {
+					return !ch.banned.some((member: { id: string }) => member.id === user.id) && !ch.members.some((member: { id: string }) => member.id === user.id);
+				})
 				.map((ch: channelType, index: number) => (
 					(ch.type !== 'dm' && ch.type !== 'private') && (
 						<div key={index} className="channel-box">
