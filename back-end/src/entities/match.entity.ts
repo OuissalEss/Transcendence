@@ -70,6 +70,15 @@ export class Match {
   winnerId: string;
 
   /**
+   * The user who lost the match (nullable).
+   * @type {String}
+   */
+  @Field(() => String, { nullable: true, description: 'User who lost the match' })
+  @IsNotEmpty({ message: 'User who lost the match cannot be empty' })
+  @IsString({ message: 'User who lost the match must be a string' })
+  loserId: string;
+
+  /**
    * The date when the match was created.
    * @type {Date}
    */

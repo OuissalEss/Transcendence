@@ -1,0 +1,152 @@
+.AboutUsPage{
+    display: flex;
+    justify-content: center;
+}
+.AboutUsPage .grid-cols-2{
+    gap: 50px;
+}
+.InfoAchievements {
+    color: #3E1256;
+    font-family: 'Manrope', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    margin: 30px 0px 40px 120px;
+}
+
+    @supports (-moz-appearance:none) {
+        .InfoAchievementBar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(62, 18, 86, 0.5) rgba(0, 0, 0, 0);
+        }
+    }
+    .InfoAchievementBar::-webkit-scrollbar {
+        width: 6px;
+        height: 0px;
+    }
+    .InfoAchievementBar::-webkit-scrollbar-thumb {
+        background-color: rgb(62 18 86 / 50%);
+        border-radius: 6px;
+    }
+    .InfoAchievementBar {
+        top: 120px;
+        width: 530px;
+        height: 80vh;
+        background-color: rgba(114, 196, 255, 0.2);
+        border-radius: 10px;
+        overflow-y: auto;
+        padding-left: 6px;
+    }
+
+.IAchievement {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #cccccc8a;
+}
+    .IAchievement img {
+        width: auto;
+        height: 200px;
+        margin-top: 10px;
+    }
+    .IAchievement p {
+        font-family: 'Manrope', sans-serif;
+        font-size: 17px;
+        font-weight: 400; 
+        color: white;
+        margin-top: 10px;
+        text-align: center;
+    }
+    
+.AboutUs{
+    color: #3E1256;
+    font-family: 'Manrope', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    top: 30px;
+    left: 850px;
+    margin: 30px 0px 40px 130px;
+}
+.AboutUsOuissal{
+    position: relative;
+}
+    .AboutUsOuissal img{
+        position: absolute;
+        height: 160px;
+        top: 10px;
+        left: 100px;
+    }
+    .AboutUsOuissal h1{
+        position: absolute;
+        font-size: 20px;
+        font-weight: 700;
+        font-family: 'Marko One', sans-serif;
+        color: white;
+        top: 150px;
+        left: 0px;
+    }
+.AboutUsZineb{
+    position: relative;
+    top: 28vh;
+}
+    .AboutUsZineb img{
+        position: absolute;
+        height: 160px;
+        top: 10px;
+        left: 0px;
+    }
+    .AboutUsZineb h1{
+        position: absolute;
+        font-size: 20px;
+        font-weight: 700;
+        font-family: 'Marko One', sans-serif;
+        color: white;
+        top: 150px;
+        left: 420px;
+    }
+.AboutUsSalma{
+    position: relative;
+    top: 55vh;
+}
+    .AboutUsSalma img{
+        position: absolute;
+        height: 160px;
+        top: 10px;
+        left: 100px;
+    }
+    .AboutUsSalma h1{
+        position: absolute;
+        font-size: 20px;
+        font-weight: 700;
+        font-family: 'Marko One', sans-serif;
+        color: white;
+        top: 150px;
+        left: 0px;
+    }
+
+@media (max-height: 700px) {
+    .AboutUsZineb{
+        top: 185px;
+    }
+    .AboutUsSalma{
+        top: 370px;
+    }
+}
+@media (max-width: 1300px) {
+    .AboutUsPage .grid-cols-2{
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    .AboutUsOuissal, .AboutUsZineb, .AboutUsSalma,
+    .AboutUsOuissal h1, .AboutUsZineb h1 , .AboutUsSalma h1,
+    .AboutUsOuissal img, .AboutUsZineb img , .AboutUsSalma img {
+        position: unset;
+    }
+    .aboutContainer{
+        margin: 0px 0px 40px 50px;
+    }
+    .InfoAchievementBar {
+        height: 600px;
+      }
+}

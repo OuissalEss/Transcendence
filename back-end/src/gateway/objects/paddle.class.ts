@@ -51,6 +51,9 @@ export class Paddle {
         this.x = this.isLeft ? this.w + 2 : this.width - this.w - 2;
     }
 
+    getId() {
+        return this.id;
+    }
     // GETTERS
     getState() {
         return {

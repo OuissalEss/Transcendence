@@ -11,206 +11,280 @@ import Player from '../../../components/Player';
 
 import { oPaddle } from './objects/opaddle';
 import User from "../../../types/user-interface";
-import DashboardLayout from '../../../layouts/LayoutDefault';
 import "../../../assets/game.css"
 import { useSocket } from '../../../App';
+import GameLoading from '../../../components/GameLoading';
+import { useAuth } from '../../../provider/authProvider';
+import GameEnded from '../../../components/GameEnded';
+import AlreadyInGame from '../../../components/AlreadyInGame';
 
 const opL = {
-    x: gameConfig.canvasWidth / 2,
-    y: gameConfig.canvasHeight / 2,
+	x: gameConfig.canvasWidth / 2,
+	y: gameConfig.canvasHeight / 2,
 
-    w: gameConfig.paddleWidth,
-    h: gameConfig.canvasHeight / 5,
+	w: gameConfig.paddleWidth,
+	h: gameConfig.canvasHeight / 5,
 
-    width: gameConfig.canvasWidth,
-    height: gameConfig.canvasHeight,
+	width: gameConfig.canvasWidth,
+	height: gameConfig.canvasHeight,
 
-    speed: 5,
-    ychange: 0,
+	speed: 5,
+	ychange: 0,
 }
 
 const opR = {
-    x: gameConfig.canvasWidth / 2,
-    y: gameConfig.canvasHeight / 2,
+	x: gameConfig.canvasWidth / 2,
+	y: gameConfig.canvasHeight / 2,
 
-    w: gameConfig.paddleWidth,
-    h: gameConfig.canvasHeight / 5,
+	w: gameConfig.paddleWidth,
+	h: gameConfig.canvasHeight / 5,
 
-    width: gameConfig.canvasWidth,
-    height: gameConfig.canvasHeight,
+	width: gameConfig.canvasWidth,
+	height: gameConfig.canvasHeight,
 
-    speed: 5,
-    ychange: 0,
+	speed: 5,
+	ychange: 0,
 }
 
 
 const calculatCanvasSize = () => {
-    if (gameConfig.windowW >= 1300) {
-        gameConfig.canvasWidth = 1000;
-        gameConfig.canvasHeight = 600;
-    } else if (gameConfig.windowW < 1300 && gameConfig.windowW >= 992) {
-        gameConfig.canvasWidth = 750;
-        gameConfig.canvasHeight = 400;
-    } else if (gameConfig.windowW < 992 && gameConfig.windowW >= 768) {
-        gameConfig.canvasWidth = 600;
-        gameConfig.canvasHeight = 300;
-    } else if (gameConfig.windowW < 768) {
-        gameConfig.canvasWidth = 260;
-        gameConfig.canvasHeight = 140;
-    }
+	if (gameConfig.windowW >= 1300) {
+		gameConfig.canvasWidth = 1000;
+		gameConfig.canvasHeight = 600;
+	} else if (gameConfig.windowW < 1300 && gameConfig.windowW >= 992) {
+		gameConfig.canvasWidth = 750;
+		gameConfig.canvasHeight = 400;
+	} else if (gameConfig.windowW < 992 && gameConfig.windowW >= 768) {
+		gameConfig.canvasWidth = 600;
+		gameConfig.canvasHeight = 300;
+	} else if (gameConfig.windowW < 768) {
+		gameConfig.canvasWidth = 260;
+		gameConfig.canvasHeight = 140;
+	}
 };
 
 const sketch = (p5: any, socket: any, updateScores: any, mode) => {
-    let puck: Puck;
-    // let paddleLeft: Paddle;
-    // let paddleRight: Paddle;
-    let opaddleL: oPaddle;
-    let opaddleR: oPaddle;
+	let puck: Puck;
+	// let paddleLeft: Paddle;
+	// let paddleRight: Paddle;
+	let opaddleL: oPaddle;
+	let opaddleR: oPaddle;
 
 
-    // Initiate Window Configurations
-    gameConfig.windowW = window.innerWidth;
-    gameConfig.windowH = window.innerWidth;
+	// Initiate Window Configurations
+	gameConfig.windowW = window.innerWidth;
+	gameConfig.windowH = window.innerWidth;
 
-    p5.setup = () => {
-
-
-        // Calculate Canvas Size
-        calculatCanvasSize();
-
-        const canvas = p5.createCanvas(gameConfig.canvasWidth, gameConfig.canvasHeight);
-
-        canvas.parent('canvas-container');
-
-        puck = new Puck(p5);
-        opaddleL = new oPaddle(p5, opL, true, socket);
-        opaddleR = new oPaddle(p5, opR, false, socket);
-    };
-
-    p5.windowResized = () => {
-        gameConfig.windowW = window.innerWidth;
-        gameConfig.windowH = window.innerWidth;
-
-        calculatCanvasSize();
-
-        socket.emit('updatePaddleScale', {
-            'windowW': gameConfig.windowW,
-            'windowH': gameConfig.windowH,
-            'canvasW': gameConfig.canvasWidth,
-            'canvasH': gameConfig.canvasHeight,
-        });
-
-        p5.resizeCanvas(gameConfig.canvasWidth, gameConfig.canvasHeight);
-    };
-
-    p5.draw = () => {
-        p5.clear();
+	p5.setup = () => {
 
 
-        p5.stroke(255);
-        p5.strokeWeight(2);
-        p5.stroke(255, 255, 255, 100);
-        p5.drawingContext.setLineDash([15, 10]);
-        p5.strokeWeight(3);
-        p5.line(gameConfig.canvasWidth / 2, 0, gameConfig.canvasWidth / 2, gameConfig.canvasHeight);
+		// Calculate Canvas Size
+		calculatCanvasSize();
 
-        p5.stroke(255, 255, 255, 200);
-        p5.strokeWeight(6);
+		const canvas = p5.createCanvas(gameConfig.canvasWidth, gameConfig.canvasHeight);
 
-        p5.drawingContext.setLineDash([]);
+		canvas.parent('canvas-container');
 
-        p5.line(gameConfig.canvasWidth, 0, gameConfig.canvasWidth, gameConfig.canvasHeight);
-        p5.line(0, gameConfig.canvasWidth, 0, 0);
-        p5.line(0, 0, gameConfig.canvasWidth, 0);
-        p5.line(0, gameConfig.canvasHeight, gameConfig.canvasWidth, gameConfig.canvasHeight);
+		puck = new Puck(p5);
+		opaddleL = new oPaddle(p5, opL, true, socket);
+		opaddleR = new oPaddle(p5, opR, false, socket);
+	};
 
-        p5.strokeWeight();
+	p5.windowResized = () => {
+		gameConfig.windowW = window.innerWidth;
+		gameConfig.windowH = window.innerWidth;
+
+		calculatCanvasSize();
+
+		socket.emit('updatePaddleScale', {
+			'windowW': gameConfig.windowW,
+			'windowH': gameConfig.windowH,
+			'canvasW': gameConfig.canvasWidth,
+			'canvasH': gameConfig.canvasHeight,
+		});
+
+		p5.resizeCanvas(gameConfig.canvasWidth, gameConfig.canvasHeight);
+	};
+
+	p5.draw = () => {
+		p5.clear();
 
 
-        socket.on('updateGameState', (gameState: { leftPaddle: { x: number; y: number; w: number; h: number; speed: number; canvasW: number; canvasH: number; }; rightPaddle: { x: number; y: number; w: number; h: number; speed: number; canvasW: number; canvasH: number; }; Ball: any; leftScore: any; rightScore: any; }) => {
-            opL.x = gameState.leftPaddle.x;
-            opL.y = gameState.leftPaddle.y;
-            opL.w = gameState.leftPaddle.w;
-            opL.h = gameState.leftPaddle.h;
-            opL.speed = gameState.leftPaddle.speed;
-            opL.width = gameState.leftPaddle.canvasW;
-            opL.height = gameState.leftPaddle.canvasH;
-            opR.x = gameState.rightPaddle.x;
-            opR.y = gameState.rightPaddle.y;
-            opR.w = gameState.rightPaddle.w;
-            opR.h = gameState.rightPaddle.h;
-            opR.speed = gameState.rightPaddle.speed;
-            opR.width = gameState.rightPaddle.canvasW;
-            opR.height = gameState.rightPaddle.canvasH;
-            puck.ballUpdate(gameState.Ball, gameConfig.canvasWidth, gameConfig.canvasHeight);
-            updateScores(gameState.leftScore, gameState.rightScore);
-        });
+		p5.stroke(255);
+		p5.strokeWeight(2);
+		p5.stroke(255, 255, 255, 100);
+		p5.drawingContext.setLineDash([15, 10]);
+		p5.strokeWeight(3);
+		p5.line(gameConfig.canvasWidth / 2, 0, gameConfig.canvasWidth / 2, gameConfig.canvasHeight);
 
-        opaddleL.update(opL);
-        opaddleL.show()
+		p5.stroke(255, 255, 255, 200);
+		p5.strokeWeight(6);
 
-        opaddleR.update(opR);
-        opaddleR.show();
+		p5.drawingContext.setLineDash([]);
 
-        puck.show();
-    };
+		p5.line(gameConfig.canvasWidth, 0, gameConfig.canvasWidth, gameConfig.canvasHeight);
+		p5.line(0, gameConfig.canvasWidth, 0, 0);
+		p5.line(0, 0, gameConfig.canvasWidth, 0);
+		p5.line(0, gameConfig.canvasHeight, gameConfig.canvasWidth, gameConfig.canvasHeight);
+
+		p5.strokeWeight();
+
+
+		socket.on('updateGameState', (gameState: { leftPaddle: { x: number; y: number; w: number; h: number; speed: number; canvasW: number; canvasH: number; }; rightPaddle: { x: number; y: number; w: number; h: number; speed: number; canvasW: number; canvasH: number; }; Ball: any; leftScore: any; rightScore: any; }) => {
+			opL.x = gameState.leftPaddle.x;
+			opL.y = gameState.leftPaddle.y;
+			opL.w = gameState.leftPaddle.w;
+			opL.h = gameState.leftPaddle.h;
+			opL.speed = gameState.leftPaddle.speed;
+			opL.width = gameState.leftPaddle.canvasW;
+			opL.height = gameState.leftPaddle.canvasH;
+			opR.x = gameState.rightPaddle.x;
+			opR.y = gameState.rightPaddle.y;
+			opR.w = gameState.rightPaddle.w;
+			opR.h = gameState.rightPaddle.h;
+			opR.speed = gameState.rightPaddle.speed;
+			opR.width = gameState.rightPaddle.canvasW;
+			opR.height = gameState.rightPaddle.canvasH;
+			puck.ballUpdate(gameState.Ball, gameConfig.canvasWidth, gameConfig.canvasHeight);
+			updateScores(gameState.leftScore, gameState.rightScore);
+		});
+
+		opaddleL.update(opL);
+		opaddleL.show()
+
+		opaddleR.update(opR);
+		opaddleR.show();
+
+		puck.show();
+	};
 };
 
 
+interface GameData {
+	p2Id: string,
+	p2Username: string,
+	p2Image: string,
+	p2Character: string,
+	p2Host: boolean,
+}
+
+interface FinishedGameData {
+	Id: string,
+	Username: string,
+	Image: string,
+	Character: string,
+	Host: boolean,
+	HostScore: number,
+	GuestScore: number,
+}
+
 
 const Pong = () => {
-    const [leftScore, setLeftScore] = useState(0);
-    const [rightScore, setRightScore] = useState(0);
-    const { socket } = useSocket();
+	const [leftScore, setLeftScore] = useState(0);
+	const [rightScore, setRightScore] = useState(0);
+	const [isLoading, setLoading] = useState(false);
+	const { socket } = useSocket();
+	const [gameIsLive, setGameLive] = useState(true);
+	const [oppUsername, setOppUsername] = useState();
+	const [oppImage, setOppImage] = useState();
+	const [oppId, setOppId] = useState();
+	const [gameData, setGameData] = useState<GameData | null>(null);
+	const [finishedGameData, setFinishedGameData] = useState<FinishedGameData | null>(null);
+	const [alreadyInGame, setAlreadyInGame] = useState(false);
 
-    const {userData} = useSocket();
+	const urlParams = new URLSearchParams(window.location.search);
+	let mode = urlParams.get('mode');
 
-    useEffect(() => {
-        if (!userData) return;
-    }, [userData]);
-
-    useEffect(() => {
-        if (socket) {
-            socket.emit('startMatch', mode);
-        }
-
-        return () => {
-            // Clean up socket listeners if component unmounts
-            if (socket) {
-                socket.off('userData');
-            }
-        };
-    }, [socket]);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let mode = urlParams.get('mode');
-
-    if (!["online", "offline", "ai"].includes(mode)) {
-        mode = "400";
-    }
-
-    const updateScores = (newLeftScore: number, newRightScore: number) => {
-        setLeftScore(newLeftScore);
-        setRightScore(newRightScore);
-    };
+	if (!["online", "offline", "ai"].includes(mode)) {
+		mode = "400";
+	}
 
 
-    if (!socket) {
-        return (
-            <div>Socket not connected</div>
-        );
-    }
 
-    return (
-            <div className="game-modes">
-                <Player username={userData?.username ? userData?.username : ''} leftScore={leftScore} rightScore={rightScore} />
-                <div className="board-container">
-                    <div id="canvas-container" className="canvas-container">
-                        <ReactP5Wrapper sketch={(p5) => sketch(p5, socket, updateScores, mode)} />
-                    </div>
-                </div>
-            </div>
-    );
+	useEffect(() => {
+		if (!socket) return;
+
+		socket.emit('startMatch', mode);
+
+		socket.on("matchStatus", (status: boolean) => {
+			if (!status.matchStatus)
+				setLoading(true);
+			else
+				setLoading(false);
+		})
+
+		socket.on('onTargetDisconnect', () => {
+			// Opponenet disconnected you won
+			setGameLive(false);
+		});
+
+		socket.on('alreadyWaiting', () => {
+			setAlreadyInGame(true);
+		})
+
+		socket.on('gameFinished', ({ userId, username, image, character, host, hostScore, guestScore }: { userId: string, username: string, image: string, character: string, host: boolean, hostScore: number, guestScore: number }) => {
+
+			console.log("HELOLLLL");
+
+			// Game Finished
+			let data: FinishedGameData = {
+				Id: userId,
+				Username: username,
+				Image: image,
+				Character: character,
+				Host: host,
+				HostScore: hostScore,
+				GuestScore: guestScore,
+			}
+			setFinishedGameData(data);
+			setGameLive(false);
+		});
+		socket.on('oppenentData', ({ userId, username, image, character, host }: { userId: string, username: string, image: string, character: string, host: boolean }) => {
+
+			let data: GameData = {
+				p2Id: userId,
+				p2Username: username,
+				p2Image: image,
+				p2Character: character,
+				p2Host: host,
+			}
+			setGameData(data);
+		})
+		return () => {
+			// Clean up socket listeners if component unmounts
+			socket.emit('endMatch')
+		};
+	}, [socket]);
+
+	const updateScores = (newLeftScore: number, newRightScore: number) => {
+		setLeftScore(newLeftScore);
+		setRightScore(newRightScore);
+	};
+
+
+	if (!socket) {
+		return (
+			<div>Socket not connected</div>
+		);
+	}
+
+	if (isLoading)
+		return <GameLoading />
+
+	if (!gameIsLive)
+		return <GameEnded gameMode={mode} gameData={finishedGameData} leftScore={leftScore} rightScore={rightScore} />
+	if (alreadyInGame)
+		return <AlreadyInGame />
+	return (
+		<div className="game-modes">
+			<Player gameMode={mode} gameData={gameData} leftScore={leftScore} rightScore={rightScore} />
+			<div className="board-container">
+				<div id="canvas-container" className="canvas-container">
+					<ReactP5Wrapper sketch={(p5) => sketch(p5, socket, updateScores, mode)} />
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default Pong;

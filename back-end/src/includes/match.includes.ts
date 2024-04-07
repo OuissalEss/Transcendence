@@ -8,7 +8,24 @@
  */
 export const matchIncludes: object = {
     match: true,
-    connection: true,
-    avatar: true,
-    send: true,
+    host:{
+        include: {
+            avatar: true,
+        }
+    },
+    guest:{
+        include: {
+            avatar: true,
+        }
+    },
+    winner:{
+        include: {
+            avatar: true,
+        }
+    },
+    loser:{
+        include: {
+            avatar: true,
+        }
+    },
 };

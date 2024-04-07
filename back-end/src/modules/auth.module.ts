@@ -16,6 +16,7 @@ import { GoogleOauthGuard } from 'src/guards/google.guard';
 import { jwtConstants } from 'src/auth/constants';
 import { AuthController } from 'src/controllers/auth.controller';
 import { AchievementService } from 'src/services/user_achievement.service';
+import { NotificationService } from 'src/services/notification.service';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AchievementService } from 'src/services/user_achievement.service';
     GoogleOauthGuard,
     UserService,
     AchievementService,
+    NotificationService,
     PrismaService
   ],
 })

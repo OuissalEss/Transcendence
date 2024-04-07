@@ -39,7 +39,7 @@ const sidebarItems = [
     icon: "/Icons/Settings.png",
   },
   {
-    name: "About",
+    name: "About us",
     href: "/about",
     icon: "/Icons/About.png",
   },

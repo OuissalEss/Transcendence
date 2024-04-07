@@ -1,13 +1,9 @@
-
 import { useNavigate } from 'react-router-dom';
-import Leaderboard3 from '/Leaderboard/Leaderboard3.png';
 import { useQuery, gql } from "@apollo/client";
 import { useMutation } from '@apollo/react-hooks'
 
 
 import '../assets/profiles.css';
-// import './Profile.css'
-import DashboardLayout from '../layouts/LayoutDefault';
 import SearchBar from '../components/SearchBar';
 import Notifications from '../components/Notifications';
 import { useEffect, useState } from 'react';
@@ -21,22 +17,28 @@ import RobotWithoutB from '/Achievements/RobotWithoutB.png';
 import RoomWithoutB from '/Achievements/RoomWithoutB.png';
 import ThreeWithoutB from '/Achievements/ThreeWithoutB.png';
 import WelcomeWithoutB from '/Achievements/WelcomeWithoutB.png';
+// Leaderboards
+import Leaderboard1 from '/Leaderboard/Leaderboard1.png';
+import Leaderboard2 from '/Leaderboard/Leaderboard2.png';
+import Leaderboard3 from '/Leaderboard/Leaderboard3.png';
+import Leaderboard4 from '/Leaderboard/Leaderboard4.png';
+import Leaderboard5 from '/Leaderboard/Leaderboard5.png';
 
 import ChevRight from '/Icons/ChevronRight.png';
 import ChevLeft from '/Icons/ChevronLeft.png';
 
-import Loading from '../components/Loading';
 import Friend from '../types/friend-interface';
+import { useSocket } from '../App';
 
-const USER_DATA = gql`
+const USER_DATA = `
 query($user_id: String!) {
-  getUserFriends {
-      id
-      username
-      status
-      avatar{filename}
-  }
-    getUserById(id: $user_id) {
+    getUserFriends {
+        id
+        username
+        status
+        avatar{filename}
+    }
+    getUserInfo {
         id
         username
         xp
@@ -45,6 +47,10 @@ query($user_id: String!) {
             achievement
             createdAt
         }
+        winner{id}
+        loser{id}
+        host{id}
+        guest{id}
     }
     getUserFriendsSender {
       id
@@ -56,32 +62,32 @@ query($user_id: String!) {
       isAccepted
       sender{id}
     }
-}
-`;
-
-const UPDATE_IS_ACCEPTED = gql`
-  mutation($f_id: String!) { 
-    updateAccept(friendId: $f_id) {
-          id
-      }
-  }
-`;
-
-const DELETE_FRIEND = gql`
-  mutation($f_id: String!) {
-    deleteFriend(friendId: $f_id) {
-      id
-    }
-  }
-`;
-
-const CREATE_FRIEND = gql`
-  mutation($receiver_id: String!, $sender_id: String!) {
-    createFriend(receiverId: $receiver_id, senderId: $sender_id) {
+    getAllUsers {
         id
+        username
+        avatar {
+            filename 
+        }
+        xp
+        winner{id}
     }
-  }
-`;
+    getUserById(id: $user_id) {
+      id
+      username
+      xp
+      avatar{filename}
+      achievements{
+          achievement
+          createdAt
+      }
+      winner{id}
+      loser{id}
+      host{id}
+      guest{id}
+    }
+}`;
+
+
 
 const achievements = [
   { enum: 'welcome', title: 'Welcome to the Arena', image: WelcomeWithoutB },
@@ -91,80 +97,170 @@ const achievements = [
   { enum: 'loyal', title: 'Loyal Opponent', image: ThreeWithoutB },
   { enum: 'team', title: 'Team Spirit', image: RoomWithoutB },
 ];
+interface TopFive {
+  id: string,
+  name: string,
+  image: string,
+  xp: number,
+  wins: number,
+  leaderboard: string
+}
 
 function Profiles() {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<User>();
+  const [users, setUsers] = useState<User[]>();
   const [friends, setFriends] = useState<User[]>();
   const [receiver, setReceiver] = useState<Friend[]>();
   const [sender, setSender] = useState<Friend[]>();
   const [isLoading, setLoading] = useState(true);
   const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
-
-  const [updateIsAccepted] = useMutation(UPDATE_IS_ACCEPTED);
-  const [deleteFriend] = useMutation(DELETE_FRIEND);
-  const [createFriend] = useMutation(CREATE_FRIEND);
+  const [buttonText, setbuttonText] = useState('');
+  const [friendShipId, setfriendShipId] = useState('');
 
   const urlParams = new URLSearchParams(window.location.search);
   let id = urlParams.get('id');
+
   const token: string | undefined = Cookies.get('token');
   const decodedToken = jwtDecode(token || '');
   const userId = decodedToken.sub;
+
+  const { socket } = useSocket();
+
   useEffect(() => {
     if (id == userId) {
       navigate('/myprofile');
     }
   }, []);
 
-  const { data, loading, error } = useQuery(USER_DATA, {
-    variables: { user_id: id }
-  });
+  useEffect(() => {
+    if (!token) return; // If token is not available, do nothing
+
+    fetch('http://localhost:3000/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        query: USER_DATA, variables: { user_id: id }
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        return response.json();
+      })
+      .then(({ data }) => {
+        if (data && data.getAllUsers) {
+          setUserData(data.getUserById);
+          setUsers(data.getAllUsers);
+          setFriends(data.getUserFriends);
+          setReceiver(data.getUserFriendsReceiver);
+          setSender(data.getUserFriendsSender);
+          setLoading(false);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching friends:', error);
+      });
+  }, []);
+  console.log("user = ", userData);
 
   useEffect(() => {
-    try {
+    if (socket === undefined) return;
 
-      if (loading) setLoading(true);
-      if (error) {
-        throw new Error('Failed to fetch user data');
-      }
-      if (data) {
-        setUserData(data.getUserById);
-        setFriends(data.getUserFriends);
-        setReceiver(data.getUserFriendsReceiver);
-        setSender(data.getUserFriendsSender);
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
-    }
-  }, [data, loading, error]);
+    socket.on('RequestReceived', ({ username, userId, image, friendId }: { username: string, userId: string, image: string, friendId: string }) => {
+      setbuttonText('accept')
+      setfriendShipId(friendId);
+    })
 
-  if (loading) return
+    socket.on('RequestAccepted', ({ username, userId, image }: { username: string, userId: string, image: string }) => {
+      setbuttonText('remove')
+    })
+
+    socket.on('AcceptedRequest', ({ friendId }: { friendId: string }) => {
+      setbuttonText('remove')
+      setfriendShipId(friendId);
+    });
+
+    socket.on('RequestSent', ({ friendId }: { friendId: string }) => {
+      setbuttonText('cancel');
+      setfriendShipId(friendId);
+    });
+    socket.on('FriendRemoved', () => {
+      setbuttonText('add');
+      setfriendShipId('');
+    });
+    if (sender === undefined || receiver === undefined) return;
+
+    let senderFriendShip = sender.find(friend => friend.receiver.id === id);
+    let receiverFriendShip = receiver.find(friend => friend.sender.id === id);
+
+    if (senderFriendShip) {
+      setfriendShipId(senderFriendShip.id);
+      if (senderFriendShip.isAccepted == true) setbuttonText('remove');
+      else setbuttonText('cancel');
+    } else if (receiverFriendShip) {
+      setfriendShipId(receiverFriendShip.id);
+      if (receiverFriendShip.isAccepted == true) setbuttonText('remove');
+      else setbuttonText('accept');
+    } else setbuttonText('add');
+  }, [socket, sender, receiver]);
+
+
   if (!userData) return
+  if (!users) return
   if (!friends) return
   if (!receiver) return
   if (!sender) return
 
+  // Top 5
+  const sortedUsers: User[] = [...users];
+  sortedUsers.sort((a, b) => { return b.xp - a.xp });
+  let topFive: TopFive[] = sortedUsers.slice(0, 5).map((player) => ({
+    id: player.id,
+    name: player.username,
+    image: player.avatar?.filename || '/Avatars/default.jpeg',
+    xp: player.xp,
+    wins: player.winner.length,
+    leaderboard: Leaderboard1
+  }));
+  topFive.sort((a, b) => {
+    if (b.xp == a.xp)
+      return b.wins - a.wins
+  });
+
+  // Leaderboard
+  let myLeaderboard = Leaderboard5;
+  if (topFive) {
+    if (userData.id == topFive[0]?.id) myLeaderboard = Leaderboard1;
+    if (userData.id == topFive[1]?.id) myLeaderboard = Leaderboard2;
+    if (userData.id == topFive[2]?.id) myLeaderboard = Leaderboard3;
+    if (userData.id == topFive[3]?.id) myLeaderboard = Leaderboard4;
+  }
+
+  // Achievements
   type Achievement = {
     enum: string;
     title: string;
     image: string;
   };
+
   const myAchievements: Achievement[] = [];
   userData?.achievements.forEach(userAchievement => {
-      const a = achievements.find(achievement => achievement.enum === userAchievement.achievement);
-      if (a) {
-          myAchievements.push(a);
-      }
+    const a = achievements.find(achievement => achievement.enum === userAchievement.achievement);
+    if (a) {
+      myAchievements.push(a);
+    }
   });
-  console.log("Matched = ",myAchievements);
-
+  // Friends
   let FriendsList = friends.map((friend: User) => ({
     id: friend.id,
     username: friend.username,
     status: friend.status,
-    image: friend.avatar ? friend.avatar.filename : ''
+    image: friend.avatar ? friend.avatar.filename : '/Avatars/default.jpeg'
   }));
 
   // calculate Level
@@ -174,69 +270,37 @@ function Profiles() {
   const nextLevel = currentLevel + 1;
   const levelProgress = (xp - currentLevel * currentLevel * 100) / (nextLevel * nextLevel * 100 - currentLevel * currentLevel * 100) * 100;
 
+  // Wins | Draw | Losses
+  const playedGames = userData.host.length + userData.guest.length;
+  const myWins = userData?.winner.length;
+  const myLosses = userData?.loser.length;
+  const myDraws = playedGames - (myWins + myLosses);
+
   // Get relation between the user and hada li mlogi
-  let buttonText = '';
-    console.log("SENDER = ", sender);
-    console.log("RECEIVER = ", receiver);
-  let senderFriendShip = sender.find(friend => friend.receiver.id === id);
-  let receiverFriendShip = receiver.find(friend => friend.sender.id === id);
-  let friendShipId = '';
-  if (senderFriendShip) {
-    friendShipId = senderFriendShip.id;
-    if (senderFriendShip.isAccepted == true) buttonText = 'remove';
-    else buttonText = 'cancel';
-  } else if (receiverFriendShip) {
-    friendShipId = receiverFriendShip.id;
-    if (receiverFriendShip.isAccepted == true) buttonText = 'remove';
-    else buttonText = 'accept';
-  } else buttonText = 'add';
+  // let buttonText = '';
+
 
   const handlePrevAchievement = () => {
     const newIndex = currentAchievementIndex === 0 ? myAchievements.length - 1 : currentAchievementIndex - 1;
     setCurrentAchievementIndex(newIndex);
   };
-
   const handleNextAchievement = () => {
     const newIndex = (currentAchievementIndex + 1) % myAchievements.length;
     setCurrentAchievementIndex(newIndex);
   };
 
   // Update Friend Table
-  const handleAddFriend = async () => {
-      try {
-          await createFriend({ variables: { receiver_id: id, sender_id: userId } });
-          console.log("FriendShip created successfully!");
-      } catch (error) {
-          console.error("Error creating FriendShip:", error.message);
-      }
-      window.location.reload();
+  const handleAddFriend = () => {
+      socket?.emit("friendRequest", { senderId: userId, receiverId: id })
   }
-  const handleRemoveFriend = async () => {
-      try {
-          await deleteFriend({ variables: { f_id: friendShipId } });
-          console.log("FriendShip removed successfully!");
-      } catch (error) {
-          console.error("Error removing FriendShip:", error.message);
-      }
-      window.location.reload();
+  const handleRemoveFriend = () => {
+    socket?.emit("removeFriend", { friendId: friendShipId })
   }
-  const handleAcceptRequest = async () => {
-      try {
-          await updateIsAccepted({ variables: { f_id: friendShipId } });
-          console.log("FriendShip updated successfully!");
-      } catch (error) {
-          console.error("Error updating FriendShip:", error.message);
-      }
-      window.location.reload();
+  const handleAcceptRequest = () => {
+    socket?.emit("acceptRequest", { friendId: friendShipId });
   }
-  const handleCancelRequest = async () => {
-      try {
-          await deleteFriend({ variables: { f_id: friendShipId } });
-          console.log("FriendShip removed successfully!");
-      } catch (error) {
-          console.error("Error removing FriendShip:", error.message);
-      }
-      window.location.reload();
+  const handleCancelRequest = () => {
+    socket?.emit("removeFriend", { friendId: friendShipId })
   }
 
   return (
@@ -258,7 +322,7 @@ function Profiles() {
         {buttonText == 'cancel' &&
           <div className="AddFriend" onClick={handleCancelRequest}>Cancel Request</div>
         }
-        <img src={Leaderboard3} className="LB" alt="Leaderboard3" />
+        <img src={myLeaderboard} className="LB" alt="Leaderboard3" />
         <div className="PLevelTube">
           <div className="PLevelMarker">Lv.{currentLevel}</div>
           <div className="PTube">
@@ -267,7 +331,7 @@ function Profiles() {
           <div className="PLevelMarker">Lv.{nextLevel}</div>
         </div>
         <div className="PStats">
-          <p className="PStatText">4&nbsp;Wins&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;5&nbsp;Draw&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;0&nbsp;Losses</p>
+          <p className="PStatText">{myWins}&nbsp;Wins&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myDraws}&nbsp;Draw&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myLosses}&nbsp;Losses</p>
         </div>
         <div className="PAchievements">Achievements</div>
         <div className="PAchievementBar">

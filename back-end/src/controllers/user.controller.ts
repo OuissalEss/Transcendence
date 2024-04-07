@@ -7,7 +7,6 @@ export class UserController {
 
   @Get('me')
   async me(@Req() req: Request){
-    console.log(req['user']);
     return await this.userService.getUserById(req['user'].sub);
   }
 }

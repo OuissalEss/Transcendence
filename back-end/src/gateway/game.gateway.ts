@@ -1,158 +1,673 @@
-// game.gateway.ts
-import { WebSocketGateway, SubscribeMessage, WebSocketServer, ConnectedSocket, MessageBody } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, WebSocketServer, ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-// import { JwtMiddleware } from 'src/middleware/jwt.middleware';
-import { CreateMatchInput } from 'src/services/dto/create-match.input';
+import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from "src/auth/constants";
 import { MatchService } from 'src/services/match.service';
-
 import { GameState } from './objects/game.class';
 import { CanvasConfig } from "./types/game.service";
+import { UserService } from '../services/user.service';
+import { CreateMatchInput } from 'src/services/dto/create-match.input';
+import { PrismaService } from 'src/services/prisma.service';
+import { create } from 'domain';
+import { Character } from '@prisma/client';
+import { CreateFriendInput } from 'src/services/dto/create-friend.input';
+import { FriendService } from 'src/services/friend.service';
+import { Friend } from 'src/entities/friend.entity';
+
+// Define a type for player information
+interface PlayerInfo {
+	playerId: string;
+	userId: string;
+	username: string;
+	image: string;
+	character: Character;
+	playerSocket: Socket;
+}
+
+// Define a type for room data
+interface RoomData {
+	roomId: string;
+	players: string[]; // Array to store player IDs
+}
 
 let width = 1000;
 let height = 600;
 
 @WebSocketGateway({ cors: true })
-export class GameGateway {
-  constructor(private readonly matchService: MatchService) {
-  //   this.server.use(new JwtMiddleware().use);
-  }
-  @WebSocketServer() server: Server;
+export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+	constructor(
+		private readonly matchService: MatchService,
+		private readonly userService: UserService,
+		private readonly jwtService: JwtService,
+		private readonly prismaService: PrismaService,
+		private readonly friendService: FriendService,
+	) {
+	}
 
-  private games: Map<string, GameState> = new Map(); // Map to store game instances for each client
-  private onlinePlayersQueue: Socket[] = [];
+	@WebSocketServer() server: Server;
+	private games: Map<GameState, { hostId: string, guestId: string }> = new Map(); // Map to store game instances for each client
+	private onlinePlayersQueue: Socket[] = [];
+	private playerInfoMap: Map<string, PlayerInfo> = new Map(); // Map to store player info
+	private activeRooms: Map<string, RoomData> = new Map(); // Map to store active room data
+
+	// Method to handle client connection
+	handleConnection(client: Socket) {
+		console.log(`Client connected: ${client.id}`);
+	}
+
+	// Method to handle client disconnection
+	handleDisconnect(client: Socket) {
+		console.log(`Client disconnected: ${client.id}`);
+
+		// Cleanup resources related to the disconnected client
+		this.cleanupDisconnectedClient(client);
+	}
+
+	private findGame(clientId: string): GameState | null {
+		let game: GameState | null = null;
+
+		this.games.forEach((value, key) => {
+			if (value.hostId == clientId || value.guestId === clientId)
+				game = key;
+		})
+
+		return game;
+	}
+
+	// Method to clean up resources of disconnected client
+	private async cleanupDisconnectedClient(client) {
+		const clientId = client.id;
+
+		// Remove player from playerInfoMap
+		this.playerInfoMap.delete(clientId);
+
+		// Check if player is on waitlist
+		if (this.onlinePlayersQueue.includes(client)) {
+			// Remove player from onlinePlayersQueue
+			this.onlinePlayersQueue = this.onlinePlayersQueue.filter(socket => socket.id !== clientId);
+		}
+
+		const game: GameState | null = this.findGame(clientId);
+
+		// Handle if the client is on Match
+		if (game) {
+			const clientInfo = this.games.get(game);
+
+			const guesId = clientInfo.guestId;
+			const hostId = clientInfo.hostId;
+
+			this.server.to(hostId).emit('gameFinished', {
+				userId: this.playerInfoMap.get(game.getGuestId()).userId,
+				username: this.playerInfoMap.get(game.getGuestId()).username,
+				image: this.playerInfoMap.get(game.getGuestId()).image,
+				character: this.playerInfoMap.get(game.getGuestId()).character,
+				host: true,
+				hostScore: game.getHostScore(),
+				guestScore: game.getGuestScore(),
+			});
+			this.server.to(guesId).emit('gameFinished', {
+				userId: this.playerInfoMap.get(game.getHostId()).userId,
+				username: this.playerInfoMap.get(game.getHostId()).username,
+				image: this.playerInfoMap.get(game.getHostId()).image,
+				character: this.playerInfoMap.get(game.getHostId()).character,
+				host: false,
+				hostScore: game.getHostScore(),
+				guestScore: game.getGuestScore(),
+			});
+
+			// Disconnect the players and create match on Database
+			// Forfient Client
+
+			// Handle if online to disconnect the Oppenent
+			if (game.getMode() === "online") {
+				// Disconnect the Opponenet from the game
+				const oppSocket = this.playerInfoMap.get(guesId);
+
+				if (oppSocket) {
+					oppSocket?.playerSocket.emit('onTargetDisconnect');
+				}
 
 
-  handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+				// Create match in database
+				if (game.getGuestScore() == game.getHostScore()) {
+					const match = await this.prismaService.match.create({
+						data: {
+							guest_score_m: game.getGuestScore(),
+							host_score_m: game.getHostScore(),
+							hostId: this.playerInfoMap.get(hostId)?.userId,
+							guestId: this.playerInfoMap.get(guesId)?.userId,
+						}
+					})
+					this.userService.addXp(this.playerInfoMap.get(hostId)?.userId, 250);
+					this.userService.addXp(this.playerInfoMap.get(guesId)?.userId, 250);
+				} else {
+					let winner = '';
+					let loser = '';
+					if (game.getGuestScore() > game.getHostScore()) {
+						winner = this.playerInfoMap.get(guesId)?.userId;
+						loser = this.playerInfoMap.get(hostId)?.userId;
+					} else if (game.getHostScore() > game.getGuestScore()) {
+						winner = this.playerInfoMap.get(hostId)?.userId;
+						loser = this.playerInfoMap.get(guesId)?.userId;
+					}
+					const match = await this.prismaService.match.create({
+						data: {
+							guest_score_m: game.getGuestScore(),
+							host_score_m: game.getHostScore(),
+							hostId: this.playerInfoMap.get(hostId)?.userId,
+							guestId: this.playerInfoMap.get(guesId)?.userId,
+							winnerId: winner,
+							loserId: loser,
+						}
+					})
+					this.userService.addXp(winner, 500);
+				}
+			}
 
-  }
+			this.games.delete(game);
+		}
+	}
 
-  @SubscribeMessage('startMatch')
-  startMatch(client: Socket, mode: string) {
-    console.log(`Client starting a match: ${client.id}`);
+	private async updateAndBroadcastGameState() {
+		this.games.forEach((clientStats, game) => {
+			const hostId = clientStats.hostId;
+			const guestId = clientStats.guestId;
 
-    // Check if the client wants to play online
-    const wantsToPlayOnline = mode === 'online';
-    console.log("Mode = ", mode);
+			if ((game.getHostScore() === 5 || game.getGuestScore() === 5) && !game.getGameEnded() && game.getMode() === 'online') {
+				console.log("Game Ended");
+				// Emit 'gameFinished' event to the client associated with this game
 
-    if (wantsToPlayOnline) {
-      // Create a new game instance for the client
-      // const game = new GameState(width, height, 'online');
-      // this.games.set(client.id, game);
+				// Emit 'gameFinished' event to the client associated with this game
+				this.server.to(hostId).emit('gameFinished', {
+					userId: this.playerInfoMap.get(game.getGuestId()).userId,
+					username: this.playerInfoMap.get(game.getGuestId()).username,
+					image: this.playerInfoMap.get(game.getGuestId()).image,
+					character: this.playerInfoMap.get(game.getGuestId()).character,
+					host: true,
+					hostScore: game.getHostScore(),
+					guestScore: game.getGuestScore(),
+				});
+				this.server.to(guestId).emit('gameFinished', {
+					userId: this.playerInfoMap.get(game.getHostId()).userId,
+					username: this.playerInfoMap.get(game.getHostId()).username,
+					image: this.playerInfoMap.get(game.getHostId()).image,
+					character: this.playerInfoMap.get(game.getHostId()).character,
+					host: false,
+					hostScore: game.getHostScore(),
+					guestScore: game.getGuestScore(),
+				});
 
-      // Add the player to the matchmaking queue for online games
-      this.onlinePlayersQueue.push(client);
-      console.log(`Player ${client.id} is looking for an online game.`);
+				// if (clientId == game.getHostId() && !game.getGameEnded())
+				this.handleFinishedGame(game);
+				game.setGameEnded(true);
+			} else if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && game.getMode() != 'online') {
+				console.log("Game Ended");
 
-      // Notify the player that they are waiting for a match
-      client.emit('waitingForMatch', { message: 'Waiting for a match...' });
+				this.server.to(hostId).emit('gameFinished', {
+					userId: this.playerInfoMap.get(game.getGuestId()).userId,
+					username: this.playerInfoMap.get(game.getGuestId()).username,
+					image: this.playerInfoMap.get(game.getGuestId()).image,
+					character: this.playerInfoMap.get(game.getGuestId()).character,
+					host: true,
+					hostScore: game.getHostScore(),
+					guestScore: game.getGuestScore(),
+				});
 
-      // Try to create a match if there are enough players in the queue
-      // Try to create a match if there are enough players in the queue
-      if (this.onlinePlayersQueue.length >= 2) {
-        const player1 = this.onlinePlayersQueue.shift()!;
-        const player2 = this.onlinePlayersQueue.shift()!;
+				this.handleFinishedGame(game);
 
-        // Create a new game instance for the players
-        const game = new GameState(width, height, 'online');
-        this.games.set(player1.id, game);
-        this.games.set(player2.id, game);
+				game.setGameEnded(true);
+			} else {
+				game.updateGameState();
+				const gameStats = game.getGameState();
+				// If the game is still ongoing, emit the updated game state
+				this.server.to(hostId).emit('updateGameState', gameStats);
+				if (game.getMode() === 'online')
+					this.server.to(guestId).emit('updateGameState', gameStats);
 
-        // Initialize paddles and start the game
-        game.initLeftPaddle(player1.id);
-        game.initRightPaddle(player2.id);
+			}
+		});
+	}
 
-        // Notify players that the match is starting
-        player1.emit('matchFound', { message: 'Match found! Starting the game...' });
-        player2.emit('matchFound', { message: 'Match found! Starting the game...' });
+	// Method to handle actions after a game finishes
+	private async handleFinishedGame(game: GameState) {
+		if (game.getMode() == 'online') {
+			if (game.getGuestScore() == game.getHostScore()){
+				const match = await this.prismaService.match.create({
+					data: {
+						guest_score_m: game.getGuestScore(),
+						host_score_m: game.getHostScore(),
+						hostId: this.playerInfoMap.get(game.getHostId()).userId,
+						guestId: this.playerInfoMap.get(game.getGuestId()).userId,
+					}
+				});
+				this.userService.addXp(this.playerInfoMap.get(game.getHostId()).userId, 250);
+				this.userService.addXp(this.playerInfoMap.get(game.getGuestId()).userId, 250);
+			} else {
+				let winner = '';
+				let loser = '';
+				if (game.getGuestScore() > game.getHostScore()) {
+					winner = this.playerInfoMap.get(game.getGuestId()).userId;
+					loser = this.playerInfoMap.get(game.getHostId()).userId;
+				} else if (game.getHostScore() > game.getGuestScore()) {
+					winner = this.playerInfoMap.get(game.getHostId()).userId;
+					loser = this.playerInfoMap.get(game.getGuestId()).userId;
+				}
+				const match = await this.prismaService.match.create({
+					data: {
+						guest_score_m: game.getGuestScore(),
+						host_score_m: game.getHostScore(),
+						hostId: this.playerInfoMap.get(game.getHostId()).userId,
+						guestId: this.playerInfoMap.get(game.getGuestId()).userId,
+						winnerId: winner,
+						loserId: loser,
+					}
+				});
+				this.userService.addXp(winner, 500);
+			}
+		}
+		this.games.delete(game);
+	}
 
-        // Join the players to a room (you may need to customize room names)
-        player1.join(`onlineRoom_${player1.id}${player2.id}`);
-        player1.join(`onlineRoom_${player1.id}${player2.id}`);
-        console.log("Player 1 = ", player1.id);
-        const data: CreateMatchInput = {
-          host_score_m: 0,
-          guest_score_m: 0,
-          hostId: '',
-          guestId: '',
-        }
-        // this.matchService.createMatch(data);
+	// Middleware to handle JWT authentication
+	afterInit() {
+		this.startGameLoop(); // Start the game loop in the constructor
+		this.server.use(async (socket: Socket, next) => {
+			const token = socket.handshake.headers.authorization?.split(' ')[1];
+			if (!token) {
+				return next(new Error("Empty Token!"));
+			}
 
-        // Broadcast the initial game state
-        this.broadcastGameState();
-      }
-    } else {
-      // Handle other scenarios, such as offline or AI games
-      console.log(`Player ${client.id} connected for other game types.`);
+			try {
+				const userPayload = await this.jwtService.verifyAsync(token, {
+					secret: jwtConstants.secret,
+				});
+
+				const user = await this.userService.getUserById(userPayload.sub);
+
+				if (!user) {
+					return next(new Error("Invalid Token!"));
+				}
+
+				const playerData: PlayerInfo = {
+					playerId: socket.id,
+					userId: user.id,
+					username: user.username,
+					image: user.avatar.filename,
+					character: user.character,
+					playerSocket: socket
+				};
+
+				this.playerInfoMap.set(socket.id, playerData);
+
+				next();
+			} catch (error) {
+				next(new Error("Invalid Token!"));
+			}
+		});
+	}
+
+	// Handler for starting a match
+	@SubscribeMessage('endMatch')
+	async endMatch(client: Socket) {
+		// On exit the game disconnect the players from the match
+		// then create the match in the db
+		console.log(`End Game ${client.id}`)
+
+		const clientId = client.id;
+		// Remove player from onlinePlayersQueue
+		this.onlinePlayersQueue = this.onlinePlayersQueue.filter(socket => socket.id !== clientId);
+
+		const game = this.findGame(clientId);
+		if (game) {
+			const clientStats = this.games.get(game);
+			const guestId = clientStats.guestId;
+			const hostId = clientStats.hostId;
+
+			this.server.to(hostId).emit('gameFinished', {
+				userId: this.playerInfoMap.get(game.getGuestId()).userId,
+				username: this.playerInfoMap.get(game.getGuestId()).username,
+				image: this.playerInfoMap.get(game.getGuestId()).image,
+				character: this.playerInfoMap.get(game.getGuestId()).character,
+				host: true,
+				hostScore: game.getHostScore(),
+				guestScore: game.getGuestScore(),
+			});
+			this.server.to(guestId).emit('gameFinished', {
+				userId: this.playerInfoMap.get(game.getHostId()).userId,
+				username: this.playerInfoMap.get(game.getHostId()).username,
+				image: this.playerInfoMap.get(game.getHostId()).image,
+				character: this.playerInfoMap.get(game.getHostId()).character,
+				host: false,
+				hostScore: game.getHostScore(),
+				guestScore: game.getGuestScore(),
+			});
+
+			if (game.getMode() == 'online') {
+				// Create match in database
+				if (game.getGuestScore() == game.getHostScore()){
+					const match = await this.prismaService.match.create({
+						data: {
+							guest_score_m: game.getGuestScore(),
+							host_score_m: game.getHostScore(),
+							hostId: this.playerInfoMap.get(hostId)?.userId,
+							guestId: this.playerInfoMap.get(guestId)?.userId,
+						}
+					})
+					this.userService.addXp(this.playerInfoMap.get(hostId)?.userId, 250);
+					this.userService.addXp(this.playerInfoMap.get(guestId)?.userId, 250);
+				} else {
+					let winner = '';
+					let loser = '';
+					if (game.getGuestScore() > game.getHostScore()) {
+						winner = this.playerInfoMap.get(guestId)?.userId;
+						loser = this.playerInfoMap.get(hostId)?.userId;
+					} else if (game.getHostScore() > game.getGuestScore()) {
+						winner = this.playerInfoMap.get(hostId)?.userId;
+						loser = this.playerInfoMap.get(guestId)?.userId;
+					}
+					const match = await this.prismaService.match.create({
+						data: {
+							guest_score_m: game.getGuestScore(),
+							host_score_m: game.getHostScore(),
+							hostId: this.playerInfoMap.get(hostId)?.userId,
+							guestId: this.playerInfoMap.get(guestId)?.userId,
+							winnerId: winner,
+							loserId: loser,
+						}
+					})
+					this.userService.addXp(winner, 500);
+				}
+			}
+
+			// To-Do: Disconnect Players and remove them from game list
+			const opp: PlayerInfo = this.playerInfoMap.get(guestId);
+
+			opp.playerSocket.emit('onTargetDisconnect');
+
+			this.games.delete(game);
+		}
+	}
 
 
-      // Create a new game instance for the client
-      const game = new GameState(width, height, `${mode}`);
-      this.games.set(client.id, game);
-      console.log("Player 1 = ", client.id);
+	// Handler for starting a match
+	@SubscribeMessage('startMatch')
+	startMatch(client: Socket, mode: string) {
 
-      // Perform necessary setup for offline or AI games
-      if (mode === 'offline') {
-        game.initLeftPaddle(client.id);
-        game.initRightPaddle(client.id);
-        this.broadcastGameState();
-        client.join('offlineRoom'); // Join an offline room
-        console.log(`Player ${client.id} joined the offline room.`);
-      } else if (mode === 'ai') {
-        game.initLeftPaddle(client.id);
-        game.initRightPaddle(client.id);
-        this.broadcastGameState();
-        client.join('aiRoom'); // Join an AI room
-        console.log(`Player ${client.id} joined the AI room.`);
-      }
-    }
-    this.server.emit('connected', client.id);
-  }
+		const userInfo = this.playerInfoMap.get(client.id);
 
-  handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
-    this.games.delete(client.id);
-    this.broadcastGameState();
-  }
+		if (userInfo) {
+			const userId = userInfo.userId;
 
-  @SubscribeMessage('updatePaddleScale')
-  updatePaddleScale(client: Socket, canvas: CanvasConfig) {
-    const game = this.games.get(client.id);
-    if (game) {
-      game.updatePaddleScale(client.id, canvas);
-    }
-  }
+			for (const [playerId, playerInfo] of this.playerInfoMap) {
+				if (playerInfo.userId === userId) {
+					const game: GameState | null = this.findGame(playerId);
+					if (game) {
+						console.log(`Player ${client.id} is already in a game.`);
+						client.emit('alreadyWaiting');
+						return;
+					}
 
-  @SubscribeMessage('updatePaddleMovement')
-  updatePaddleMovement(client: Socket, sideMovement: string) {
-    const game = this.games.get(client.id);
-    if (game) {
-      game.updatePaddleMovement(client.id, sideMovement[0], sideMovement[1]);
-    }
-  }
+					if (mode === 'online' && this.onlinePlayersQueue.some(socket => socket.id === playerId)) {
+						console.log(`Player ${client.id} is already waiting for an online game.`);
+						client.emit('alreadyWaiting');
+						return;
+					}
+				}
+			}
+		}
+		const gameInfo: GameState | null = this.findGame(client.id);
+		// Check if the player is already in a game
+		if (gameInfo) {
+			console.log(`Player ${client.id} is already in a game.`);
+			client.emit('alreadyInGame', { message: 'You are already in a game.' });
+			return;
+		}
 
-  private updateGameState() {
-    this.games.forEach((game, clientId) => {
-      game.updateGameState();
-    });
-  }
+		// Check if the player is already waiting for an online game
+		if (mode === 'online' && this.onlinePlayersQueue.includes(client)) {
+			console.log(`Player ${client.id} is already waiting for an online game.`);
+			client.emit('alreadyWaiting', { message: 'You are already waiting for an online game.' });
+			return;
+		}
 
-  private broadcastGameState() {
-    this.games.forEach((game, clientId) => {
-      game.updateGameState();
-      this.server.to(clientId).emit('updateGameState', game.getGameState());
+		if (mode === 'online') {
+			this.handleOnlineMatch(client);
+		} else if (mode === 'ai') {
+			this.handleAIMatch(client);
+		} else if (mode === 'offline') {
+			this.handleOfflineMatch(client);
+		} else {
+			client.send("Unavailable mode");
+		}
+	}
 
-    });
-  }
+	// Handler for starting an online match
+	private handleOnlineMatch(client: Socket) {
+		this.onlinePlayersQueue.push(client);
+		console.log(`Player ${client.id} is looking for an online game.`);
+		client.emit('matchStatus', { matchStatus: false });
 
-  private startGameLoop() {
-    setInterval(() => {
-      this.updateGameState();
-      this.broadcastGameState();
-    }, 1000 / 60); // 60 times per second
-  }
+		if (this.onlinePlayersQueue.length >= 2) {
+			this.createOnlineMatch();
+		}
+	}
 
-  afterInit() {
-    this.startGameLoop();
-  }
+	// Method to create an online match
+	private createOnlineMatch() {
+		const player1 = this.onlinePlayersQueue.shift()!;
+		const player2 = this.onlinePlayersQueue.shift()!;
+
+		console.log(`Starting a game between ${player1.id} : ${player2.id}`)
+
+		const game = new GameState(width, height, 'online');
+
+		this.games.set(game, { hostId: player1.id, guestId: player2.id });
+
+		game.initLeftPaddle(player1.id);
+		game.initRightPaddle(player2.id);
+
+		game.setHostId(player1.id);
+		game.setGuestId(player2.id);
+
+		player1.emit('matchStatus', { matchStatus: true });
+		player2.emit('matchStatus', { matchStatus: true });
+
+		const player1Data = this.playerInfoMap.get(player1.id);
+		const player2Data = this.playerInfoMap.get(player2.id);
+
+		player1.emit('oppenentData', {
+			userId: player2Data?.userId,
+			username: player2Data?.username,
+			image: player2Data?.image,
+			character: player2Data?.character,
+			host: true,
+		});
+
+		player2.emit('oppenentData', {
+			userId: player1Data?.userId,
+			username: player1Data?.username,
+			image: player1Data?.image,
+			character: player1Data?.character,
+			host: false,
+		});
+
+		const roomName = `onlineRoom_${player1.id}${player2.id}`;
+		const roomData: RoomData = {
+			roomId: roomName,
+			players: [player1.id, player2.id],
+		};
+
+		this.activeRooms.set(roomName, roomData);
+
+		player1.join(roomName);
+		player2.join(roomName);
+
+		this.updateAndBroadcastGameState();
+	}
+
+	// Handler for starting an AI match
+	private handleAIMatch(client: Socket) {
+		const game = new GameState(width, height, 'ai');
+		this.games.set(game, { hostId: client.id, guestId: client.id });
+
+		game.setHostId(client.id);
+		game.setGuestId(client.id);
+
+		game.initLeftPaddle(client.id);
+		game.initRightPaddle(client.id);
+		client.join('aiRoom');
+		this.updateAndBroadcastGameState();
+	}
+
+	// Handler for starting an offline match
+	private handleOfflineMatch(client: Socket) {
+		const game = new GameState(width, height, 'offline');
+		this.games.set(game, { hostId: client.id, guestId: client.id });
+
+		game.setHostId(client.id);
+		game.setGuestId(client.id);
+		game.initLeftPaddle(client.id);
+		game.initRightPaddle(client.id);
+		client.join('offlineRoom');
+		this.updateAndBroadcastGameState();
+	}
+
+	// Handler for updating paddle scale
+	@SubscribeMessage('updatePaddleScale')
+	updatePaddleScale(client: Socket, canvas: CanvasConfig) {
+		const game = this.findGame(client.id);
+		if (game) {
+			game.updatePaddleScale(client.id, canvas);
+		}
+	}
+
+	// Handler for updating paddle movement
+	@SubscribeMessage('updatePaddleMovement')
+	updatePaddleMovement(client: Socket, sideMovement: string) {
+		const game = this.findGame(client.id);
+		if (game) {
+			game.updatePaddleMovement(client.id, sideMovement[0], sideMovement[1]);
+		}
+	}
+
+	private findPlayerInfo(userId) {
+		let user: PlayerInfo | null = null;
+		this.playerInfoMap.forEach((value) => {
+			if (userId === value.userId) {
+				user = value;
+				return;
+			}
+		})
+
+		return user;
+	}
+
+	@SubscribeMessage('friendRequest')
+	async friendRequest(client: Socket, { senderId, receiverId }) {
+		const user = this.playerInfoMap.get(client.id);
+
+		if (user) {
+			if (user.userId != senderId && user.userId != receiverId) {
+				client.send("Unauthorized!");
+			}
+
+			// Check receiverId existance
+			const newFriend = this.prismaService.user.findUnique({
+				where: {
+					id: receiverId
+				}
+			})
+
+			if (!newFriend) {
+				client.send("No Friend is found!");
+				return;
+			}
+
+			const data: CreateFriendInput = {
+				senderId: senderId,
+				receiverId: receiverId,
+				isAccepted: false,
+			}
+
+			const newData = await this.friendService.createFriend(data);
+
+			console.log("Request Sent");
+			// send notification to the receiver friend
+			if (newData) {
+				client.emit("RequestSent", { friendId: newData.id });
+
+				const friendInfo = this.findPlayerInfo(receiverId);
+
+				if (friendInfo) {
+					friendInfo.playerSocket.emit('RequestReceived', { username: user.username, userId: user.userId, image: user.image, friendId: newData.id });
+				}
+			}
+		}
+	}
+
+	@SubscribeMessage('acceptRequest')
+	async acceptRequest(client: Socket, data) {
+		const user = this.playerInfoMap.get(client.id);
+
+		if (user) {
+			// Check receiverId existance
+			const newFriend: Friend = await this.prismaService.friend.findUnique({
+				where: {
+					id: data.friendId
+				}
+			});
+
+			if (!newFriend) {
+				client.send("No Friend is found!");
+				return;
+			}
+
+			const update = await this.friendService.updateAccept(user.userId, data.friendId);
+
+			if (update) {
+				const userFriend = this.findPlayerInfo(newFriend.senderId);
+
+				client.emit('AcceptedRequest', { friendId: data.friendId });
+				if (userFriend)
+					userFriend.playerSocket.emit("RequestAccepted", { username: user.username, userId: user.userId, image: user.image })
+			}
+		}
+	}
+	@SubscribeMessage('removeFriend')
+	async removeFriend(client: Socket, data) {
+		const user = this.playerInfoMap.get(client.id);
+
+		if (user) {
+			// Check receiverId existance
+			const newFriend: Friend = await this.prismaService.friend.findUnique({
+				where: {
+					id: data.friendId
+				}
+			});
+
+			if (!newFriend) {
+				client.send("No Friend is found!");
+				return;
+			}
+
+			const deleteFriend = await this.friendService.deleteFriend(user.userId, data.friendId);
+
+			if (deleteFriend) {
+				const receiver = this.findPlayerInfo(newFriend.receiverId);
+				const sender = this.findPlayerInfo(newFriend.senderId);
+
+				// client.emit('FriendRemoved', { friendId: data.friendId });
+				if (sender)
+					sender.playerSocket.emit("FriendRemoved");
+				if (receiver)
+					receiver.playerSocket.emit("FriendRemoved");
+			}
+		}
+	}
+
+	private startGameLoop() {
+		setInterval(() => {
+			this.updateAndBroadcastGameState();
+		}, 1000 / 60); // 60 times per second
+	}
 }

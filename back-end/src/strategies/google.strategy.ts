@@ -70,7 +70,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         }
         user = await this.userService.createUser(data);
         const res = await this.achievementService.createAchievement(user.id, Achievement.welcome);
-        console.log('RESULTAT = ', res);
       }
     } catch (e) {
       console.log(e)

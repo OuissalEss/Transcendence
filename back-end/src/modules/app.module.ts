@@ -65,10 +65,6 @@ import { AuthService } from 'src/services/auth.service';
       provide: APP_GUARD,
       useClass: JwtGuard
     },
-    //    {
-    //      provide: APP_GUARD,
-    //      useClass: ThrottlerGuard
-    //    }
   ],
 })
 export class AppModule { }

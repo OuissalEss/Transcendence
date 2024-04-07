@@ -42,8 +42,6 @@ export class TwoFactorAuthController {
         @GetUser() user, // Assuming this retrieves the authenticated user
         @Body(ValidationPipe) twoFaAuthDto: TwoFaAuthDto,
     ) {
-        console.log(twoFaAuthDto);
-
         // Activate two-factor authentication
         const activation = await this.twoFactorAuthService.activationOfTwoFa(
             twoFaAuthDto.code,

@@ -32,7 +32,6 @@ export class AuthController {
     @Res() res: Response
 
   ) {
-    console.log(data);
     const token: JwtResponse = await this.authService.getJwttoken(data.user.id, false, data.firstLogIn);
 
     res.cookie('token', token['access_token'], {
@@ -55,7 +54,6 @@ export class AuthController {
     @GetUser() data: { user: User, firstLogIn: boolean },
     @Res() res: Response
   ) {
-    console.log(data);
     const token: JwtResponse = await this.authService.getJwttoken(data.user.id, false, data.firstLogIn);
 
     res.cookie('token', token['access_token'], {

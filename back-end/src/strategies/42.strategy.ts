@@ -10,6 +10,7 @@ import { CreateUserInput } from "../services/dto/create-user.input";
 
 import { UserService } from 'src/services/user.service';
 import { User } from 'src/entities/user.entity';
+
 @Injectable()
 export class FTStrategy extends PassportStrategy(Strategy, '42') {
   constructor(
@@ -72,7 +73,6 @@ export class FTStrategy extends PassportStrategy(Strategy, '42') {
           provider: "42",
           providerId: `${profile.id}`
         }
-        console.log(data);
         user = await this.userService.createUser(data);
       }
     } catch (e) {

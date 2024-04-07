@@ -240,6 +240,9 @@ type Match {
   host_score_m: Int!
   id: String!
 
+  """User who lost the match"""
+  loserId: String
+
   """Start time of the match"""
   start_m: DateTime!
 
@@ -295,6 +298,7 @@ type Mutation {
 
   """Updates the score of the host in a match."""
   updateHostScore(host_score: Float!, matchId: String!): Match!
+  updateIsRead(id: String!): Notification!
   updateLastName(firstname: String!): User!
 
   """Updates the winner of a match."""
@@ -313,11 +317,17 @@ type Notification {
   """Read status of the notification"""
   isRead: Boolean!
 
+  """User who receive the notification"""
+  receiver: User!
+
   """User who received the notification"""
-  receiverId: User!
+  receiverId: String!
+
+  """User who receive the notification"""
+  sender: User!
 
   """User who sent the notification"""
-  senderId: User!
+  senderId: String!
 
   """Time the notification was sent"""
   time: DateTime!
@@ -368,7 +378,7 @@ type Query {
   """Retrieves a specific match by its ID."""
   getMatchById(id: String!): Match!
   getMessageById(id: String!): Message!
-  getNotificationById(id: String!): Notification!
+  getNotificationById(id: String!): [Notification!]!
 
   """Retrieves all blocks with their associated data"""
   getUserBlocked: [Block!]!
@@ -387,6 +397,7 @@ type Query {
 
   """Retrieves authenticated user information"""
   getUserInfo: User!
+  getUserNotifications: [Notification!]!
 
   """Searches for users based on the provided query"""
   searchUsers(query: String!): [User!]!
@@ -436,6 +447,9 @@ type User {
 
   """User last name"""
   lastName: String!
+
+  """Matches where the user is the loser"""
+  loser: [Match!]!
 
   """User received friend requests"""
   receive: [Friend!]!

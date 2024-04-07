@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import User from "../types/user-interface";
 import { useQuery, gql } from "@apollo/client";
-import {useAuth} from "../provider/authProvider.tsx";
-import {useSocket} from "../App.tsx";
+import { useAuth } from "../provider/authProvider.tsx";
+// import { useSocket } from "../App.tsx";
 
 const USER_DATA = gql`
-        query {
+        query UserData {
             getUserFriends {
                 id
                 username
@@ -28,21 +28,91 @@ interface Friend {
     status: string,
     image: string,
 }
+
+const USER_DATA_QUERY = `
+    query UserData {
+        getUserFriends {
+            id
+            username
+            status
+            avatar {
+                id
+                filename
+            }
+            createdAt
+        }
+        getUserInfo {
+            id
+            email
+            username
+            xp
+            character
+            connection {
+                provider
+                is2faEnabled
+            }
+            avatar {
+              filename
+            }
+            achievements{
+                achievement
+                createdAt
+            }
+            blocking {id}
+            winner{id}
+            loser{id}
+            host{id}
+            guest{id}
+            createdAt
+        }
+    }
+`;
 const Friends = () => {
-    const { friends, userData } = useSocket();
+    // const { userData } = useSocket();
+    const [userData, setUserData] = useState();
     const [FriendsList, setFriendsList] = useState<Friend[]>([]);
 
-    useEffect(() => {
-        if (!friends) return;
+    const { token } = useAuth();
 
-        const updatedFriendsList: Friend[] = friends.map((friend) => ({
-            id: friend.id,
-            username: friend.username,
-            status: friend.status,
-            image: friend.avatar?.filename || ''
-        }));
-        setFriendsList(updatedFriendsList);
-    }, [friends]);
+    console.log('friend');
+    useEffect(() => {
+        if (!token) return; // If token is not available, do nothing
+
+        fetch('http://localhost:3000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                query: USER_DATA_QUERY
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                return response.json();
+            })
+            .then(({ data }) => {
+                if (data && data.getUserFriends) {
+                    const friends = data.getUserFriends;
+                    const updatedFriendsList: Friend[] = friends.map((friend: any) => ({
+                        id: friend.id,
+                        username: friend.username,
+                        status: friend.status,
+                        image: friend.avatar?.filename || ''
+                    }));
+                    setFriendsList(updatedFriendsList);
+                } if (data && data.getUserInfo) {
+                    setUserData(data.getUserInfo);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching friends:', error);
+            });
+    }, []);
+
 
     return (
         <div>

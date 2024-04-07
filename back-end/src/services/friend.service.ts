@@ -8,6 +8,9 @@ import { User } from "src/entities/user.entity";
 import { UserService } from "./user.service";
 import { AchievementService } from "./user_achievement.service";
 import { Achievement } from "@prisma/client";
+import { NotificationService } from "./notification.service";
+import { CreateNotificationInput } from "./dto/create-notification.input";
+import { NotifType as NotificationType } from '@prisma/client';
 
 @Injectable()
 export class FriendService {
@@ -15,6 +18,7 @@ export class FriendService {
     private prisma: PrismaService,
     private userService: UserService,
     private achievementService: AchievementService,
+    private notificationService: NotificationService,
   ) { }
 
   /**
@@ -29,8 +33,10 @@ export class FriendService {
 
   async getFriendById(friendId: string): Promise<Friend> {
     // Check if the provided userId is a valid id
-    let friendObject = this.prisma.friend.findUnique({
-      where: { id: friendId },
+    let friendObject = await this.prisma.friend.findUnique({
+      where: {
+        id: friendId
+      },
       include: friendIncludes
     });
 
@@ -49,7 +55,7 @@ export class FriendService {
       const friends: Friend[] = await this.getAllFriends();
       const friendList: User[] = [];
 
-      (await friends).map((value: Friend, index: number) => {
+      friends.map((value: Friend, index: number) => {
         if (value.sender && value.sender.id === userId && value.isAccepted === true) {
           friendList.push(value.receiver);
         } else if (value.receiver && value.receiver.id === userId && value.isAccepted === true) {
@@ -100,14 +106,26 @@ export class FriendService {
   }
 
   async createFriend(createFriendInput: CreateFriendInput): Promise<Friend> {
-    return this.prisma.friend.create({
-      data: {
+    try {
+      const createdFriendShip = this.prisma.friend.create({
+        data: {
+          senderId: createFriendInput.senderId,
+          receiverId: createFriendInput.receiverId,
+          isAccepted: false,
+        },
+        include: friendIncludes
+      });
+      const notifData: CreateNotificationInput = {
+        type: NotificationType.FRIEND_REQUEST,
+        isRead: false,
         senderId: createFriendInput.senderId,
         receiverId: createFriendInput.receiverId,
-        isAccepted: false,
-      },
-      include: friendIncludes
-    });
+      }
+      this.notificationService.createNotification(notifData);
+      return createdFriendShip;
+    } catch (e) {
+      throw new ForbiddenException("Unable to create FriendShip");
+    }
   }
 
   async updateAccept(userId: string, friendId: string): Promise<Friend> {
@@ -119,27 +137,27 @@ export class FriendService {
     let friendObject: Friend = await this.getFriendById(friendId);
     if (!friendObject) throw new NotFoundException("Friend doesn't exist");
     try {
-      const friendship = this.prisma.friend.update({
+      const friendship = await this.prisma.friend.update({
         where: {
           id: friendId,
-          receiverId: (await userObject).id,
+          receiverId: userObject.id,
         },
         data: {
           isAccepted: true
         },
         include: friendIncludes
       });
-          const id_receiver = (await friendship).receiverId;
-          const id_sender = (await friendship).senderId;
+      const id_receiver = friendship.receiverId;
+      const id_sender = friendship.senderId;
       this.userService.addXp(id_receiver, 100);
       this.userService.addXp(id_sender, 100);
       let friendsOfReceiver = await this.getFriendList(id_receiver);
       let friendsOfSender = await this.getFriendList(id_sender);
-      if (friendsOfReceiver.length == 1){
+      if (friendsOfReceiver.length == 1) {
         await this.achievementService.createAchievement(id_receiver, Achievement.social);
       }
-      if (friendsOfSender.length == 1){
-          await this.achievementService.createAchievement(id_sender, Achievement.social);
+      if (friendsOfSender.length == 1) {
+        await this.achievementService.createAchievement(id_sender, Achievement.social);
       }
       return friendship;
     } catch (e) {

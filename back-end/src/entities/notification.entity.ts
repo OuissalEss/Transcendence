@@ -48,7 +48,7 @@ export class Notification {
    * User who sent the notification.
    * @type {User}
    */
-  @Field(() => User, { description: 'User who sent the notification' })
+  @Field(() => String, { description: 'User who sent the notification' })
   @IsString({ message: 'Sender ID must be a string' })
   @IsNotEmpty({ message: 'Sender ID cannot be empty' })
   senderId: String;
@@ -57,10 +57,16 @@ export class Notification {
    * User who received the notification.
    * @type {User}
    */
-  @Field(() => User, { description: 'User who received the notification' })
+  @Field(() => String, { description: 'User who received the notification' })
   @IsString({ message: 'Receiver ID must be a string' })
   @IsNotEmpty({ message: 'Receiver ID cannot be empty' })
   receiverId: String;
+
+  @Field(() => User, { description: 'User who receive the notification' })
+  sender?: User;
+
+  @Field(() => User, { description: 'User who receive the notification' })
+  receiver?: User;
 
   /**
    * The date when the notification was created.

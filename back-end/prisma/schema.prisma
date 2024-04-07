@@ -77,6 +77,7 @@ model User {
 	host			Match[]				@relation(name: "host")
 	guest			Match[]				@relation(name: "guest")
 	winner			Match[]				@relation(name: "winner")
+	loser			Match[]				@relation(name: "loser")
 
 	user			ChannelUser[]		@relation(name: "user")
 
@@ -166,10 +167,12 @@ model Match {
 	hostId			String
 	guestId		 	String
 	winnerId		String?
+	loserId		String?
 
 	host			User		@relation(name: "host", fields: [hostId], references: [id])
 	guest			User		@relation(name: "guest", fields: [guestId], references: [id])
 	winner			User?		@relation(name: "winner", fields: [winnerId], references: [id])
+	loser			User?		@relation(name: "loser", fields: [loserId], references: [id])
 
 	createdAt 		DateTime 	@default(now())
     updatedAt 		DateTime 	@updatedAt

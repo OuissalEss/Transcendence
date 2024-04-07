@@ -7,8 +7,16 @@
  * @property {boolean} connection - Whether to include the friend's connection.
  */
 export const friendIncludes: object = {
-    sender: true,
-    receiver: true
+    sender: {
+        include: {
+            avatar: true
+        }
+    },
+    receiver: {
+        include: {
+            avatar: true
+        }
+    }
 };
 
 // sender: {

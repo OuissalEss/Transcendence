@@ -1,4 +1,5 @@
 import Block from "./block-interface";
+import Match from "./match-interface";
 
 export default interface User {
     xp: number;
@@ -18,4 +19,8 @@ export default interface User {
         achievement: string;
     },
     blocking: Block,
+    winner: Match,
+    loser: Match,
+    host: Match,
+    guest: Match,
 }

@@ -1,0 +1,18 @@
+.containerAIG {
+    margin-top: 40px;
+    color: #3E1256;
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+}
+.containerAIG .center{
+    justify-content: center;
+    align-items: center;
+}
+.containerAIG h1{
+    font-size: 24px;
+    margin-bottom: 90px;
+}
+.containerAIG img{
+    width: 90%;
+}

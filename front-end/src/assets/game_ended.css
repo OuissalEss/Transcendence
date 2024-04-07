@@ -1,0 +1,19 @@
+.containerGE {
+    margin-top: 50px;
+    color: #3E1256;
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+}
+.containerGE .center{
+    justify-content: center;
+    align-items: center;
+}
+.containerGE h1{
+    font-size: 35px;
+    margin-bottom: 50px;
+}
+
+.containerGE .player-name{
+    font-size: 11px;
+}

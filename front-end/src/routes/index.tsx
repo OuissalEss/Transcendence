@@ -69,6 +69,10 @@ const Routes = () => {
                     path: "/profiles",
                     element: <Profiles />,
                 },
+                {
+                    path: "/about",
+                    element: <About />,
+                },
             ],
         },
     ];

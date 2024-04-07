@@ -268,8 +268,6 @@ export class UserService {
         // Check if the provided userId is a valid id
         let userObject: User = await this.getUserById(userId);
         if (!userObject) throw new NotFoundException("User does't exist");
-
-        console.log("USER = ", userObject);
         try {
             await this.prisma.avatar.update({
                 where: { id: userObject.avatar.id },
@@ -304,7 +302,6 @@ export class UserService {
             });
             return userObject;
         } catch (e) {
-            console.log(e);
             throw new ForbiddenException("Unable to update Otp");
         }
     }

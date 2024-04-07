@@ -12,6 +12,7 @@ import { Reflector } from '@nestjs/core';
 
 import { IS_PUBLIC_KEY } from 'src/auth/public-metadata';
 import { Payload } from "src/services/types/auth.service";
+import { WsException } from "@nestjs/websockets";
 
 
 @Injectable()
@@ -34,8 +35,31 @@ export class JwtGuard implements CanActivate {
 
     if (gqlContext.getType() === 'graphql') {
       return this.handleGraphqlRequest(context);
+    } else if (context.getType() === 'ws') {
+      this.handleWsRequest(context);
     } else {
       return this.handleRestRequest(context);
+    }
+  }
+
+  async handleWsRequest(context: ExecutionContext): Promise<boolean> {
+    const client = context.switchToWs().getClient();
+    const token = client.handshake.query.token;
+
+    if (!token) {
+      client.disconnect('Unauthorized: Token missing');
+      return false; // Return false instead of throwing an exception
+    }
+
+    try {
+      const user = await this.jwtService.verifyAsync(token, {
+        secret: jwtConstants.secret,
+      });
+      client.user = user; // Attach user information to the client
+      return true;
+    } catch (error) {
+      client.disconnect('Unauthorized: Invalid token');
+      return false; // Return false if verification fails
     }
   }
 

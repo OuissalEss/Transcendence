@@ -15,7 +15,6 @@ export class AppController {
 
   @Post()
   async router(@Req() req: Request, @Body() body: Body): Promise<string> {
-    console.log(req);
     return `HELLO ${body}`
   }
 

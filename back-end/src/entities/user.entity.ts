@@ -209,6 +209,17 @@ export class User {
   winner?: Match[];
 
   /**
+   * Matches where the user is the winner (nullable).
+   * @type {Match[]}
+   */
+  @IsNotEmpty({ message: 'Matches must not be empty' })
+  @Field(() => [Match], {
+    description: 'Matches where the user is the loser',
+    defaultValue: [],
+  })
+  loser?: Match[];
+
+  /**
    * User's channel participation (nullable).
    * @type {ChannelUser[]}
    */

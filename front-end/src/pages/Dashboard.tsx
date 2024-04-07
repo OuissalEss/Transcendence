@@ -41,7 +41,9 @@ import AegonLeft from '/Characters/Aegon/02.png';
 import AegonRight from '/Characters/Aegon/01.png';
 import AegonInfos from '/Characters/Aegon/Infos.png';
 import Notifications from "../components/Notifications";
-import {useSocket} from "../App.tsx";
+// import { useSocket } from "../App.tsx";
+import User from "../types/user-interface";
+import { useAuth } from "../provider/authProvider";
 
 
 const characters = [
@@ -69,121 +71,198 @@ const topFiveTest = [
   { id: '', name: '', image: '', xp: 0, wins: 0, leaderboard: Leaderboard4 },
   { id: '', name: '', image: '', xp: 0, wins: 0, leaderboard: Leaderboard5 },
 ];
-export default function Dashboard() {
-  const { users, userData } = useSocket();
-  const [topFive, setTopFive] = useState<TopFive[]>(); // State variable for top five players
 
-
-  useEffect(() => {
-    if (!users || !userData) return;
-    let updatedTopFive: TopFive[] = users.slice(0, 5).map((player) => ({
-      id: player.id,
-      name: player.username,
-      image: player.avatar?.filename || '/Avatars/default.jpeg',
-      xp: player.xp,
-      wins: player.winner.length,
-      leaderboard: Leaderboard1
-    }));
-    for(let i = 0; i < 5; i++){
-      topFiveTest[i].id = updatedTopFive[i]?.id;
-      topFiveTest[i].name = updatedTopFive[i]?.name;
-      topFiveTest[i].image = updatedTopFive[i]?.image;
-      topFiveTest[i].xp = updatedTopFive[i]?.xp;
-      topFiveTest[i].wins = updatedTopFive[i]?.wins;
+const USER_DATA = `
+    query { 
+        getUserFriends {
+            id
+            username
+            status
+            avatar{filename}
+            createdAt
+        }
+        getUserInfo {
+            id
+            email
+            username
+            xp
+            character
+            connection {
+                provider
+                is2faEnabled
+            }
+            avatar {
+              filename
+            }
+            achievements{
+                achievement
+                createdAt
+            }
+            blocking {id}
+            winner{id}
+            loser{id}
+            host{id}
+            guest{id}
+            createdAt
+        }
+        getAllUsers {
+            id
+            username
+            avatar {
+                filename 
+            }
+            xp
+            winner{id}
+        }
     }
+`;
 
-    setTopFive(topFiveTest);
-  }, [users, userData]);
+export default function Dashboard() {
+  const { token } = useAuth();
+  const [topFive, setTopFive] = useState<TopFive[]>();
+  const [userData, setUserData] = useState<User>();
+
+  console.log('dashboard');
+  useEffect(() => {
+    fetch('http://localhost:3000/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        query: USER_DATA
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        return response.json();
+      })
+      .then(({ data }) => {
+        if (data) {
+          const users = data.getAllUsers;
+          const sortedUsers: User[] = [...users];
+          sortedUsers.sort((a, b) => { return b.xp - a.xp });
+          let updatedTopFive: TopFive[] = sortedUsers.slice(0, 5).map((player) => ({
+            id: player.id,
+            name: player.username,
+            image: player.avatar?.filename || '/Avatars/default.jpeg',
+            xp: player.xp,
+            wins: player.winner.length,
+            leaderboard: Leaderboard1
+          }));
+          updatedTopFive.sort((a, b) => {
+            if (b.xp == a.xp)
+              return b.wins - a.wins
+          });
+          for (let i = 0; i < 5; i++) {
+            topFiveTest[i].id = updatedTopFive[i]?.id;
+            topFiveTest[i].name = updatedTopFive[i]?.name;
+            topFiveTest[i].image = updatedTopFive[i]?.image;
+            topFiveTest[i].xp = updatedTopFive[i]?.xp;
+            topFiveTest[i].wins = updatedTopFive[i]?.wins;
+          }
+          setTopFive(topFiveTest);
+          setUserData(data.getUserInfo);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching friends:', error);
+      });
+
+  }, []);
 
   const index = characters.findIndex(character => character.name === userData?.character);
   const myCharacter = characters[index];
-
+  console.log("---User--- = ", userData);
   return (
-      <main className="flex flex-col items-center justify-between p-24 ">
+    <main className="flex flex-col items-center justify-between p-24 ">
 
-        <div className="Login">
-          <header className="Login-header">
-            <div className="SearchBarD">
-              <SearchBar />
+      <div className="Login">
+        <header className="Login-header">
+          <div className="SearchBarD">
+            <SearchBar />
+          </div>
+          <div className="NotificationBarD">
+            <Notifications />
+          </div>
+          <div className="WelcomeMssg">
+            <h1>Welcome, {userData?.username}!</h1>
+          </div>
+          <div className="Character">
+            <h1>Character</h1>
+            <div className="CharacterBar">
+              <p>{myCharacter?.name}</p>
             </div>
-            <div className="NotificationBarD">
-              <Notifications />
-            </div>
-            <div className="WelcomeMssg">
-              <h1>Welcome, {userData?.username}!</h1>
-            </div>
-            <div className="Character">
-              <h1>Character</h1>
-              <div className="CharacterBar">
-                <p>{myCharacter?.name}</p>
-              </div>
-            </div>
-            <div className="TopFivePlayers">
-                <h1>Top 5 players</h1>
+          </div>
+          <div className="TopFivePlayers">
+            <h1>Top 5 players</h1>
 
-                {topFive?.map((player, index) => (
-                  player.name ? (
-                    <Link key={index} to={`/profiles?id=${player.id}`}>
-                      <div className={`AvatarContainer${index + 1}`}>
-                        <h1>{player.name}</h1>
-                        <p>{player.xp} xp | {player.wins} wins</p>
-                          <img
-                            src={player.image}
-                            alt={`Top${index + 1}`}
-                            className={`Top${index + 1}`}
-                          />
-                          {index < 3 &&
-                            <img
-                              src={player.leaderboard}
-                              className={`Leaderboard${index + 1}`}
-                              alt={`Leaderboard${index + 1}`}
-                            />
-                          }
-                      </div>
-                    </Link>
-                  ) : null
-                ))}
-            </div>
+            {topFive?.map((player, index) => (
+              player.name ? (
+                <Link key={index} to={`/profiles?id=${player.id}`}>
+                  <div className={`AvatarContainer${index + 1}`}>
+                    <h1>{player.name}</h1>
+                    <p>{player.xp} xp | {player.wins} wins</p>
+                    <img
+                      src={player.image}
+                      alt={`Top${index + 1}`}
+                      className={`Top${index + 1}`}
+                    />
+                    {index < 3 &&
+                      <img
+                        src={player.leaderboard}
+                        className={`Leaderboard${index + 1}`}
+                        alt={`Leaderboard${index + 1}`}
+                      />
+                    }
+                  </div>
+                </Link>
+              ) : null
+            ))}
+          </div>
 
-            <div className="Question">
-              <h1>Up for a game?</h1>
+          <div className="Question">
+            <h1>Up for a game?</h1>
+          </div>
+          <div className="OnlineBar">
+            <h1>Online</h1>
+            <p>Challenge a <br></br> random player!</p>
+          </div>
+          <div className="OfflineBar">
+            <h1>Offline</h1>
+            <p>Challenge a <br></br> friend offline!</p>
+          </div>
+          <div className="RobotBar">
+            <h1>Robot</h1>
+            <p>Test your skills<br></br>against a robot!</p>
+          </div>
+          <Link to="/game/pong?mode=online">
+            <div className="PlayNow1">
+              <p>Play now</p>
             </div>
-            <div className="OnlineBar">
-              <h1>Online</h1>
-              <p>Challenge a <br></br> random player!</p>
+          </Link>
+          <Link to="/game/pong?mode=offline">
+            <div className="PlayNow2">
+              <p>Play now</p>
             </div>
-            <div className="OfflineBar">
-              <h1>Offline</h1>
-              <p>Challenge a <br></br> friend offline!</p>
+          </Link>
+          <Link to="/game/pong?mode=ai">
+            <div className="PlayNow3">
+              <p>Play now</p>
             </div>
-            <div className="RobotBar">
-              <h1>Robot</h1>
-              <p>Test your skills<br></br>against a robot!</p>
-            </div>
-            <Link to="/game/pong?mode=online">
-              <div className="PlayNow1">
-                <p>Play now</p>
-              </div>
-            </Link>
-            <Link to="/game/pong?mode=offline">
-              <div className="PlayNow2">
-                <p>Play now</p>
-              </div>
-            </Link>
-            <Link to="/game/pong?mode=ai">
-              <div className="PlayNow3">
-                <p>Play now</p>
-              </div>
-            </Link>
-            <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" />
-            <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" />
-            <img src={Robot} alt="Robot" className="RobotPic" />
-            <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" />
-            <img src={myCharacter?.Right} className="DashRight" alt="DashRight" />
-            <img src={myCharacter?.infos} className="AuroraInfos" alt="AuroraInfos" />
-          </header>
-        </div>
-      </main>
+          </Link>
+          <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" />
+          <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" />
+          <img src={Robot} alt="Robot" className="RobotPic" />
+          <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" />
+          <img src={myCharacter?.Right} className="DashRight" alt="DashRight" />
+          <img src={myCharacter?.infos} className="AuroraInfos" alt="AuroraInfos" />
+        </header>
+      </div>
+    </main>
   )
 }
 

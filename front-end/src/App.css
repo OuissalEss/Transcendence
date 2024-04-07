@@ -20,7 +20,7 @@
 /* --------------- Body --------------- */
 
 body {
-  background: url('/bg01.png') center/cover no-repeat;
+  background: url('/bg.png') center/cover no-repeat;
   padding: 0px;
   display: flex;
   justify-content: center;

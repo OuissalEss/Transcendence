@@ -49,6 +49,47 @@ import Alert from '../components/Alert';
 import TwoFactorAuthActivation from '../components/TwoFactorAuthActivation';
 import { useSocket } from '../App';
 import Block from '../types/block-interface';
+import { useAuth } from '../provider/authProvider';
+import GameLoading from '../components/GameLoading';
+
+const USER_DATA_QUERY = `
+    query UserData {
+        getUserInfo {
+            id
+            email
+            username
+            xp
+            character
+            connection {
+                provider
+                is2faEnabled
+            }
+            avatar {
+              filename
+            }
+            achievements{
+                achievement
+                createdAt
+            }
+            blocking {id}
+            winner{id}
+            loser{id}
+            host{id}
+            guest{id}
+            createdAt
+        }
+        getUserBlocked{
+            id
+            blockedUser{
+                id
+                username
+                avatar {
+                    filename
+                }
+            }
+        }
+    }
+`;
 
 const USER_BLOCKED = gql`
     query {
@@ -112,8 +153,8 @@ function Settings() {
     const [alertMessage, setAlertMessage] = useState('');
     const [isShowAlert, setIsShowAlert] = useState(false);
     const [isShowTFA, setIsShowTFA] = useState(false);
+    const { token } = useAuth();
 
-    const navigate = useNavigate();
     const [characterChanged, setCharacterChanged] = useState(false);
     const [editedUsername, setEditedUsername] = useState('');
     const [avatarImage, setAvatarImage] = useState<string | ArrayBuffer | null>(null);
@@ -131,32 +172,41 @@ function Settings() {
     const [desactivate2Fa] = useMutation(UPDATE_TFA);
 
     const [blocked, setBlocked] = useState<Block[]>();
-
-    const { userData } = useSocket();
+    const [isLoading, setLoading] = useState(true);
+    const [userData, setUserData] = useState<User>();
 
     useEffect(() => {
-        if ( !userData) return;
+        if (!token) return; // If token is not available, do nothing
 
-        // setBlocked2(blocked);
-    }, [ userData]);
+        fetch('http://localhost:3000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                query: USER_DATA_QUERY
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                return response.json();
+            })
+            .then(({ data }) => {
+                if (data) {
+                    setLoading(false);
+                    setUserData(data.getUserInfo);
+                    setBlocked(data.getUserBlocked);
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                console.error('Error fetching friends:', error);
+            });
+    }, []);
 
-
-  const { data, loading, error } = useQuery(USER_BLOCKED, { variables: { } });
-
-  useEffect(() => {
-    try {
-      if (error) {
-        throw new Error('Failed to fetch user data');
-      }
-      if (data) {
-        setBlocked(data.getUserBlocked);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }, [data, loading, error]);
-
-    console.log("Blocked = ", blocked);
     const blockedList = blocked?.map((b: Block) => ({
         b_id: b.id,
         id: b.blockedUser.id,
@@ -167,7 +217,7 @@ function Settings() {
     const userAvatar = userData?.avatar?.filename;
     const index = characters.findIndex(character => character.name === userData?.character);
     const [currentCharacterIndex, setCurrentCharacterIndex] = useState(index);
-    
+
     const handleLeftChevronClick = () => {
         setCurrentCharacterIndex((prevIndex) => (prevIndex - 1 + characters.length) % characters.length);
         setCharacterChanged(true);
@@ -201,6 +251,7 @@ function Settings() {
     };
 
     const currentCharacter = characters[currentCharacterIndex];
+
     const myCharacter = characters[index];
 
 
@@ -266,7 +317,7 @@ function Settings() {
 
     const handleDesactivate = async () => {
         try {
-            await desactivate2Fa({ variables: { } });
+            await desactivate2Fa({ variables: {} });
             console.log("2fa updated successfully!");
         } catch (error) {
             console.error("Error updating Username:", error.message);
@@ -287,27 +338,27 @@ function Settings() {
                 try {
                     await updateUserCharacter({ variables: { char_name: currentCharacter.name } });
                     console.log("Character updated successfully!");
-                  } catch (error) {
+                } catch (error) {
                     console.error("Error updating character:", error.message);
-                  }
+                }
             }
             if (avatarImage) {
                 const Url = await uploadAvatar();
                 try {
                     await updateUserAvatar({ variables: { avatar_name: Url } });
                     console.log("Avatar updated successfully!");
-                  } catch (error) {
+                } catch (error) {
                     console.error("Error updating Avatar:", error.message);
-                  }
-                
+                }
+
             }
             if (editedUsername) {
                 try {
                     await updateUserName({ variables: { user_name: editedUsername } });
                     console.log("Username updated successfully!");
-                  } catch (error) {
+                } catch (error) {
                     console.error("Error updating Username:", error.message);
-                  }
+                }
             }
             window.location.reload();
         }
@@ -317,10 +368,13 @@ function Settings() {
             await unblockUser({ variables: { block_id: id } });
             console.log("Username updated successfully!");
         } catch (error) {
-             console.error("Error updating Username:", error.message);
+            console.error("Error updating Username:", error.message);
         }
         window.location.reload();
     }
+
+    if (isLoading)
+        return <GameLoading />
     return (
         <div className="Login">
             <header className="Login-header">
@@ -429,7 +483,7 @@ function Settings() {
                     onClick={handleRightChevronClick}
                 />
 
-                {!userData.connection.is2faEnabled ?(
+                {!userData.connection.is2faEnabled ? (
                     <div className="TFA" onClick={showTFA}>
                         <img src={TFAicon} alt="TFA Icon" className="TFAIcon" /><h1>Activate Two-factor authentication</h1>
                     </div>

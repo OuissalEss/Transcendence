@@ -10,23 +10,24 @@ const Chat = () => {
         // socket.emit('message', newMessage);
         setNewMessage('');
     };
+    console.log('chat')
 
     return (
-            <div>
-                <div className="chat">
-                    {messages.map((msg, index) => (
-                        <div key={index}>{msg}</div>
-                    ))}
-                </div>
-                <div className="input">
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                    />
-                    <button onClick={sendMessage}>Send</button>
-                </div>
+        <div>
+            <div className="chat">
+                {messages.map((msg, index) => (
+                    <div key={index}>{msg}</div>
+                ))}
             </div>
+            <div className="input">
+                <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                />
+                <button onClick={sendMessage}>Send</button>
+            </div>
+        </div>
     );
 };
 

@@ -8,78 +8,14 @@ import SearchBar from "../../components/SearchBar";
 import Notifications from "../../components/Notifications";
 
 
-const liveMatches = [
-    {
-        host: "OuissalEs",
-        guest: "OuissalEss",
-        href: "#",
-    },
-    {
-        host: "Player3",
-        guest: "Player7",
-        href: "#",
-    },
-    {
-        host: "Player8",
-        guest: "Player4",
-        href: "#",
-    },
-    {
-        host: "Player1",
-        guest: "Player2",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-    {
-        host: "Player5",
-        guest: "Player9",
-        href: "#",
-    },
-];
+const liveMatches = null;
+// [
+//     {
+//         host: "OuissalEs",
+//         guest: "OuissalEss",
+//         href: "#",
+//     },
+// ];
 
 
 export default function Game() {
@@ -164,24 +100,27 @@ export default function Game() {
                                 <div className="mode-img live">
 
                                     <ol className="matches">
-                                        {liveMatches.map(({ host, guest }, index) => {
-                                            return (
-                                                <li key={index} className="match grid grid-cols-3">
-                                                    <div className="players col-span-2">
-                                                        <span className="text-white">{host}</span>
-                                                        <span> vs </span>
-                                                        <span className="text-white">{guest} </span>
-                                                    </div>
-                                                    <div>
-                                                        <Link to="" className="live-btn transition-all">
-                                                            <span title="watch">
-                                                                <img className="eyesIcon" src="/Icons/eyes2.png" alt="character" />
-                                                            </span>
-                                                        </Link>
-                                                    </div>
-                                                </li>
-                                            );
-                                        })}
+                                        {liveMatches &&
+                                            liveMatches.map(({ host, guest }, index) => {
+                                                return (
+                                                    <li key={index} className="match grid grid-cols-3">
+                                                        <div className="players col-span-2">
+                                                            <span className="text-white">{host}</span>
+                                                            <span> vs </span>
+                                                            <span className="text-white">{guest} </span>
+                                                        </div>
+                                                        <div>
+                                                            <Link to="" className="live-btn transition-all">
+                                                                <span title="watch">
+                                                                    <img className="eyesIcon" src="/Icons/eyes2.png" alt="character" />
+                                                                </span>
+                                                            </Link>
+                                                        </div>
+                                                    </li>
+                                                );
+                                            })
+                                        }
+                                        
                                     </ol>
 
                                 </div>

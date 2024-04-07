@@ -14,6 +14,7 @@ export const userIncludes: object = {
     achievements: true,
     blocking: true,
     winner: true,
+    loser: true,
     host: true,
     guest: true,
 };

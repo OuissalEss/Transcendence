@@ -15,8 +15,8 @@ export class Puck {
     constructor(width, height) {
         this.x = width / 2;
         this.y = height / 2; // Corrected assignment
-        this.xspeed = 2;
-        this.yspeed = 2;
+        this.xspeed = 5;
+        this.yspeed = 5;
         this.r = 10;
         this.width = width;
         this.height = height;
@@ -41,7 +41,6 @@ export class Puck {
         this.y += this.yspeed;
     }
 
-
     private randomAngle(min: number, max: number): number {
         return Math.random() * (max - min) + min;
     }
@@ -51,8 +50,8 @@ export class Puck {
         this.y = this.height / 2;
 
         const angle = this.randomAngle(-Math.PI/4, Math.PI/4);
-        this.xspeed = 3 * Math.cos(angle);
-        this.yspeed = 3 * Math.cos(angle);
+        this.xspeed = 6 * Math.cos(angle);
+        this.yspeed = 6 * Math.cos(angle);
     }
 
     checkPaddleLeft(paddle: Paddle) {
@@ -83,8 +82,8 @@ export class Puck {
                 let diff = this.y - (p.y - p.h/2);
                 let rad = this.radians(45);
                 let angle = this.map(diff, 0, p.h, -rad, rad);
-                this.xspeed = 3 * Math.cos(angle);
-                this.yspeed = 3 * Math.sin(angle);
+                this.xspeed = 6 * Math.cos(angle);
+                this.yspeed = 6 * Math.sin(angle);
                 this.x = p.x + p.w/2 + this.r;
             }
         }
@@ -117,8 +116,8 @@ export class Puck {
             if (this.x < p.x) {
                 let diff = this.y - (p.y - p.h/2);
                 let angle = this.map(diff, 0, p.h, this.radians(225), this.radians(135));
-                this.xspeed = 3 * Math.cos(angle);
-                this.yspeed = 3 * Math.sin(angle);
+                this.xspeed = 6 * Math.cos(angle);
+                this.yspeed = 6 * Math.sin(angle);
                 this.x = p.x - p.w/2 - this.r;
             }
         }

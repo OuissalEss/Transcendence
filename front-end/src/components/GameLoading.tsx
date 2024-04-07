@@ -11,14 +11,17 @@ import Pixie from '/Characters/Stories/Pixie.png'
 import All from '/Characters/Stories/All.png'
 
 const GameLoading = () => {
-    const [previousStoryIndex, setPreviousStoryIndex] = useState(0);
-    const [currentStoryIndex, setCurrentStoryIndex] = useState(1);
-    const [nextStoryIndex, setNextStoryIndex] = useState(2);
-    const stories = [Aegon, Lumina, Aurora, Luna, Nova, Starlight, Pixie, All];
+    const [previousStoryIndex, setPreviousStoryIndex] = useState(7);
+    const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+    const [nextStoryIndex, setNextStoryIndex] = useState(1);
+    const stories = [Aegon, Aurora, Lumina, Luna, Nova, Starlight, Pixie, All];
 
     const handlePrevStory = () => {
         const newIndex = currentStoryIndex === 0 ? stories.length - 1 : currentStoryIndex - 1;
-        setPreviousStoryIndex(currentStoryIndex);
+        let prev = newIndex - 1;
+        if (prev == -1)
+            prev = 7;
+        setPreviousStoryIndex(prev);
         setCurrentStoryIndex(newIndex);
         setNextStoryIndex((newIndex + 1) % stories.length);
     };
