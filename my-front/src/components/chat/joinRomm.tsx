@@ -5,6 +5,9 @@ import { ALL_CHANNELS } from "../../graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import { ADD_MEMBER } from "../../graphql/mutations";
 import defaultPtofileImage from '../../../public/assets/chatBanner.png';
+import { Socket } from "socket.io-client";
+import bcrypt from 'bcryptjs';
+
 
 /**
  * TODO:
@@ -28,6 +31,7 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 	const user = JSON.parse(localStorage.getItem('user') || '{}');
 	const {loading, error, data} = useQuery(ALL_CHANNELS);
 	const [Channels, updateChannels] =  useState<channelType[]>([]);
+	// const [socket, setSocket] = useState<Socket>();
 	// let Channels: channelType[] = [];
 	const fetch_channels = async () => {
 		
@@ -99,6 +103,12 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 	}, []);
 
 	// useEffect(() => {
+
+	// }, []);
+
+
+
+	// useEffect(() => {
 	// 	// const update = Channels.filter((channel: { id: string; }) => channel.id !== channelId);
 	// 	// filters
 	// 	let update: channelType[] = [];
@@ -152,11 +162,12 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 		}));
 	};
 
-	const handleSubmitPassword = (e: React.FormEvent<HTMLInputElement>, channelId: string): void => {
+	const handleSubmitPassword = async (e: React.FormEvent<HTMLInputElement>, channelId: string) => {
 		e.preventDefault();
 		console.log('Password submitted for channel', channelId, ':', password);
 		const channelPwd = Channels.find((channel: channelType) => channel.id === channelId)?.password;
-		if (channelPwd === password) {
+		const isMatch = await bcrypt.compare(password || '', channelPwd || '');
+		if (isMatch) {
 			console.log('Password correct');
 			joinRoom(channelId);
 			setPasswordInputs((prevInputs: { [key: string]: boolean }) => ({

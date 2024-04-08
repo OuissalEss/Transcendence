@@ -161,17 +161,28 @@
 }
 
 .descriptionInput{
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    padding: 8px;
+    background-color: transparent;
+    outline: none;
+    color: rgb(255, 255, 255);
+    width: 200px;
+    height: 150px;
+    margin-top: 3%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: center;
+	resize: none;
+}
+
+.descriptionText {
+    word-wrap: break-word;
 	font-family: "Manrope", sans-serif;
-	font-size: 15px;
-	padding: 8px;
-	background-color: transparent;
-	outline: none;
 	color: rgb(255, 255, 255);
-	width: 240px;
-	height: 15px;
-	padding-left: 16px;
-	margin-bottom: 10%;
-	margin-left: 19%;
+    font-size: 15px;
+    background-color: transparent;
+	max-width: 150px;
 }
 
 .descriptionInput::placeholder {

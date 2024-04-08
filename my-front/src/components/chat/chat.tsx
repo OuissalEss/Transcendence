@@ -112,22 +112,13 @@ const PasswordSettings: React.FC<PasswordSettingsProps> = ({
 									placeholder="a"
 								/>
 							</div>			
-						) : addPassword ? (
+						) : addPassword && (
 							<div className="flex flex-col gap-2">
 							<input
 								type="password"
 								onChange={(e) => setPassword(e.target.value)}
 								className="p-2 bg-white bg-opacity-30 text-white border-none outline-none rounded-lg placeholder-white" 
 								placeholder="c"
-							/>
-						</div>
-						) : (
-							<div className="flex flex-col gap-2">
-							<input
-								type="password"
-								onChange={(e) => setPassword(e.target.value)}
-								className="p-2 bg-white bg-opacity-30 text-white border-none outline-none rounded-lg placeholder-white" 
-								placeholder="b"
 							/>
 						</div>
 						)}
@@ -248,13 +239,12 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 						className="setTitleInput"
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
+						maxLength={12}
 						onKeyDown={async (e) => {
 							if (e.key === "Enter")  {
 								setEditTitle(false);
-								// console.log(title);
 								if (title === undefined)
 									console.log("title is undefined : ");
-								// console.log("title : ", title);
 								if (title && title !== channel.title) {
 									channel.title = title;
 									await updateTitle({
@@ -263,8 +253,6 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 											title,
 										}										
 									});
-									// channels[index].title = title;
-									// setChannels([...channels]);
 									setTitle('');
 								}
 							}
@@ -285,15 +273,16 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 
 				<div className="descriptionContainer">
 				{editDescription ? (
-					<input
-						type="text"
+					<textarea
+						placeholder="description ..."
 						className="descriptionInput"
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
+						autoFocus
 						onKeyDown={async (e) => {
 							if (e.key === "Enter") {
 								setEditDescription(false);
-								if (description !== channel.description) {
+								if (description !== channel.description && description !== '') {
 									if (description)
 										description.trim() !== '';
 									channel.description = description;
@@ -304,11 +293,10 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 										}
 									});
 									setDescription('');
-									// setChannels((prevState) => [...prevState]);
 								}
 							}
 						}}
-						autoFocus
+						maxLength={100}
 					/>
 					) : (
 						<>
@@ -317,7 +305,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 								<FaPen className="text-white w-4 h-4 cursor-pointer" />	
 							</div>
 						)}
-							<span className="text-white inline-flex center">{channel.description ? channel.description : "set description"}</span>
+							<span className="descriptionText">{channel.description ? channel.description : "set description"}</span>
 						</>
 					)}	
 				</div>
@@ -709,7 +697,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const channel: channelType = channels.find((channel: { id: string; }) => channel.id === id) || channels[0];
 	console.log(channel)
 	console.log(channel.messages)
-	const [messages, setMessages] = useState<{text: string; sender: string; senderId: string; time: Date; read: boolean; unread: number;}[]>(channel.messages || []);
+	const [messages, setMessages] = useState<{text: string; sender: string; senderId: string; time: Date; read: boolean;}[]>(channel.messages || []);
 	const [members, setMembers] = useState<{id: string, name: string, icon: string, status: string, blocked: string[], blocken: string[]}[]>(channel.members || []);
 	const [banList, setBanList] = useState<{ id: string, name: string, icon: string }[]>(channel.banned || []);
 	const [muteList, setMuteList] = useState<{ id: string, name: string, icon: string }[]>(channel.muted || []);
@@ -728,39 +716,108 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	let member = undefined;
 	if (channel.type === "DM")
 		member = channel.members.find((member: { name: string; }) => member.name !== user.username);
-	const memberListner = (data: {
-		id: string;
-		name: string;
-		icon: string;
-		status: string;
-		blocked: string[];
-		blocken: string[];
-	}, opt: number) => {
+	const memberListner = (
+		data: {
+			id: string;
+			name: string;
+			icon: string;
+			status: string;
+			blocked: string[];
+			blocken: string[];
+		},
+		room: string,
+		opt: number
+	) => {
 		console.log("data : ", data);
 		console.log("opt : ", opt);
 		if (opt === 1) {
-			setMembers((prevMembers: any) => [...prevMembers, data]);
-			setChannels((prevChannels: any) => {
-				const updatedChannels = prevChannels.map((channel: channelType) => {
-					if (channel.id === id) {
-						channel.members = [...channel.members, data];
-					}
-					return channel;
+			if (data.id === user.id) {
+				// if the user is added to a room by another user add the room to the channels
+				// based on the room id query the channel and add it to the channels
+				const { data } = client.readQuery({
+					query: CHANNEL_BY_ID,
+					variables: { id: room }
 				});
-				return updatedChannels;
-			});
+				console.log("data : ", data);
+				setChannels((prevChannels: channelType[]) => {
+					const channel: channelType = {
+						id: data.channel.id,
+						title: data.channel.title,
+						description: data.channel.description,
+						type: data.channel.type,
+						password: data.channel.password,
+						icon: data.channel.profileImage,
+						updatedAt: data.channel.updatedAt,
+						owner: {
+							id: data.channel.owner.id,
+							name: data.channel.owner.username,
+							icon: data.channel.owner.avatarTest
+						},
+						admins: data.channel.admins.map((admin: { id: string, username: string, avatarTest: string }) => ({
+							id: admin.id,
+							name: admin.username,
+							icon: admin.avatarTest
+						})),
+						members: data.channel.members.map((member: { id: string, username: string, avatarTest: string, status: string, blocked: { blockedUserId: string }[], blocking: { blockerId: string }[] }) => ({
+							id: member.id,
+							name: member.username,
+							icon: member.avatarTest,
+							status: member.status,
+							blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+							blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
+						})),
+						banned: data.channel.banned.map((banned: { id: string, username: string, avatarTest: string }) => ({
+							id: banned.id,
+							name: banned.username,
+							icon: banned.avatarTest
+						})),
+						muted: data.channel.muted.map((muted: { id: string, username: string, avatarTest: string }) => ({
+							id: muted.id,
+							name: muted.username,
+							icon: muted.avatarTest
+						})),
+						messages: data.channel.messages.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
+							text: message.text,
+							sender: message.sender,
+							senderId: message.senderId,
+							time: message.time,
+							read: true,
+							unread: 0
+						})).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
+					};
+					return [...prevChannels, channel];
+				});
+
+			} else {
+				setMembers((prevMembers: any) => [...prevMembers, data]);
+				setChannels((prevChannels: any) => {
+					const updatedChannels = prevChannels.map((channel: channelType) => {
+						if (channel.id === id) {
+							channel.members = [...channel.members, data];
+						}
+						return channel;
+					});
+					return updatedChannels;
+				});
+			}
 		}
 		else if (opt === 0) {
-			setMembers((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
-			setChannels((prevChannels: any) => {
-				const updatedChannels = prevChannels.map((channel: channelType) => {
-					if (channel.id === id) {
-						channel.members = channel.members.filter((member: { id: string; }) => member.id !== data.id);
-					}
-					return channel;
-				});
-				return updatedChannels;
-			});
+			if (data.id === user.id) {
+				// if the user is removed from the room he is in remove it from the channels
+				setChannels((prevChannels: any) => prevChannels.filter((channel: { id: string; }) => channel.id !== room));
+				setDisplay('');
+			} else {
+				setMembers((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
+				setChannels((prevChannels: any) => {
+					const updatedChannels = prevChannels.map((channel: channelType) => {
+						if (channel.id === id) {
+							channel.members = channel.members.filter((member: { id: string; }) => member.id !== data.id);
+						}
+						return channel;
+					});
+					return updatedChannels;
+				});				
+			}
 		}
 			
 		console.log("new members : ", members);
@@ -799,24 +856,33 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		}
 	}
 
-	const bannedListner = (data: {
+	const bannedListner = (
+		data: {
 			id: string;
 			name: string;
 			icon: string;
-	}, opt: number) => {
+		},
+		room: string,
+		opt: number) => {
 		if (opt === 1) {
-			setBanList((prevMembers: any) => [...prevMembers, data]);
-			setMembers((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
-			setChannels((prevChannels: any) => {
-				const updatedChannels = prevChannels.map((channel: channelType) => {
-					if (channel.id === id) {
-						channel.banned = [...channel.banned, data];
-						channel.members = channel.members.filter((member: { id: string; }) => member.id !== data.id);
-					}
-					return channel;
-				});
-				return updatedChannels;
-			});
+			if (data.id === user.id) {
+				// if the user is banned from the room he is in remove it from the channels
+				setChannels((prevChannels: any) => prevChannels.filter((channel: { id: string; }) => channel.id !== room));
+				setDisplay('');
+			} else {
+				setBanList((prevMembers: any) => [...prevMembers, data]);
+				setMembers((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
+				setChannels((prevChannels: any) => {
+					const updatedChannels = prevChannels.map((channel: channelType) => {
+						if (channel.id === id) {
+							channel.banned = [...channel.banned, data];
+							channel.members = channel.members.filter((member: { id: string; }) => member.id !== data.id);
+						}
+						return channel;
+					});
+					return updatedChannels;
+				});				
+			}
 		}
 		else if (opt === 0) {
 			setBanList((prevMembers: any) => prevMembers.filter((member: { id: string; }) => member.id !== data.id));
@@ -865,9 +931,30 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			
 	}
 
-	const messageListner = (data: {sender:string; text:string; time: Date; senderId: string;}) => {
+	const messageListner = (data: {sender:string; text:string; time: Date; senderId: string; id: string;}) => {
 		console.log("data : ", data);
 		setMessages((prevMessages: any) => [...prevMessages, data]);
+		// add the changes to channels
+		setChannels((prevChannels: any) => {
+			const updatedChannels = prevChannels.map((channel: channelType) => {
+				if (channel.id === id) {
+					const message = {
+						text: data.text,
+						sender: data.sender,
+						senderId: data.senderId,
+						time: data.time,
+						read: (data.sender !== user.username)? true : false,
+					};
+					// if read is set to true decrease the unread count and update the read via a mutation or emit an event to the server
+					channel.messages = [...channel.messages, message];
+					if (message.read)
+						socket?.emit('messageRead', { messageId: id, userId: user.id, roomId: id });
+					channel.messages.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+				}
+				return channel;
+			});
+			return updatedChannels;
+		});
 	};
 
 	const handleSendDm = async (roomId: string) => {
@@ -909,17 +996,14 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 				  unread: 0
 				})).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
 			};
-			// add new channel to the list of channels using setChannels and sort them by the most recently updated
 			setChannels((prevChannels: any) => {
 				const updatedChannels = [...prevChannels, newChannel];
 				// Sort the channels by the most recently updated
 				updatedChannels.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+				setId(roomId);
 				return updatedChannels;
 			  });
-			setId(roomId);
 		}
-				
-		
 	};
 
 	const handleBlock = (data: { blockerId: string, blockedUserId: string }) => {
@@ -966,11 +1050,9 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	}, [memberListner, adminListner, bannedListner, mutedListner, messageListner, handleSendDm, handleBlock]);
 
 	useEffect(() => {
-		// channel = channels[index];
 		setLock(channel.type !== "PUBLIC");
 		setShowSettings(false);
 		setNextPage(false);
-		setShowPasswordContainer(channel.type === "PROTECTED");
 		setMessages(channel.messages || []);
 		setMembers(channel.members || []);
 		setBanList(channel.banned || []);
@@ -1106,7 +1188,14 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 									{channel.type === "DM" && !(member?.blocken.includes(user.id) || member?.blocked.includes(user.id)) && (
 										<>
 											<li><IoVolumeMuteSharp className="w-10 h-10" /></li>
-											<li className="chat__details d-flex d-xl-none"><GiPingPongBat className="w-10 h-10" /></li>
+											<li
+												className="chat__details d-flex d-xl-none"
+												onClick={() => {
+													socket?.emit('muteUser', { room: channel.id, user: member?.id, duration: null, permanent: true });
+												}}
+											>
+												<GiPingPongBat className="w-10 h-10" />
+											</li>
 											<li
 												className="chat__details d-none d-xl-flex"
 												onClick={() => {

@@ -60,4 +60,7 @@ export class Message {
   @IsNotEmpty({ message: 'Channel cannot be empty' })
   @IsString({ message: 'Channel must be a string' })
   channel?: Channel;
+
+  @Field({ description: 'Message read status' })
+  read: boolean;
 }

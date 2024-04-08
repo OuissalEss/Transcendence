@@ -14,32 +14,24 @@ const Discussions: React.FC<DiscussionsProps> = ({
 	const user = JSON.parse(localStorage.getItem('user') || '{}');
 	console.log(channels);
 
-	function handleDiscussionClick(index: number): void {
-		// update read and unread based on the channel id using setChannels
-
-
-
-		// localStorage.setItem('channels', JSON.stringify(
-		// 	JSON.parse(localStorage.getItem('channels') || '[]').map((channel: channelType) => {
-		// 		if (channel.id === discussions[index].id) {
-		// 			channel.messages.forEach((message: { sender: string, text: string, read: boolean }) => {
-		// 				if (message.sender !== user.username && !message.read) {
-		// 					message.read = true;
-		// 					// message.unread = 0;
-		// 				}
-		// 			});
-					
-		// 			return channel; // Return the updated channel object
-		// 		} else {
-		// 			return channel; // Return the unchanged channel if not found
-		// 		}
-		// 	})
-		// ));
-
-
-		setId(channels[index].id);
-		setDisplay("Chat");
-	}
+	// count unread messages
+	const unreadMessages = (
+		messages: {
+			text: string;
+			sender: string;
+			senderId: string;
+			time: Date;
+			read: boolean;
+		}[]
+	) => {
+		let unread = 0;
+		messages.forEach((message) => {
+			if (message.sender !== user.username && !message.read) {
+				unread++;
+			}
+		});
+		return unread;
+	};
 
     return (
         <div className="discussion-container z-10">
@@ -52,7 +44,10 @@ const Discussions: React.FC<DiscussionsProps> = ({
             </div>
             <div className="chat-list">
 			{channels.map((discussion: channelType, index: number) => (
-				<div key={index} className="chat-box" onClick={() => handleDiscussionClick(index)}>
+				<div key={index} className="chat-box" onClick={() => {
+					setId(channels[index].id);
+					setDisplay("Chat");
+				}}>
 					<div className="img-box">
 					{discussion.type === 'DM' ? (
 						discussion.members.map((member) => (
@@ -85,8 +80,8 @@ const Discussions: React.FC<DiscussionsProps> = ({
 									discussion.type === 'DM' ? "Say hi to your friend" : "Say hi to your friends"
 								)}
 							</p>
-							{discussion.messages.length > 0 && discussion.messages[discussion.messages.length - 1].unread > 0 && (
-								<b>{discussion.messages[discussion.messages.length - 1].unread}</b>
+							{discussion.messages.length > 0 && unreadMessages(discussion.messages) > 0 && (
+								<b>{unreadMessages(discussion.messages)}</b>
 							)}
 						</div>
 					</div>
@@ -97,20 +92,5 @@ const Discussions: React.FC<DiscussionsProps> = ({
         </div>
     );
 }
-
-function getStatusColor(status: string | undefined) {
-	switch (status) {
-	  case "ONLINE":
-		return "bg-green-500";
-	  case "OFFLINE":
-		return "bg-red-500";
-	  case "AWAY":
-		return "bg-yellow-500";
-	  case "INGAME":
-		return "bg-blue-500";
-	  default:
-		return "";
-	}
-  }
 
 export default Discussions;

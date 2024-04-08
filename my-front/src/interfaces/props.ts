@@ -147,6 +147,7 @@ export type channel = {
 	  time: Date,
 	  sender: string,
 	  senderId: string,
+	  read: boolean,
 	}[] 
 }
 
@@ -192,6 +193,6 @@ export type channelType = {
 	  senderId: string,
 	  time: Date,
 	  read: boolean,
-	  unread: number
 	}[]
   };
+

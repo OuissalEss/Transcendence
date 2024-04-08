@@ -83,13 +83,12 @@ function ChatPageContainer() {
                 icon: muted.avatarTest
               })),
               messages: channel.messages
-              .map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
+              .map((message: { id: string, text: string, time: Date, sender: string, senderId: string, read: boolean }) => ({
                 text: message.text,
                 sender: message.sender,
                 senderId: message.senderId,
                 time: message.time,
-                read: true,
-                unread: 0
+                read: message.read,
               })).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
         })).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
         setChannels(temp.filter((channel: channelType) => channel.members.some((member) => member.name === user.username)));
@@ -103,17 +102,11 @@ return (
     <>
       <Layout/>
       <Discussions setDisplay={setDisplay} setId={setId} channels={channels} setChannels={setChannels}/>
-      {/* <MemoizedDiscussions
-          setDisplay={setDisplay}
-          setIndex={setIndex}
-          channels={channels}
-          setChannels={setChannels}
-        /> */}
       <div className="chat-container">
         {display === '' && <NoChannelSelected/>}
         {display === 'JoinRoom' && <JoinRoom channels={channels} setChannels={setChannels} setDisplay={setDisplay} setId={setId}/>}
         {display === 'NewRoom' && <NewRoom setDisplay={setDisplay} setChannels={setChannels}/>}
-        {display === 'Chat' && <Chat id={id} channels={channels} setChannels={setChannels} setDisplay={setDisplay} setId={setId}/>}
+        {display === 'Chat' && <Chat id={id} channels={channels} setChannels={setChannels} setDisplay={setDisplay} setId={setId} />}
       </div>
     </>
   );

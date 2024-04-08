@@ -60,6 +60,7 @@ export const ALL_CHANNELS = gql`
         time
 				sender
         senderId
+        read
       }
     }
   }
@@ -88,6 +89,12 @@ export const CHANNEL_BY_ID = gql`
         username
         avatarTest
         status
+        blocked {
+          blockedUserId
+        }
+        blocking {
+          blockerId
+        }
       }
       muted {
         id

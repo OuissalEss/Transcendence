@@ -1,12 +1,16 @@
-import { ChangeEvent, Key, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { CiCamera, CiLock, CiUnlock } from "react-icons/ci";
-import { HiUserGroup } from "react-icons/hi";
 import { IoIosAddCircleOutline, IoIosAddCircle } from "react-icons/io";
 import { MdOutlineAddModerator, MdOutlineCheckCircle, MdOutlineCancel, MdAddModerator } from "react-icons/md";
 import { channelType, NewRoomProps } from "../../interfaces/props";
 import { useMutation } from '@apollo/client';
 import { CREATE_CHANNEL, ADD_MEMBER, ADD_ADMIN } from "../../graphql/mutations";
+import bcrypt from 'bcryptjs';
 
+
+/**
+ * simple way to make it real-time : emit the channels data to the server and then listen on it in discussion or chat and add it
+ */
 
 const NewRoom: React.FC<NewRoomProps>= ({
   setDisplay,
@@ -54,11 +58,13 @@ const NewRoom: React.FC<NewRoomProps>= ({
   const handleCreateChannel = async () => {
     if (!title) return;
     try {
+      const salt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(password, salt);
       const createChannelInput = {
         title: title,
         description: description || null,
         type: (lock ? "PUBLIC" : (password != '' ? "PROTECTED" : "PRIVATE")),
-        password: password || null,
+        password: hashedPassword || null,
         profileImage: document.getElementById('output')?.getAttribute('src') || '../../../public/assets/chatBanner.png',
         ownerId: JSON.parse(localStorage.getItem('user') || '{}').id,
       };
@@ -205,19 +211,20 @@ const NewRoom: React.FC<NewRoomProps>= ({
                 placeholder="set room title ..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                maxLength={12}
                 autoFocus
                 />									
             </div>
 
             <div className="descriptionContainer">
-              <input
-                type="text"
-                placeholder="description ..."
-                className="descriptionInput"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                autoFocus
-              />	
+              <textarea
+                  placeholder="description ..."
+                  className="descriptionInput"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  autoFocus
+                  maxLength={100}
+              />
             </div>
             <MdOutlineCheckCircle
               className='w-10 h-10 text-white'

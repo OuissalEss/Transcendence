@@ -154,7 +154,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is banning user: ${user} in room: ${room}`);
             const User = await this.ban.banUser(room, user);
-            this.server.to(room).emit('userBanned', { id: User.id, name: User.username, icon: User.avatarTest }, 1);
+            this.server.to(room).emit('userBanned', { id: User.id, name: User.username, icon: User.avatarTest }, room, 1);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -178,7 +178,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is adding user: ${user} in room: ${room}`);
             const User = await this.channel.addMember(room, user);
-            this.server.to(room).emit('userAdded', { id: User.id, name: User.username, icon: User.avatarTest, status: User.status }, 1);
+            this.server.emit('userAdded', { id: User.id, name: User.username, icon: User.avatarTest, status: User.status }, room, 1);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -242,5 +242,19 @@ export class ChatGateway {
             this.logger.error(e);
         }
     }
+
+    // message read 
+    @SubscribeMessage('readMessage')
+    async handleReadMessage(@MessageBody() data: { messageId: string, userId: string, roomId: string }) {
+        try {
+            const { messageId, userId, roomId } = data;
+            this.logger.log(`Client is reading message: ${messageId}`);
+            await this.message.readMessage(messageId, userId);
+            this.server.emit('messageRead', data);
+        } catch (e) {
+            this.logger.error(e);
+        }
+    }
+
     
 }

@@ -104,4 +104,13 @@ export class MessageService {
             console.error(e);
         }
     }
+
+    async readMessage(mid: string, uid: string): Promise<Message> {
+        return this.prisma.message.update({
+            where: { id: mid },
+            data: {
+                read: true,
+            },
+        });
+    }
 }

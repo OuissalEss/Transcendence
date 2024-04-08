@@ -263,6 +263,9 @@ type Message {
   createdAt: DateTime!
   id: ID!
 
+  """Message read status"""
+  read: Boolean!
+
   """User who sent the message"""
   sender: String!
 
