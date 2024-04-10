@@ -227,11 +227,17 @@ type Match {
   """Date the match was created"""
   createdAt: DateTime!
 
+  """guest"""
+  guest: User!
+
   """User who participated as a guest in the match"""
   guestId: String!
 
   """Score of the guest in the match"""
   guest_score_m: Int!
+
+  """host"""
+  host: User!
 
   """User who hosted the match"""
   hostId: String!
@@ -239,6 +245,9 @@ type Match {
   """Score of the host in the match"""
   host_score_m: Int!
   id: String!
+
+  """loser"""
+  loser: User!
 
   """User who lost the match"""
   loserId: String
@@ -248,6 +257,9 @@ type Match {
 
   """Date the match was updated"""
   updatedAt: DateTime!
+
+  """winner"""
+  winner: User!
 
   """User who won the match"""
   winnerId: String

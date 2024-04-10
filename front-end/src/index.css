@@ -284,7 +284,6 @@ html {
 }
 .cercle.status{
   background-color: #6c6c6cf7;
-  /* background-color: #fff; */
   width: 16px;
   height: 16px;
   z-index: 1;
@@ -293,10 +292,10 @@ html {
   background-color: #52fb03;
 }
 .cercle.OFFLINE{
-  background-color: rgb(240, 238, 238);
+  background-color: #f80505;
 }
 .cercle.INGAME{
-  background-color: #f80505;
+  background-color: rgb(240, 238, 238);
 }
 
 
@@ -439,7 +438,7 @@ html {
   top: 65px;
   position: absolute;
   z-index: 4;
-  background-color: #ffffff7b;
+  background-color: #ffffffe5;
   border-radius: 15px;
   padding: 5px 15px 10px 15px;
   width: 400px;
@@ -476,7 +475,7 @@ html {
   right: -30px;
   position: absolute;
   z-index: 4;
-  background-color: #ffffff99;
+  background-color: #ffffffe5;
   border-radius: 15px;
   padding: 10px;
   padding-top: 15px;
@@ -507,6 +506,39 @@ html {
 .bellImg {
   /* margin: 5px; */
   border-radius: 15px;
+}
+
+.cercleNotif{
+  background-color: #f80505;
+  width: 12px;
+  height: 12px;
+  z-index: 2;
+  position: absolute;
+  top: 13%;
+  left: 88%;
+  transform: translate(-50%, -50%);
+  border-radius: 20px;
+  display: none;
+}
+.visible {
+  display: block; /* Show the notification when the class is present */
+}
+.noNotificationsContainer {
+  text-align: center;
+  padding: 20px;
+}
+
+.noNotificationsMessage {
+  color: #3e12569f; /* Example color */
+  font-style: italic;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.noNotificationsImage {
+  width: 50px; /* Example width */
+  height: 50px; /* Example height */
+  margin-left: 120px;
 }
 
 

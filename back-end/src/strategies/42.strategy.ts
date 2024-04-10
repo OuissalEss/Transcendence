@@ -10,6 +10,8 @@ import { CreateUserInput } from "../services/dto/create-user.input";
 
 import { UserService } from 'src/services/user.service';
 import { User } from 'src/entities/user.entity';
+import { AchievementService } from 'src/services/user_achievement.service';
+import { Achievement } from '@prisma/client';
 
 @Injectable()
 export class FTStrategy extends PassportStrategy(Strategy, '42') {
@@ -17,6 +19,7 @@ export class FTStrategy extends PassportStrategy(Strategy, '42') {
     configService: ConfigService,
     // private authService: AuthService,
     private userService: UserService,
+    private achievementService: AchievementService,
     private prisma: PrismaService
   ) {
     super({
@@ -74,6 +77,7 @@ export class FTStrategy extends PassportStrategy(Strategy, '42') {
           providerId: `${profile.id}`
         }
         user = await this.userService.createUser(data);
+        const res = await this.achievementService.createAchievement(user.id, Achievement.welcome);
       }
     } catch (e) {
       console.log(e);

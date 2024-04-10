@@ -18,6 +18,8 @@ import { useAuth } from '../../../provider/authProvider';
 import GameEnded from '../../../components/GameEnded';
 import AlreadyInGame from '../../../components/AlreadyInGame';
 
+
+
 const opL = {
 	x: gameConfig.canvasWidth / 2,
 	y: gameConfig.canvasHeight / 2,
@@ -69,7 +71,8 @@ const sketch = (p5: any, socket: any, updateScores: any, mode) => {
 	// let paddleRight: Paddle;
 	let opaddleL: oPaddle;
 	let opaddleR: oPaddle;
-
+	let leftScore: number;
+	let rightScore: number;
 
 	// Initiate Window Configurations
 	gameConfig.windowW = window.innerWidth;
@@ -88,6 +91,8 @@ const sketch = (p5: any, socket: any, updateScores: any, mode) => {
 		puck = new Puck(p5);
 		opaddleL = new oPaddle(p5, opL, true, socket);
 		opaddleR = new oPaddle(p5, opR, false, socket);
+		leftScore = 0;
+		rightScore = 0;
 	};
 
 	p5.windowResized = () => {
@@ -145,8 +150,14 @@ const sketch = (p5: any, socket: any, updateScores: any, mode) => {
 			opR.speed = gameState.rightPaddle.speed;
 			opR.width = gameState.rightPaddle.canvasW;
 			opR.height = gameState.rightPaddle.canvasH;
+			// if (leftScore != gameState.leftScore || rightScore != gameState.rightScore) {
+			// 	audio.loop = false;
+			// 	audio.play();
+			// }
 			puck.ballUpdate(gameState.Ball, gameConfig.canvasWidth, gameConfig.canvasHeight);
 			updateScores(gameState.leftScore, gameState.rightScore);
+			leftScore = gameState.leftScore;
+			rightScore = gameState.rightScore;
 		});
 
 		opaddleL.update(opL);
@@ -178,6 +189,15 @@ interface FinishedGameData {
 	GuestScore: number,
 }
 
+import ringer from '/Sounds/ding.mp3';
+import hit from '/Sounds/hit.mp3';
+import Wall from '/Sounds/wallHit.mp3';
+
+import { left } from '@cloudinary/url-gen/qualifiers/textAlignment';
+
+const audio = new Audio(ringer);
+const BallHit = new Audio(hit);
+const wallHit = new Audio(Wall);
 
 const Pong = () => {
 	const [leftScore, setLeftScore] = useState(0);
@@ -195,7 +215,7 @@ const Pong = () => {
 	const urlParams = new URLSearchParams(window.location.search);
 	let mode = urlParams.get('mode');
 
-	if (!["online", "offline", "ai"].includes(mode)) {
+	if (!["online", "offline", "ai", "alter"].includes(mode)) {
 		mode = "400";
 	}
 
@@ -205,6 +225,21 @@ const Pong = () => {
 		if (!socket) return;
 
 		socket.emit('startMatch', mode);
+
+		socket.on("OnGoal", () => {
+			audio.loop = false;
+			audio.play();
+		});
+
+		socket.on("HitPaddle", () => {
+			BallHit.loop = false;
+			BallHit.play();
+		})
+
+		socket.on("WallHit", () => {
+			wallHit.loop = false;
+			wallHit.play();
+		})
 
 		socket.on("matchStatus", (status: boolean) => {
 			if (!status.matchStatus)
@@ -223,9 +258,6 @@ const Pong = () => {
 		})
 
 		socket.on('gameFinished', ({ userId, username, image, character, host, hostScore, guestScore }: { userId: string, username: string, image: string, character: string, host: boolean, hostScore: number, guestScore: number }) => {
-
-			console.log("HELOLLLL");
-
 			// Game Finished
 			let data: FinishedGameData = {
 				Id: userId,

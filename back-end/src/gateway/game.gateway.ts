@@ -78,9 +78,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	private async cleanupDisconnectedClient(client) {
 		const clientId = client.id;
 
-		// Remove player from playerInfoMap
-		this.playerInfoMap.delete(clientId);
-
 		// Check if player is on waitlist
 		if (this.onlinePlayersQueue.includes(client)) {
 			// Remove player from onlinePlayersQueue
@@ -97,29 +94,32 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const hostId = clientInfo.hostId;
 
 			this.server.to(hostId).emit('gameFinished', {
-				userId: this.playerInfoMap.get(game.getGuestId()).userId,
-				username: this.playerInfoMap.get(game.getGuestId()).username,
-				image: this.playerInfoMap.get(game.getGuestId()).image,
-				character: this.playerInfoMap.get(game.getGuestId()).character,
+				userId: this.playerInfoMap.get(game.getGuestId())?.userId,
+				username: this.playerInfoMap.get(game.getGuestId())?.username,
+				image: this.playerInfoMap.get(game.getGuestId())?.image,
+				character: this.playerInfoMap.get(game.getGuestId())?.character,
 				host: true,
 				hostScore: game.getHostScore(),
 				guestScore: game.getGuestScore(),
 			});
 			this.server.to(guesId).emit('gameFinished', {
-				userId: this.playerInfoMap.get(game.getHostId()).userId,
-				username: this.playerInfoMap.get(game.getHostId()).username,
-				image: this.playerInfoMap.get(game.getHostId()).image,
-				character: this.playerInfoMap.get(game.getHostId()).character,
+				userId: this.playerInfoMap.get(game.getHostId())?.userId,
+				username: this.playerInfoMap.get(game.getHostId())?.username,
+				image: this.playerInfoMap.get(game.getHostId())?.image,
+				character: this.playerInfoMap.get(game.getHostId())?.character,
 				host: false,
 				hostScore: game.getHostScore(),
 				guestScore: game.getGuestScore(),
 			});
 
+			await this.userService.updateStatus(this.playerInfoMap.get(game.getHostId())?.userId, "ONLINE");
+			await this.userService.updateStatus(this.playerInfoMap.get(game.getGuestId())?.userId, "ONLINE");
+
 			// Disconnect the players and create match on Database
 			// Forfient Client
 
 			// Handle if online to disconnect the Oppenent
-			if (game.getMode() === "online") {
+			if (game.getMode() === "online" || game.getMode() === 'alter') {
 				// Disconnect the Opponenet from the game
 				const oppSocket = this.playerInfoMap.get(guesId);
 
@@ -166,14 +166,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 			this.games.delete(game);
 		}
+		// Remove player from playerInfoMap
+		this.playerInfoMap.delete(clientId);
 	}
 
 	private async updateAndBroadcastGameState() {
-		this.games.forEach((clientStats, game) => {
+		this.games.forEach(async (clientStats, game) => {
 			const hostId = clientStats.hostId;
 			const guestId = clientStats.guestId;
 
-			if ((game.getHostScore() === 5 || game.getGuestScore() === 5) && !game.getGameEnded() && game.getMode() === 'online') {
+			if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && game.getMode() === 'online') {
 				console.log("Game Ended");
 				// Emit 'gameFinished' event to the client associated with this game
 
@@ -196,6 +198,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					hostScore: game.getHostScore(),
 					guestScore: game.getGuestScore(),
 				});
+				await this.userService.updateStatus(this.playerInfoMap.get(game.getHostId()).userId, "ONLINE");
+				await this.userService.updateStatus(this.playerInfoMap.get(game.getGuestId()).userId, "ONLINE");
 
 				// if (clientId == game.getHostId() && !game.getGameEnded())
 				this.handleFinishedGame(game);
@@ -212,6 +216,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					hostScore: game.getHostScore(),
 					guestScore: game.getGuestScore(),
 				});
+				await this.userService.updateStatus(this.playerInfoMap.get(game.getHostId()).userId, "ONLINE");
+				await this.userService.updateStatus(this.playerInfoMap.get(game.getGuestId()).userId, "ONLINE");
 
 				this.handleFinishedGame(game);
 
@@ -221,7 +227,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				const gameStats = game.getGameState();
 				// If the game is still ongoing, emit the updated game state
 				this.server.to(hostId).emit('updateGameState', gameStats);
-				if (game.getMode() === 'online')
+				if (game.getMode() === 'online' || game.getMode() === 'alter')
 					this.server.to(guestId).emit('updateGameState', gameStats);
 
 			}
@@ -230,8 +236,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	// Method to handle actions after a game finishes
 	private async handleFinishedGame(game: GameState) {
-		if (game.getMode() == 'online') {
-			if (game.getGuestScore() == game.getHostScore()){
+		if (game.getMode() == 'online' || game.getMode() === 'alter') {
+			if (game.getGuestScore() == game.getHostScore()) {
 				const match = await this.prismaService.match.create({
 					data: {
 						guest_score_m: game.getGuestScore(),
@@ -342,9 +348,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				guestScore: game.getGuestScore(),
 			});
 
-			if (game.getMode() == 'online') {
+			await this.userService.updateStatus(this.playerInfoMap.get(game.getHostId()).userId, "ONLINE");
+			await this.userService.updateStatus(this.playerInfoMap.get(game.getGuestId()).userId, "ONLINE");
+
+			if (game.getMode() == 'online' || game.getMode() == 'alter') {
 				// Create match in database
-				if (game.getGuestScore() == game.getHostScore()){
+				if (game.getGuestScore() == game.getHostScore()) {
 					const match = await this.prismaService.match.create({
 						data: {
 							guest_score_m: game.getGuestScore(),
@@ -407,7 +416,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 						return;
 					}
 
-					if (mode === 'online' && this.onlinePlayersQueue.some(socket => socket.id === playerId)) {
+					if ((mode === 'online' || mode === 'alter') && this.onlinePlayersQueue.some(socket => socket.id === playerId)) {
 						console.log(`Player ${client.id} is already waiting for an online game.`);
 						client.emit('alreadyWaiting');
 						return;
@@ -424,14 +433,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 
 		// Check if the player is already waiting for an online game
-		if (mode === 'online' && this.onlinePlayersQueue.includes(client)) {
+		if ((mode === 'online' || mode === 'alter') && this.onlinePlayersQueue.includes(client)) {
 			console.log(`Player ${client.id} is already waiting for an online game.`);
 			client.emit('alreadyWaiting', { message: 'You are already waiting for an online game.' });
 			return;
 		}
 
-		if (mode === 'online') {
-			this.handleOnlineMatch(client);
+		if (mode === 'online' || mode === 'alter') {
+			this.handleOnlineMatch(client, mode);
 		} else if (mode === 'ai') {
 			this.handleAIMatch(client);
 		} else if (mode === 'offline') {
@@ -442,24 +451,24 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	// Handler for starting an online match
-	private handleOnlineMatch(client: Socket) {
+	private handleOnlineMatch(client: Socket, mode: string) {
 		this.onlinePlayersQueue.push(client);
 		console.log(`Player ${client.id} is looking for an online game.`);
 		client.emit('matchStatus', { matchStatus: false });
 
 		if (this.onlinePlayersQueue.length >= 2) {
-			this.createOnlineMatch();
+			this.createOnlineMatch(mode);
 		}
 	}
 
 	// Method to create an online match
-	private createOnlineMatch() {
+	private async createOnlineMatch(mode: string) {
 		const player1 = this.onlinePlayersQueue.shift()!;
 		const player2 = this.onlinePlayersQueue.shift()!;
 
 		console.log(`Starting a game between ${player1.id} : ${player2.id}`)
 
-		const game = new GameState(width, height, 'online');
+		const game = new GameState(width, height, mode, player1, player2);
 
 		this.games.set(game, { hostId: player1.id, guestId: player2.id });
 
@@ -474,6 +483,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		const player1Data = this.playerInfoMap.get(player1.id);
 		const player2Data = this.playerInfoMap.get(player2.id);
+
+		await this.userService.updateStatus(player2Data?.userId, "INGAME");
+		await this.userService.updateStatus(player1Data?.userId, "INGAME");
 
 		player1.emit('oppenentData', {
 			userId: player2Data?.userId,
@@ -506,8 +518,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	// Handler for starting an AI match
-	private handleAIMatch(client: Socket) {
-		const game = new GameState(width, height, 'ai');
+	private async handleAIMatch(client: Socket) {
+		const game = new GameState(width, height, 'ai', client, client);
 		this.games.set(game, { hostId: client.id, guestId: client.id });
 
 		game.setHostId(client.id);
@@ -516,12 +528,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		game.initLeftPaddle(client.id);
 		game.initRightPaddle(client.id);
 		client.join('aiRoom');
+		await this.userService.updateStatus(this.playerInfoMap.get(client.id).userId, "INGAME");
 		this.updateAndBroadcastGameState();
 	}
 
 	// Handler for starting an offline match
-	private handleOfflineMatch(client: Socket) {
-		const game = new GameState(width, height, 'offline');
+	private async handleOfflineMatch(client: Socket) {
+		const game = new GameState(width, height, "offline", client, client);
 		this.games.set(game, { hostId: client.id, guestId: client.id });
 
 		game.setHostId(client.id);
@@ -529,6 +542,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		game.initLeftPaddle(client.id);
 		game.initRightPaddle(client.id);
 		client.join('offlineRoom');
+		await this.userService.updateStatus(this.playerInfoMap.get(client.id).userId, "INGAME");
 		this.updateAndBroadcastGameState();
 	}
 

@@ -9,15 +9,15 @@ interface GameData {
     p2Id: string,
     p2Username: string,
     p2Image: string,
-	p2Character: string,
-	p2Host: boolean,
+    p2Character: string,
+    p2Host: boolean,
 }
 
 interface player {
     id: any,
     username: any,
     image: any,
-	character: any,
+    character: any,
 }
 
 const USER_DATA_QUERY = `
@@ -31,7 +31,7 @@ const USER_DATA_QUERY = `
         }
     `;
 
-const Players = ({ gameMode, gameData, leftScore, rightScore } : { gameMode: any, gameData: GameData, leftScore: number, rightScore: number }) => {
+const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any, gameData: GameData, leftScore: number, rightScore: number }) => {
     const [userData, setUserData] = useState<User>();
     const [isLoading, setLoading] = useState(true);
     const { token } = useAuth();
@@ -98,7 +98,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore } : { gameMode: any
             character: 'Aurora',
         };
     }
-    if (gameData && gameData.p2Host == false){
+    if (gameData && gameData.p2Host == false) {
         // left
         leftPlayer.id = gameData.p2Id;
         leftPlayer.username = gameData.p2Username;
@@ -168,7 +168,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore } : { gameMode: any
                                 <img
                                     src={`/Characters/${rightPlayer.character}/GameR.png`}
                                     alt=""
-                                    // style={{ width: '200px', height: '120px' }}
+                                // style={{ width: '200px', height: '120px' }}
                                 />
 
                             ) : (

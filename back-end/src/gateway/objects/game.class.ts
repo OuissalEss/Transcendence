@@ -1,11 +1,14 @@
 import { Puck } from './puck.class';
 import { Paddle } from './paddle.class';
 import { CanvasConfig } from "../types/game.service";
+import { Socket } from 'socket.io';
 
 export class GameState {
 	private gameEnded: boolean;
 	private hostId: string;
 	private guestId: string;
+	private hostSocket: Socket;
+	private guestSocket: Socket;
 	private puck: Puck;
 	private leftPaddle: Paddle;
 	private rightPaddle: Paddle;
@@ -13,10 +16,12 @@ export class GameState {
 	private readonly height: number;
 	private mode: string
 
-	constructor(width: number, height: number, mode: string) {
+	constructor(width: number, height: number, mode: string, hostSocket: Socket, guestSocket: Socket) {
 		this.width = width;
 		this.height = height;
-		this.puck = new Puck(width, height);
+		this.hostSocket = hostSocket;
+		this.guestSocket = guestSocket;
+		this.puck = new Puck(width, height, mode, this.hostSocket, this.guestSocket);
 		this.mode = mode;
 		this.gameEnded = false;
 	}
@@ -43,7 +48,12 @@ export class GameState {
 	setHostId(hostId: string) {
 		this.hostId = hostId;
 	}
-
+	setGuestSocket(socket: Socket) {
+		this.guestSocket = socket;
+	}
+	setHostSocket(socket: Socket) {
+		this.hostSocket = socket;
+	}
 	setGuestId(guestId: string) {
 		this.guestId = guestId;
 	}
@@ -114,13 +124,13 @@ export class GameState {
 	}
 
 	updatePaddleMovement(playerId: string, side: string, movement: string) {
-		if (side === 'L' && this.leftPaddle.getPaddle().id == playerId && this.mode === 'online') {
+		if (side === 'L' && this.leftPaddle.getPaddle().id == playerId && (this.mode === 'online' || this.mode == 'alter')) {
 			this.leftPaddle.updateMovement(movement);
-		} else if (side === 'L' && this.rightPaddle.getPaddle().id == playerId && this.mode === 'online') {
+		} else if (side === 'L' && this.rightPaddle.getPaddle().id == playerId && (this.mode === 'online' || this.mode == 'alter')) {
 			this.rightPaddle.updateMovement(movement);
 		} else if (side == 'R' && this.mode == "offline") {
 			this.leftPaddle.updateMovement(movement);
-		} else if (side == 'L' && this.mode == 'offline') {
+		} else if (side == 'L' && this.mode == "offline") {
 			this.rightPaddle.updateMovement(movement);
 		} else if (side == 'L' && this.mode == "ai") {
 			this.leftPaddle.updateMovement(movement);

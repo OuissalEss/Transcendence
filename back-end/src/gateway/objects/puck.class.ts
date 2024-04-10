@@ -1,5 +1,6 @@
-import {Ball} from '../types/game.service';
-import {Paddle} from "./paddle.class";
+import { Socket } from 'socket.io';
+import { Ball } from '../types/game.service';
+import { Paddle } from "./paddle.class";
 
 export class Puck {
     private x;
@@ -11,8 +12,11 @@ export class Puck {
     private height;
     private leftScore;
     private rightScore;
+    private hostSocket;
+    private guestSocket;
+    private mode;
 
-    constructor(width, height) {
+    constructor(width, height, mode, hostSocket: Socket, guestSocket: Socket) {
         this.x = width / 2;
         this.y = height / 2; // Corrected assignment
         this.xspeed = 5;
@@ -22,9 +26,13 @@ export class Puck {
         this.height = height;
         this.leftScore = 0;
         this.rightScore = 0;
+        this.hostSocket = hostSocket;
+        this.guestSocket = guestSocket;
+        this.mode = mode;
+        console.log("Mode: ", mode);
     }
 
-    getpuck() : Ball {
+    getpuck(): Ball {
         return {
             x: this.x,
             y: this.y,
@@ -49,7 +57,7 @@ export class Puck {
         this.x = this.width / 2;
         this.y = this.height / 2;
 
-        const angle = this.randomAngle(-Math.PI/4, Math.PI/4);
+        const angle = this.randomAngle(-Math.PI / 4, Math.PI / 4);
         this.xspeed = 6 * Math.cos(angle);
         this.yspeed = 6 * Math.cos(angle);
     }
@@ -61,7 +69,7 @@ export class Puck {
         const heightScaleFactor = this.height / p.canvasH;
 
         // Update width and height properties
-        p.canvasW = this.width ;
+        p.canvasW = this.width;
         p.canvasH = this.height;
 
         p.w = 14;
@@ -75,16 +83,20 @@ export class Puck {
         p.x = this.constrain(p.x, p.w / 2, p.canvasW - p.w / 2);
         p.y = this.constrain(p.y, p.h / 2, p.canvasH - p.h / 2);
 
-        if (this.y - this.r < p.y + p.h/2 &&
-            this.y + this.r > p.y - p.h/2 &&
-            this.x - this.r < p.x + p.w/2) {
+        if (this.y - this.r < p.y + p.h / 2 &&
+            this.y + this.r > p.y - p.h / 2 &&
+            this.x - this.r < p.x + p.w / 2) {
             if (this.x > p.x) {
-                let diff = this.y - (p.y - p.h/2);
+                let diff = this.y - (p.y - p.h / 2);
                 let rad = this.radians(45);
                 let angle = this.map(diff, 0, p.h, -rad, rad);
                 this.xspeed = 6 * Math.cos(angle);
                 this.yspeed = 6 * Math.sin(angle);
-                this.x = p.x + p.w/2 + this.r;
+                this.x = p.x + p.w / 2 + this.r;
+                if (this.mode === 'alter') {
+                    this.hostSocket.emit("HitPaddle");
+                    this.guestSocket.emit("HitPaddle");
+                }
             }
         }
     }
@@ -95,7 +107,7 @@ export class Puck {
         const heightScaleFactor = this.height / p.canvasH;
 
         // Update width and height properties
-        p.canvasW = this.width ;
+        p.canvasW = this.width;
         p.canvasH = this.height;
 
         p.w = 14;
@@ -109,20 +121,24 @@ export class Puck {
         p.x = this.constrain(p.x, p.w / 2, p.canvasW - p.w / 2);
         p.y = this.constrain(p.y, p.h / 2, p.canvasH - p.h / 2);
 
-        if (this.y - this.r < p.y + p.h/2 &&
-            this.y + this.r > p.y - p.h/2 &&
-            this.x + this.r > p.x - p.w/2) {
+        if (this.y - this.r < p.y + p.h / 2 &&
+            this.y + this.r > p.y - p.h / 2 &&
+            this.x + this.r > p.x - p.w / 2) {
 
             if (this.x < p.x) {
-                let diff = this.y - (p.y - p.h/2);
+                let diff = this.y - (p.y - p.h / 2);
                 let angle = this.map(diff, 0, p.h, this.radians(225), this.radians(135));
                 this.xspeed = 6 * Math.cos(angle);
                 this.yspeed = 6 * Math.sin(angle);
-                this.x = p.x - p.w/2 - this.r;
+                this.x = p.x - p.w / 2 - this.r;
+                if (this.mode === 'alter') {
+                    this.hostSocket.emit("HitPaddle");
+                    this.guestSocket.emit("HitPaddle");
+                }
             }
         }
     }
-    
+
     private constrain(value: number, min: number, max: number): number {
         return Math.min(Math.max(value, min), max);
     }
@@ -137,16 +153,28 @@ export class Puck {
     edges(): boolean {
         if (this.y < 15 || this.y > this.height - 15) {
             this.yspeed *= -1;
+            if (this.mode === 'alter') {
+                this.hostSocket.emit("WallHit");
+                this.guestSocket.emit("WallHit");
+            }
         }
 
         if (this.x - this.r > this.width) {
             this.leftScore++;
+            if (this.mode === 'alter') {
+                this.hostSocket.emit("OnGoal");
+                this.guestSocket.emit("OnGoal");
+            }
             this.reset();
             return true;
         }
 
         if (this.x + this.r < 0) {
             this.rightScore++;
+            if (this.mode === 'alter') {
+                this.hostSocket.emit("OnGoal");
+                this.guestSocket.emit("OnGoal");
+            }
             this.reset();
             return true
         }

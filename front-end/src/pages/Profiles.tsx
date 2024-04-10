@@ -85,6 +85,22 @@ query($user_id: String!) {
       host{id}
       guest{id}
     }
+    getAllMatches(userId: $user_id) {
+      id
+      host_score_m
+      guest_score_m
+      host{
+        id
+        username
+        avatar{filename}
+      }
+      guest{
+        id
+        username
+        avatar{filename}
+      }
+      createdAt
+    }
 }`;
 
 
@@ -117,6 +133,7 @@ function Profiles() {
   const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
   const [buttonText, setbuttonText] = useState('');
   const [friendShipId, setfriendShipId] = useState('');
+  const [matches, setMatches] = useState<Match[]>([]);
 
   const urlParams = new URLSearchParams(window.location.search);
   let id = urlParams.get('id');
@@ -154,11 +171,13 @@ function Profiles() {
       })
       .then(({ data }) => {
         if (data && data.getAllUsers) {
+          console.log("data = ", data)
           setUserData(data.getUserById);
           setUsers(data.getAllUsers);
           setFriends(data.getUserFriends);
           setReceiver(data.getUserFriendsReceiver);
           setSender(data.getUserFriendsSender);
+          setMatches(data.getAllMatches);
           setLoading(false);
         }
       })
@@ -249,12 +268,16 @@ function Profiles() {
   };
 
   const myAchievements: Achievement[] = [];
-  userData?.achievements.forEach(userAchievement => {
-    const a = achievements.find(achievement => achievement.enum === userAchievement.achievement);
-    if (a) {
-      myAchievements.push(a);
-    }
-  });
+      const uniqueAchievements: Set<string> = new Set();
+
+      userData?.achievements?.forEach(userAchievement => {
+          let a = achievements.find(achievement => achievement.enum === userAchievement.achievement);
+          if (a && !uniqueAchievements.has(a.enum)) {
+              a.createdAt = userAchievement.createdAt;
+              myAchievements.push(a);
+              uniqueAchievements.add(a.enum);
+          }
+      });
   // Friends
   let FriendsList = friends.map((friend: User) => ({
     id: friend.id,
@@ -349,23 +372,23 @@ function Profiles() {
         <div className="PPL">Playthrough Legacy</div>
         <div className="PPLBar">
 
-          <ul>
-            {FriendsList.map((f, index) => {
-              return (
-                <li key={index} className="play">
-                  <div className="PlayerLeft">
-                    <img src={f.image} className="LeftPlayer" alt="LeftPlayer" />
-                    <p className="PlayerName">{f.username}</p>
-                  </div>
-                  <p className="ScoreP">2&nbsp;&nbsp;-&nbsp;&nbsp;5</p>
-                  <div className="PlayerRight">
-                    <img src={f.image} className="RightPlayer" alt="RightPlayer" />
-                    <p className="PlayerName">{f.username}</p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+        <ul >
+              {matches.map((match, index) => {
+                return (
+                  <li key={index} className="play">
+                    <div className="PlayerLeft">
+                      <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} />
+                      <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
+                    </div>
+                    <p className="ScoreP">{match.host_score_m} - {match.guest_score_m}</p>
+                    <div className="PlayerRight">
+                      <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} />
+                      <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
+                    </div>
+                  </li>
+                );
+              })}
+        </ul>
         </div>
         <div className="SearchBarP">
           <SearchBar />

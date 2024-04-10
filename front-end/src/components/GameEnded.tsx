@@ -5,20 +5,20 @@ import '../App.css';
 import User from "../types/user-interface";
 
 interface FinishedGameData {
-	Id: string,
-	Username: string,
-	Image: string,
-	Character: string,
-	Host: boolean,
-	HostScore: number,
-	GuestScore: number,
+    Id: string,
+    Username: string,
+    Image: string,
+    Character: string,
+    Host: boolean,
+    HostScore: number,
+    GuestScore: number,
 }
 
 interface player {
     id: any,
     username: any,
     image: any,
-	character: any,
+    character: any,
 }
 
 const USER_DATA_QUERY = `
@@ -32,7 +32,7 @@ const USER_DATA_QUERY = `
         }
 `;
 
-const GameEnded = ({ gameMode, gameData } : { gameMode: any, gameData: FinishedGameData }) => {
+const GameEnded = ({ gameMode, gameData }: { gameMode: any, gameData: FinishedGameData }) => {
     console.log("data = ", gameData);
     const [userData, setUserData] = useState<User>();
     const [isLoading, setLoading] = useState(true);
@@ -84,7 +84,7 @@ const GameEnded = ({ gameMode, gameData } : { gameMode: any, gameData: FinishedG
         image: '/Avatars/01.jpeg',
         character: '2',
     };
-    if (gameData){
+    if (gameData) {
         // left
         rightPlayer.id = gameData.Id;
         rightPlayer.username = gameData.Username;
@@ -114,7 +114,7 @@ const GameEnded = ({ gameMode, gameData } : { gameMode: any, gameData: FinishedG
     }
     let leftScore = gameData.HostScore;
     let rightScore = gameData.GuestScore;
-    if (gameData.Host == false){
+    if (gameData.Host == false) {
         rightScore = gameData.HostScore;
         leftScore = gameData.GuestScore;
     }
@@ -123,43 +123,43 @@ const GameEnded = ({ gameMode, gameData } : { gameMode: any, gameData: FinishedG
             <div className='flex center'>
                 <h1>Game Ended</h1>
             </div>
-        <div>
-                    <div className="col-span-7 center score-container grid grid-cols-3">
-                        <div className="col-span-1 center left-player-data">
-                            <span title="Player">
-                                <img
-                                    className="player-img"
-                                    src={leftPlayer.image}
-                                    alt=""
-                                />
-                            </span>
-                            <span className="player-name">
-                                {leftPlayer.username?.length > 9 ? `${leftPlayer.username?.slice(0, 9)}.` : leftPlayer.username}
-                            </span>
-                        </div>
-                        <div className="col-span-1 center score-rounds">
-                            <div className="rounds">Round {leftScore + rightScore + 1}</div>
-                            <div className="score">
-                                <span title="Left player score">{leftScore}</span>
-                                <span> - </span>
-                                <span title="Right player score">{rightScore}</span>
-                            </div>
-                        </div>
-                        <div className="col-span-1 center right-player-data">
-                            <span title="Player">
-                                <img
-                                    className="player-img"
-                                    src={rightPlayer.image}
-                                    alt=""
-                                />
-                            </span>
-                            <span className="player-name">
-                                {rightPlayer.username?.length > 9 ? `${rightPlayer.username?.slice(0, 9)}.` : rightPlayer.username}
-                            </span>
+            <div>
+                <div className="col-span-7 center score-container grid grid-cols-3">
+                    <div className="col-span-1 center left-player-data">
+                        <span title="Player">
+                            <img
+                                className="player-img"
+                                src={leftPlayer.image}
+                                alt=""
+                            />
+                        </span>
+                        <span className="player-name">
+                            {leftPlayer.username?.length > 9 ? `${leftPlayer.username?.slice(0, 9)}.` : leftPlayer.username}
+                        </span>
+                    </div>
+                    <div className="col-span-1 center score-rounds">
+                        <div className="rounds">Round {leftScore + rightScore + 1}</div>
+                        <div className="score">
+                            <span title="Left player score">{leftScore}</span>
+                            <span> - </span>
+                            <span title="Right player score">{rightScore}</span>
                         </div>
                     </div>
+                    <div className="col-span-1 center right-player-data">
+                        <span title="Player">
+                            <img
+                                className="player-img"
+                                src={rightPlayer.image}
+                                alt=""
+                            />
+                        </span>
+                        <span className="player-name">
+                            {rightPlayer.username?.length > 9 ? `${rightPlayer.username?.slice(0, 9)}.` : rightPlayer.username}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     );
 }
 

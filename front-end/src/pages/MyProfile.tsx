@@ -31,11 +31,14 @@ import ChevLeft from '/Icons/ChevronLeft.png';
 import CircleSettings from '/Icons/CircleSettings.png';
 import Achievement from '../types/achievement-interface';
 import User from '../types/user-interface';
-
+import { jwtDecode } from 'jwt-decode';
+import Cookies from "js-cookie";
+import Match from '../types/match-interface.tsx';
+import Loading from '../components/Loading.tsx';
 
 
 const USER_DATA_QUERY = `
-    query UserData {
+    query($user_id: String!) {
         getUserInfo {
             id
             email
@@ -76,6 +79,22 @@ const USER_DATA_QUERY = `
             avatar{filename}
             createdAt
         }
+        getAllMatches(userId: $user_id) {
+          id
+          host_score_m
+          guest_score_m
+          host{
+            id
+            username
+            avatar{filename}
+          }
+          guest{
+            id
+            username
+            avatar{filename}
+          }
+          createdAt
+        }
     }
 `;
 const achievements = [
@@ -107,36 +126,16 @@ interface TopFive {
   leaderboard: string
 }
 function Profile() {
-    // const achievements = [WelcomeWithoutB, FiveWithoutB, ThreeWithoutB, FirstfWithoutB, RobotWithoutB, RoomWithoutB];
     const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
-    const [FriendsList, setFriendsList] = useState<Friend[]>([]);
-
-    // useEffect(() => {
-    //         if (!users || !friends || !userData) return;
-    //         const updatedFriendsList: Friend[] = friends.map((friend) => ({
-    //             id: friend.id,
-    //             username: friend.username,
-    //             status: friend.status,
-    //             image: friend.avatar?.filename || ''
-    //         }));
-
-    //         setFriendsList(updatedFriendsList);
-
-    //         const xp = userData.xp;
-    //         const level = Math.sqrt(xp) / 10;
-    //         const currentLevel = Math.floor(level);
-    //         const nextLevel = currentLevel + 1;
-    //         // Calculate level progress (percentage)
-    //         const levelProgress = ((xp - currentLevel * currentLevel * 100) / ((nextLevel * nextLevel * 100) - (currentLevel * currentLevel * 100))) * 100;
-    //         setLevelData({ currentLevel, nextLevel, levelProgress });
-    // }, [users, friends, userData]);
-
-    const { token } = useAuth();
     const [isLoading, setLoading] = useState(true);
     const [userData, setUserData] = useState<User>();
     const [friends, setFriends] = useState<User[]>([]);
     const [users, setUsers] = useState<User[]>([]);
-  
+    const [matches, setMatches] = useState<Match[]>([]);
+
+    const token: string | undefined = Cookies.get('token');
+    const decodedToken = jwtDecode(token || '');
+    const userId = decodedToken.sub;
     useEffect(() => {
       if (!token) return; // If token is not available, do nothing
 
@@ -147,7 +146,7 @@ function Profile() {
               Authorization: `Bearer ${token}`
           },
           body: JSON.stringify({
-              query: USER_DATA_QUERY
+              query: USER_DATA_QUERY, variables: { user_id: userId }
           })
       })
           .then(response => {
@@ -158,16 +157,21 @@ function Profile() {
           })
           .then(({ data }) => {
               if (data) {
+                  console.log("data = ", data)
                   setLoading(false);
                   setUserData(data.getUserInfo);
                   setUsers(data.getAllUsers);
                   setFriends(data.getUserFriends);
+                  setMatches(data.getAllMatches);
               }
           })
           .catch(error => {
               setLoading(false);
               console.error('Error fetching friends:', error);
           });
+    }, []);
+  if (!users || !friends || !userData || !matches) return;
+      console.log("matches = ", matches);
 
     let updatedFriendsList: Friend[] = {
       id: '',
@@ -183,10 +187,8 @@ function Profile() {
           image: friend.avatar?.filename || ''
       }));
     }
-    setFriendsList(updatedFriendsList);
+    const FriendsList: Friend[] = updatedFriendsList;
 
-  }, []);
-  if (!users || !friends || !userData) return;
 
     let xp = userData.xp;
     const level = Math.sqrt(xp) / 10;
@@ -206,11 +208,14 @@ function Profile() {
         createdAt: string;
       };
       const myAchievements: Achievement[] = [];
+      const uniqueAchievements: Set<string> = new Set();
+
       userData?.achievements?.forEach(userAchievement => {
           let a = achievements.find(achievement => achievement.enum === userAchievement.achievement);
-          if (a) {
+          if (a && !uniqueAchievements.has(a.enum)) {
               a.createdAt = userAchievement.createdAt;
               myAchievements.push(a);
+              uniqueAchievements.add(a.enum);
           }
       });
   // Interplays
@@ -224,7 +229,7 @@ function Profile() {
       friends.forEach(friend => {
         myInterplays.push({
             icon: "🤍",
-            description: `Just added a new friend '${friend.username}'!`,
+            description: `Added a new friend '${friend.username}'!`,
             createdAt: new Date().toISOString()
         });
       });
@@ -233,10 +238,16 @@ function Profile() {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
       const playedGames = userData?.host.length + userData?.guest.length;
+          // Wins | Draw | Losses
+              const myWins = userData?.winner.length;
+              const myLosses = userData?.loser.length;
+              const myDraws = playedGames - (myWins + myLosses);
+
+      myInterplays.unshift({ icon: "💰", description: `Earned ${(myWins*500) + (myDraws*250)} points in games`, createdAt: new Date().toISOString(),});
       if (playedGames == 1 )
-        myInterplays.unshift({ icon: "🏓", description: `You have played ${playedGames} game!`, createdAt: new Date().toISOString(),});
+        myInterplays.unshift({ icon: "🏓", description: `Played ${playedGames} game!`, createdAt: new Date().toISOString(),});
       else
-        myInterplays.unshift({ icon: "🏓", description: `You have played ${playedGames} games`, createdAt: new Date().toISOString(),});
+        myInterplays.unshift({ icon: "🏓", description: `Played ${playedGames} games`, createdAt: new Date().toISOString(),});
   // Top 5
       const sortedUsers: User[] = [...users];
       sortedUsers.sort((a, b) => { return b.xp - a.xp});
@@ -260,10 +271,6 @@ function Profile() {
         if (userData.id == topFive[2]?.id) myLeaderboard = Leaderboard3;
         if (userData.id == topFive[3]?.id) myLeaderboard = Leaderboard4;
       }
-  // Wins | Draw | Losses
-      const myWins = userData?.winner.length;
-      const myLosses = userData?.loser.length;
-      const myDraws = playedGames - (myWins + myLosses);
 
     const handlePrevAchievement = () => {
         const newIndex = currentAchievementIndex === 0 ? myAchievements.length - 1 : currentAchievementIndex - 1;
@@ -275,7 +282,7 @@ function Profile() {
     };
 
   if (isLoading)
-    return <GameLoading />
+    return <Loading />
   return (
     <div className="Profile">
       <header className="Profile-header">
@@ -362,17 +369,17 @@ function Profile() {
 
 
               <ul >
-              {FriendsList.map(({ username,  image }, index) => {
+              {matches.map((match, index) => {
                 return (
                   <li key={index} className="play">
                     <div className="PlayerLeft">
-                      <img src={image} className="LeftPlayer" alt={username} />
-                      <p className="PlayerName">{username}</p>
+                      <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} />
+                      <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
                     </div>
-                    <p className="ScoreP">2&nbsp;&nbsp;-&nbsp;&nbsp;5</p>
+                    <p className="ScoreP">{match.host_score_m}&nbsp;&nbsp;-&nbsp;&nbsp;{match.guest_score_m}</p>
                     <div className="PlayerRight">
-                      <img src={image} className="RightPlayer" alt={username} />
-                      <p className="PlayerName">{username}</p>
+                      <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} />
+                      <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
                     </div>
                   </li>
                 );

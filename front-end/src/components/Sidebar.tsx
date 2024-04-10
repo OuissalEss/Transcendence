@@ -75,15 +75,10 @@ const Sidebar = () => {
         <div className="sidebar__wrapper">
           <aside className="sidebar items-center">
             <div className="sidebar__top">
-              <img
-                title="Logo"
-                className="sidebar__logo"
-                src="/logo.png"
-                alt="logo"
-                style={{ width: "100%", height: "auto" }}
-                width={200}
-                height={200}
-              />
+              <Link to="/">
+                <img title="Logo" className="sidebar__logo"
+                  src="/logo.png" alt="logo" style={{ width: "100%", height: "auto" }} />
+              </Link>
             </div>
             <ul className="sidebar__list">
               {sidebarItems.map(({ name, href, icon }, index) => {

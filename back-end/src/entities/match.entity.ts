@@ -78,6 +78,18 @@ export class Match {
   @IsString({ message: 'User who lost the match must be a string' })
   loserId: string;
 
+  @Field(() => User, { description: 'loser' })
+  loser?: User;
+
+  @Field(() => User, { description: 'winner' })
+  winner?: User;
+
+  @Field(() => User, { description: 'host' })
+  host?: User;
+
+  @Field(() => User, { description: 'guest' })
+  guest?: User;
+
   /**
    * The date when the match was created.
    * @type {Date}

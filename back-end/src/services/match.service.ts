@@ -15,18 +15,25 @@ export class MatchService {
 
     /**
      * Retrieves all user matchs.
-     * @param {number} id - host ID
+     * @param {number} userId - host ID
      * @returns {Promise<Match[]>}
      */
     async getAllUserMatchs(userId: string): Promise<Match[]> {
-        const match = await this.prisma.match.findMany({
-            where: {
-                OR: [{ hostId: userId }, { guestId: userId }]
-            },
-            include: matchIncludes,
-        });
-        if (!match) throw new NotFoundException("Match not found");
-        return match;
+        try {
+            console.log("USER ID = ", userId);
+            console.log("*******************************************");
+            const match = await this.prisma.match.findMany({
+                where: {
+                    OR: [{ hostId: userId }, { guestId: userId }]
+                },
+                include: matchIncludes,
+            });
+            console.log("MATCH = ", match);
+            if (!match) throw new NotFoundException("Match not found");
+            return match;
+        } catch (error) {
+            throw new Error(`Error fetching matches: ${error.message}`);
+        }
     }
 
     /**
