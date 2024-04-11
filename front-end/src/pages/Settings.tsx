@@ -265,8 +265,8 @@ function Settings() {
     const uploadAvatar = async () => {
         const imageCompressor = new ImageCompressor(); // Instantiate ImageCompressor
         const compressedFile = await imageCompressor.compress(selectedFile, { // Use compress method
-            maxWidth: 150,
-            maxHeight: 150,
+            maxWidth: 500,
+            maxHeight: 500,
             quality: 0.5, // Adjust quality as needed
         });
         const data = new FormData();

@@ -178,89 +178,100 @@ export default function Dashboard() {
   const myCharacter = characters[index];
   console.log("---User--- = ", userData);
   return (
-    <main className="flex flex-col items-center justify-between p-24 ">
+    <main className="flex flex-col mt-5 main-dashboard-page">
+      <div className="grid grid-cols-3 header_dashboard">
+          <div className='col-span-1 welcome_text '>
+              <h1>Welcome, {userData?.username}!</h1>
+          </div>
 
-      <div className="Login">
-        <header className="Login-header">
-          <div className="SearchBarD">
-            <SearchBar />
+          <div className='col-span-1 text-while'>
+              <SearchBar />
           </div>
-          <div className="NotificationBarD">
-            <Notifications />
+
+          <div className='col-span-1'>
+              <Notifications />
           </div>
-          <div className="WelcomeMssg">
-            <h1>Welcome, {userData?.username}!</h1>
-          </div>
-          <div className="Character">
-            <h1>Character</h1>
-            <div className="CharacterBar">
-              <p>{myCharacter?.name}</p>
+      </div>
+
+      <div className="grid grid-cols-2 dash_">
+
+        <div className="dash-left">
+            <div className="Character">
+              <h1>Character</h1>
+              <div className="CharacterBar">
+                  <p>{myCharacter?.name}</p>
+                  <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" />
+                  <img src={myCharacter?.Right} className="DashRight" alt="DashRight" />
+                  <img src={myCharacter?.infos} className="CharacterInfos" alt="CharacterInfos" />
+              </div>
             </div>
+
+              <div className="Question">
+                <h1>Up for a game?</h1>
+              </div>
+            <div className="dash_games grid grid-cols-3">
+              <div className="GameModeBar">
+                <h1>Online</h1>
+                <p>Challenge a <br></br> random player!</p>
+                <Link to="/game/pong?mode=online">
+                  <div className="PlayNow">
+                    <h3>Play now</h3>
+                  </div>
+                </Link>
+                <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" />
+
+              </div>
+              <div className="GameModeBar">
+                <h1>Offline</h1>
+                <p>Challenge a <br></br> friend offline!</p>
+                <Link to="/game/pong?mode=offline">
+                  <div className="PlayNow">
+                    <h3>Play now</h3>
+                  </div>
+                </Link>
+                <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" />
+              </div>
+              <div className="GameModeBar">
+                <h1>Robot</h1>
+                <p>Test your skills<br></br>against a robot!</p>
+                <Link to="/game/pong?mode=ai">
+                  <div className="PlayNow">
+                    <h3>Play now</h3>
+                  </div>
+                </Link>
+                <img src={Robot} alt="Robot" className="RobotPic" />
+              </div>
+              
           </div>
+
+        </div>
+
+        <div className="dash-right">
           <div className="TopFivePlayers">
             <h1>Top 5 players</h1>
 
             {topFive?.map((player, index) => (
               player.name ? (
                 <Link key={index} to={`/profiles?id=${player.id}`}>
-                  <div className={`AvatarContainer${index + 1}`}>
-                    <h1>{player.name}</h1>
+                  <div className='AvatarContainer'>
+                    <h2>{player.name}</h2>
                     <p>{player.xp} xp | {player.wins} wins</p>
                     <img
                       src={player.image}
-                      alt={`Top${index + 1}`}
-                      className={`Top${index + 1}`}
+                      alt='Top'
+                      className='Top'
                     />
-                    {index < 3 &&
                       <img
                         src={player.leaderboard}
-                        className={`Leaderboard${index + 1}`}
-                        alt={`Leaderboard${index + 1}`}
+                        className='Leaderboard'
+                        alt='Leaderboard'
                       />
-                    }
                   </div>
                 </Link>
               ) : null
             ))}
           </div>
-
-          <div className="Question">
-            <h1>Up for a game?</h1>
-          </div>
-          <div className="OnlineBar">
-            <h1>Online</h1>
-            <p>Challenge a <br></br> random player!</p>
-          </div>
-          <div className="OfflineBar">
-            <h1>Offline</h1>
-            <p>Challenge a <br></br> friend offline!</p>
-          </div>
-          <div className="RobotBar">
-            <h1>Robot</h1>
-            <p>Test your skills<br></br>against a robot!</p>
-          </div>
-          <Link to="/game/pong?mode=online">
-            <div className="PlayNow1">
-              <p>Play now</p>
-            </div>
-          </Link>
-          <Link to="/game/pong?mode=offline">
-            <div className="PlayNow2">
-              <p>Play now</p>
-            </div>
-          </Link>
-          <Link to="/game/pong?mode=ai">
-            <div className="PlayNow3">
-              <p>Play now</p>
-            </div>
-          </Link>
-          <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" />
-          <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" />
-          <img src={Robot} alt="Robot" className="RobotPic" />
-          <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" />
-          <img src={myCharacter?.Right} className="DashRight" alt="DashRight" />
-          <img src={myCharacter?.infos} className="AuroraInfos" alt="AuroraInfos" />
-        </header>
+        </div>
       </div>
     </main>
   )

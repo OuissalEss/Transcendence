@@ -17,3 +17,6 @@
 .containerGE .player-name{
     font-size: 11px;
 }
+.containerGE .score-container{
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+}

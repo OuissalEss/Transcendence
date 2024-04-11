@@ -50,7 +50,7 @@ export default function Game() {
                         </div>
 
                     </div>
-                    <Link to="/game/pong?mode=online" className="mode-btn transition-all">
+                    <Link to="/game/pong?mode=online" className="mode-btn">
                         <div>Play now</div>
                     </Link>
                 </div>
@@ -69,7 +69,7 @@ export default function Game() {
                         </div>
 
                     </div>
-                    <Link to="/game/pong?mode=ai" className="mode-btn transition-all">
+                    <Link to="/game/pong?mode=ai" className="mode-btn ">
                         <div>Play now</div>
                     </Link>
                 </div>

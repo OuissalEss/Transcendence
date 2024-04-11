@@ -27,27 +27,27 @@ const SearchBar = () => {
         }
     }, [data]);
 
-    useEffect(() => {
-        // Add event listener to the document to handle clicks outside the search results
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                searchResultsRef.current &&
-                !searchResultsRef.current.contains(event.target as Node) &&
-                !inputFocused
-            ) {
-                // Click occurred outside the search results and input is not focused, clear them
-                setSearchResults([]);
-            }
-        };
+    // useEffect(() => {
+    //     // Add event listener to the document to handle clicks outside the search results
+    //     const handleClickOutside = (event: MouseEvent) => {
+    //         if (
+    //             searchResultsRef.current &&
+    //             !searchResultsRef.current.contains(event.target as Node) &&
+    //             !inputFocused
+    //         ) {
+    //             // Click occurred outside the search results and input is not focused, clear them
+    //             setSearchResults([]);
+    //         }
+    //     };
     
-        // Attach the event listener
-        document.addEventListener("click", handleClickOutside);
+    //     // Attach the event listener
+    //     document.addEventListener("click", handleClickOutside);
     
-        // Clean up the event listener on component unmount
-        return () => {
-            document.removeEventListener("click", handleClickOutside);
-        };
-    }, [inputFocused]); // Include inputFocused in the dependency array
+    //     // Clean up the event listener on component unmount
+    //     return () => {
+    //         document.removeEventListener("click", handleClickOutside);
+    //     };
+    // }, [inputFocused]); // Include inputFocused in the dependency array
     
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +87,7 @@ const SearchBar = () => {
                 onChange={handleInputChange}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
-                placeholder="Search..."
+                placeholder="Search for player"
                 className="searchInput"
             />
 
