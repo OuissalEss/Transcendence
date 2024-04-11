@@ -47,6 +47,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@WebSocketServer() server: Server;
 	private games: Map<GameState, { hostId: string, guestId: string }> = new Map(); // Map to store game instances for each client
 	private onlinePlayersQueue: Socket[] = [];
+	private alterPlayersQueue: Socket[] = [];
 	private playerInfoMap: Map<string, PlayerInfo> = new Map(); // Map to store player info
 	private activeRooms: Map<string, RoomData> = new Map(); // Map to store active room data
 
@@ -175,7 +176,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const hostId = clientStats.hostId;
 			const guestId = clientStats.guestId;
 
-			if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && game.getMode() === 'online') {
+			if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && (game.getMode() === 'online' || game.getMode() === 'alter')) {
 				console.log("Game Ended");
 				// Emit 'gameFinished' event to the client associated with this game
 
@@ -204,7 +205,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				// if (clientId == game.getHostId() && !game.getGameEnded())
 				this.handleFinishedGame(game);
 				game.setGameEnded(true);
-			} else if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && game.getMode() != 'online') {
+			} else if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && game.getMode() != 'online' && game.getMode() != 'alter') {
 				console.log("Game Ended");
 
 				this.server.to(hostId).emit('gameFinished', {
@@ -329,6 +330,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const guestId = clientStats.guestId;
 			const hostId = clientStats.hostId;
 
+			console.log("SEND HOST", hostId)
 			this.server.to(hostId).emit('gameFinished', {
 				userId: this.playerInfoMap.get(game.getGuestId()).userId,
 				username: this.playerInfoMap.get(game.getGuestId()).username,
@@ -338,6 +340,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				hostScore: game.getHostScore(),
 				guestScore: game.getGuestScore(),
 			});
+			console.log("SEND", guestId)
 			this.server.to(guestId).emit('gameFinished', {
 				userId: this.playerInfoMap.get(game.getHostId()).userId,
 				username: this.playerInfoMap.get(game.getHostId()).username,
@@ -361,7 +364,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 							hostId: this.playerInfoMap.get(hostId)?.userId,
 							guestId: this.playerInfoMap.get(guestId)?.userId,
 						}
-					})
+					});
 					this.userService.addXp(this.playerInfoMap.get(hostId)?.userId, 250);
 					this.userService.addXp(this.playerInfoMap.get(guestId)?.userId, 250);
 				} else {
@@ -439,8 +442,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return;
 		}
 
-		if (mode === 'online' || mode === 'alter') {
-			this.handleOnlineMatch(client, mode);
+		if (mode === 'online') {
+			this.handleOnlineMatch(client);
+		} else if (mode === 'alter') {
+			this.handleAlterMatch(client);
 		} else if (mode === 'ai') {
 			this.handleAIMatch(client);
 		} else if (mode === 'offline') {
@@ -451,24 +456,91 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	// Handler for starting an online match
-	private handleOnlineMatch(client: Socket, mode: string) {
+	private handleAlterMatch(client: Socket) {
+		this.alterPlayersQueue.push(client);
+		console.log(`Player ${client.id} is looking for an alter game.`);
+		client.emit('matchStatus', { matchStatus: false });
+
+		if (this.alterPlayersQueue.length >= 2) {
+			this.createAlterMatch();
+		}
+	}
+
+	// Method to create an online match
+	private async createAlterMatch() {
+		const player1 = this.alterPlayersQueue.shift()!;
+		const player2 = this.alterPlayersQueue.shift()!;
+
+		console.log(`Starting a game between ${player1.id} : ${player2.id}`)
+
+		const game = new GameState(width, height, "alter", player1, player2);
+
+		this.games.set(game, { hostId: player1.id, guestId: player2.id });
+
+		game.initLeftPaddle(player1.id);
+		game.initRightPaddle(player2.id);
+
+		game.setHostId(player1.id);
+		game.setGuestId(player2.id);
+
+		player1.emit('matchStatus', { matchStatus: true });
+		player2.emit('matchStatus', { matchStatus: true });
+
+		const player1Data = this.playerInfoMap.get(player1.id);
+		const player2Data = this.playerInfoMap.get(player2.id);
+
+		await this.userService.updateStatus(player2Data?.userId, "INGAME");
+		await this.userService.updateStatus(player1Data?.userId, "INGAME");
+
+		player1.emit('oppenentData', {
+			userId: player2Data?.userId,
+			username: player2Data?.username,
+			image: player2Data?.image,
+			character: player2Data?.character,
+			host: true,
+		});
+
+		player2.emit('oppenentData', {
+			userId: player1Data?.userId,
+			username: player1Data?.username,
+			image: player1Data?.image,
+			character: player1Data?.character,
+			host: false,
+		});
+
+		const roomName = `onlineRoom_${player1.id}${player2.id}`;
+		const roomData: RoomData = {
+			roomId: roomName,
+			players: [player1.id, player2.id],
+		};
+
+		this.activeRooms.set(roomName, roomData);
+
+		player1.join(roomName);
+		player2.join(roomName);
+
+		this.updateAndBroadcastGameState();
+	}
+
+	// Handler for starting an online match
+	private handleOnlineMatch(client: Socket) {
 		this.onlinePlayersQueue.push(client);
 		console.log(`Player ${client.id} is looking for an online game.`);
 		client.emit('matchStatus', { matchStatus: false });
 
 		if (this.onlinePlayersQueue.length >= 2) {
-			this.createOnlineMatch(mode);
+			this.createOnlineMatch();
 		}
 	}
 
 	// Method to create an online match
-	private async createOnlineMatch(mode: string) {
+	private async createOnlineMatch() {
 		const player1 = this.onlinePlayersQueue.shift()!;
 		const player2 = this.onlinePlayersQueue.shift()!;
 
 		console.log(`Starting a game between ${player1.id} : ${player2.id}`)
 
-		const game = new GameState(width, height, mode, player1, player2);
+		const game = new GameState(width, height, "online", player1, player2);
 
 		this.games.set(game, { hostId: player1.id, guestId: player2.id });
 
