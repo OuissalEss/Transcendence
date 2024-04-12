@@ -15,6 +15,7 @@ export class Puck {
     private hostSocket;
     private guestSocket;
     private mode;
+    private speed;
 
     constructor(width, height, mode, hostSocket: Socket, guestSocket: Socket) {
         this.x = width / 2;
@@ -29,6 +30,7 @@ export class Puck {
         this.hostSocket = hostSocket;
         this.guestSocket = guestSocket;
         this.mode = mode;
+        this.speed = 0;
         console.log("Mode: ", mode);
     }
 
@@ -58,8 +60,8 @@ export class Puck {
         this.y = this.height / 2;
 
         const angle = this.randomAngle(-Math.PI / 4, Math.PI / 4);
-        this.xspeed = 6 * Math.cos(angle);
-        this.yspeed = 6 * Math.cos(angle);
+        this.xspeed = 6 * Math.cos(angle) + this.speed;
+        this.yspeed = 6 * Math.cos(angle) + this.speed;
     }
 
     checkPaddleLeft(paddle: Paddle) {
@@ -90,9 +92,13 @@ export class Puck {
                 let diff = this.y - (p.y - p.h / 2);
                 let rad = this.radians(45);
                 let angle = this.map(diff, 0, p.h, -rad, rad);
-                this.xspeed = 6 * Math.cos(angle);
-                this.yspeed = 6 * Math.sin(angle);
+
+                // Calculate the new x and y speeds based on the angle
+                this.xspeed = 6 * Math.cos(angle) + this.speed;;
+                this.yspeed = 6 * Math.sin(angle) + this.speed;;
+
                 this.x = p.x + p.w / 2 + this.r;
+
                 if (this.mode === 'alter') {
                     this.hostSocket.emit("HitPaddle");
                     this.guestSocket.emit("HitPaddle");
@@ -100,6 +106,7 @@ export class Puck {
             }
         }
     }
+
     checkPaddleRight(paddle: Paddle) {
         const p = paddle.getState();
 
@@ -128,9 +135,13 @@ export class Puck {
             if (this.x < p.x) {
                 let diff = this.y - (p.y - p.h / 2);
                 let angle = this.map(diff, 0, p.h, this.radians(225), this.radians(135));
-                this.xspeed = 6 * Math.cos(angle);
-                this.yspeed = 6 * Math.sin(angle);
+
+                // Calculate the new x and y speeds based on the angle
+                this.xspeed = 6 * Math.cos(angle) + this.speed;
+                this.yspeed = 6 * Math.sin(angle) + this.speed;
+
                 this.x = p.x - p.w / 2 - this.r;
+
                 if (this.mode === 'alter') {
                     this.hostSocket.emit("HitPaddle");
                     this.guestSocket.emit("HitPaddle");
@@ -138,6 +149,7 @@ export class Puck {
             }
         }
     }
+
 
     private constrain(value: number, min: number, max: number): number {
         return Math.min(Math.max(value, min), max);
@@ -165,6 +177,7 @@ export class Puck {
                 this.hostSocket.emit("OnGoal");
                 this.guestSocket.emit("OnGoal");
             }
+            this.speed++;
             this.reset();
             return true;
         }
@@ -175,6 +188,7 @@ export class Puck {
                 this.hostSocket.emit("OnGoal");
                 this.guestSocket.emit("OnGoal");
             }
+            this.speed += 2;
             this.reset();
             return true
         }

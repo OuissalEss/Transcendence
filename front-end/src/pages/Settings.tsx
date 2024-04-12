@@ -51,6 +51,7 @@ import { useSocket } from '../App';
 import Block from '../types/block-interface';
 import { useAuth } from '../provider/authProvider';
 import GameLoading from '../components/GameLoading';
+import Loading from '../components/Loading';
 
 const USER_DATA_QUERY = `
     query UserData {
@@ -374,7 +375,7 @@ function Settings() {
     }
 
     if (isLoading)
-        return <GameLoading />
+        return <Loading />
     return (
         <div className="Login">
             <header className="Login-header">
