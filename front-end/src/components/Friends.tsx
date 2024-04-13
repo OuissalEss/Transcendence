@@ -99,19 +99,20 @@ const Friends = () => {
                         status: friend.status,
                         image: friend.avatar?.filename || ''
                     }));
-                    const friendsItems = friends?.map((user: { id: string, username: string, avatar: {filename: string}, status: string, xp: number, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[] }) => ({
-                      id: user.id,
-                      name: user.username,
-                      icon: user?.avatar?.filename || '/Avatars/default.jpeg', // Assuming avatarTest is the avatar URL
-                      status: user.status,
-                      xp: user.xp,
-                      blocked: user.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
-                      blocken: user.blocking.map((blocker: { blockerId: string }) => blocker.blockerId)
+                    const friendsItems = friends?.map((user: { id: string, username: string, avatar: { filename: string }, status: string, xp: number, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({
+                        id: user.id,
+                        name: user.username,
+                        icon: user?.avatar?.filename || '/Avatars/default.jpeg', // Assuming avatarTest is the avatar URL
+                        status: user.status,
+                        xp: user.xp,
+                        blocked: user.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+                        blocken: user.blocking.map((blocker: { blockerId: string }) => blocker.blockerId)
                     }));
                     localStorage.setItem('friends', JSON.stringify(friendsItems));
                     setFriendsList(updatedFriendsList);
                 } if (data && data.getUserInfo) {
                     setUserData(data.getUserInfo);
+                    // localStorage.setItem('user', JSON.stringify({ id: userData?.id, username: userData?.username, icon: userData?.avatar?.filename || '/Avatars/default.jpeg', }));
                 }
             })
             .catch(error => {
@@ -119,10 +120,7 @@ const Friends = () => {
             });
     }, []);
 
-                    console.log(userData?.id + "hhh")
-                    localStorage.setItem('user', JSON.stringify({id: userData?.id, username: userData?.username, icon: userData?.avatar?.filename || '/Avatars/default.jpeg', }));
-                
-                    console.log("hhhh" + JSON.parse(localStorage.getItem('user') || '{42}'));
+    console.log(userData?.id + "hhh")
 
     return (
         <div>

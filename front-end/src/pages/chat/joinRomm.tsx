@@ -29,88 +29,88 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 	const [addMember] = useMutation(ADD_MEMBER);
 	const [password, setPassword] = useState('');
 	const user = JSON.parse(localStorage.getItem('user') || '{}');
-	const {loading, error, data} = useQuery(ALL_CHANNELS);
-	const [Channels, updateChannels] =  useState<channelType[]>([]);
+	const { loading, error, data } = useQuery(ALL_CHANNELS);
+	const [Channels, updateChannels] = useState<channelType[]>([]);
 	const [socket, setSocket] = useState<Socket>();
 	// const [socket, setSocket] = useState<Socket>();
 	// let Channels: channelType[] = [];
 	const fetch_channels = async () => {
-		
+
 		if (error) console.log('Channels : Error:', error.message);
 		else if (loading) console.log('Channels : Loading...');
 		else if (data) {
 			// extract the channels from the data and filter out the channels that the user is not a member of
 			const All_Channels = data.AllChannels
-			.filter((channel: channelType) => 
-				!channel.members.some((member: { id: string }) => member.id === user.id) &&
-				channel.type !== "DM" &&
-				channel.type !== "PRIVATE"
-			  )
-			.map((channel: channel) => ({
-				id: channel.id,
-				title: channel.title,
-				description: channel.description,
-				type: channel.type,
-				password: channel.password,
-				icon: channel.profileImage,
-				updatedAt: channel.updatedAt,
-				owner: {
-				  id: channel.owner.id,
-				  name: channel.owner.username,
-				  icon: channel.owner.avatar.filename
-				},
-				admins: channel.admins
-				.map((admin: { id: string, username: string, avatar:{filename: string} }) => ({
-				  id: admin.id,
-				  name: admin.username,
-				  icon: admin.avatar.filename
-				})),
-				members: channel.members
-				.map((member: { id: string, username: string, avatar:{filename: string}, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
-				  id: member.id,
-				  name: member.username,
-				  icon: member.avatar.filename,
-				  status: member.status,
-				  blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
-				  blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
-				})),
-				banned: channel.banned.map((banned: { id: string, username: string, avatar:{filename: string} }) => ({
-				  id: banned.id,
-				  name: banned.username,
-				  icon: banned.avatar.filename
-				})),
-				muted: channel.muted.map((muted: { id: string, username: string, avatar:{filename: string} }) => ({
-				  id: muted.id,
-				  name: muted.username,
-				  icon: muted.avatar.filename
-				})),
-				messages: channel.messages
-				.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
-				  text: message.text,
-				  sender: message.sender,
-				  senderId: message.senderId,
-				  time: message.time,
-				  read: true,
-				  unread: 0
-				})).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
-		  })).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-		  updateChannels(All_Channels);
+				.filter((channel: channelType) =>
+					!channel.members.some((member: { id: string }) => member.id === user.id) &&
+					channel.type !== "DM" &&
+					channel.type !== "PRIVATE"
+				)
+				.map((channel: channel) => ({
+					id: channel.id,
+					title: channel.title,
+					description: channel.description,
+					type: channel.type,
+					password: channel.password,
+					icon: channel.profileImage,
+					updatedAt: channel.updatedAt,
+					owner: {
+						id: channel.owner.id,
+						name: channel.owner.username,
+						icon: channel.owner.avatar.filename
+					},
+					admins: channel.admins
+						.map((admin: { id: string, username: string, avatar: { filename: string } }) => ({
+							id: admin.id,
+							name: admin.username,
+							icon: admin.avatar.filename
+						})),
+					members: channel.members
+						.map((member: { id: string, username: string, avatar: { filename: string }, status: string, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({
+							id: member.id,
+							name: member.username,
+							icon: member.avatar.filename,
+							status: member.status,
+							blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+							blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
+						})),
+					banned: channel.banned.map((banned: { id: string, username: string, avatar: { filename: string } }) => ({
+						id: banned.id,
+						name: banned.username,
+						icon: banned.avatar.filename
+					})),
+					muted: channel.muted.map((muted: { id: string, username: string, avatar: { filename: string } }) => ({
+						id: muted.id,
+						name: muted.username,
+						icon: muted.avatar.filename
+					})),
+					messages: channel.messages
+						.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
+							text: message.text,
+							sender: message.sender,
+							senderId: message.senderId,
+							time: message.time,
+							read: true,
+							unread: 0
+						})).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
+				})).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+			updateChannels(All_Channels);
 		}
 		console.log('Channels:', Channels);
 	};
-	
+
 	useEffect(() => {
 		fetch_channels();
-	}, [loading]);
+	}, [loading, error, data]);
 
 	useEffect(() => {
-        const newSocket = io('ws://localhost:3003/chat');
-        setSocket(newSocket);
+		const newSocket = io('ws://localhost:3003/chat');
+		setSocket(newSocket);
 
-        return () => {
-            newSocket.disconnect();
-        };
-    }, [setSocket]);
+		return () => {
+			newSocket.disconnect();
+		};
+	}, [setSocket]);
 
 	const joinRoom = async (channelId: string) => {
 		// emit a join event to the server
@@ -173,83 +173,83 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 		<div className="channels-container">
 			<div className="channel-list">
 				{Channels
-				.filter((ch: channelType) => {
-					return !ch.banned.some((member: { id: string }) => member.id === user.id) && !ch.members.some((member: { id: string }) => member.id === user.id);
-				})
-				.map((ch: channelType, index: number) => (
-					(ch.type !== 'dm' && ch.type !== 'private') && (
-						<div key={index} className="channel-box">
-							{!ch.icon ? (
-								<div className="channel-profile" style={{ backgroundImage: `url(${defaultPtofileImage})` }}>
-									{ch.type === 'protected' && <IoLockClosed />}
-								</div>
-							)
-							: (
-								<div className="channel-profile" style={{ backgroundImage: `url(${ch.icon})` }}>
-									{ch.type === 'protected' && <IoLockClosed />}
-								</div>								
-							)}
+					.filter((ch: channelType) => {
+						return !ch.banned.some((member: { id: string }) => member.id === user.id) && !ch.members.some((member: { id: string }) => member.id === user.id);
+					})
+					.map((ch: channelType, index: number) => (
+						(ch.type !== 'dm' && ch.type !== 'private') && (
+							<div key={index} className="channel-box">
+								{!ch.icon ? (
+									<div className="channel-profile" style={{ backgroundImage: `url(${defaultPtofileImage})` }}>
+										{ch.type === 'protected' && <IoLockClosed />}
+									</div>
+								)
+									: (
+										<div className="channel-profile" style={{ backgroundImage: `url(${ch.icon})` }}>
+											{ch.type === 'protected' && <IoLockClosed />}
+										</div>
+									)}
 
-							<div className="title-box">{ch.title}</div>
-							<div className="description-box">
-								{ch.description ? (
-									ch.description.length > 30 ? (
-										`${ch.description.slice(0, 30)}...`
-									) : (
-										ch.description
-									)
-								) : (
-									'Join the community !'
-								)}
-							</div>
-							<div className="request-btn-row">
-								{ch.type === 'PROTECTED' ? (
-									<>
-										{passwordInputs[ch.id] ? (
-											<form onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmitPassword(e as unknown as React.FormEvent<HTMLInputElement>, ch.id)}>
-												{response[ch.id] && (
-													<p className="channel-request accept-request">Incorrect Password</p>
-												)}
-												<input
-													type="password"
-													placeholder="Password"
-													className="channel-request accept-request"
-													value={password}
-													onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.currentTarget.value)}
-													onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-														if (e.key === 'Enter') {
-															// setPassword(e.currentTarget.value);
-															handleSubmitPassword(e as unknown as React.FormEvent<HTMLInputElement>, ch.id);
-														}
-													}}
-												/>
-												<button type="submit" className="channel-request accept-request">submit</button>
-											</form>
+								<div className="title-box">{ch.title}</div>
+								<div className="description-box">
+									{ch.description ? (
+										ch.description.length > 30 ? (
+											`${ch.description.slice(0, 30)}...`
 										) : (
-											<button
-												className="channel-request accept-request"
-												onClick={() => togglePasswordInput(ch.id)}
-											>
-												Join Room
-											</button>
-										)}
-									</>
-								) : ch.type === 'PUBLIC' ? (
-									<button
-										className="channel-request accept-request"
-										onClick={() => {
-											joinRoom(ch.id);
-											setId(ch.id);
-											setDisplay('Chat');
-										}}
-									>
-										Join Room
-									</button>
-								) : null}
+											ch.description
+										)
+									) : (
+										'Join the community !'
+									)}
+								</div>
+								<div className="request-btn-row">
+									{ch.type === 'PROTECTED' ? (
+										<>
+											{passwordInputs[ch.id] ? (
+												<form onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmitPassword(e as unknown as React.FormEvent<HTMLInputElement>, ch.id)}>
+													{response[ch.id] && (
+														<p className="channel-request accept-request">Incorrect Password</p>
+													)}
+													<input
+														type="password"
+														placeholder="Password"
+														className="channel-request accept-request"
+														value={password}
+														onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.currentTarget.value)}
+														onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+															if (e.key === 'Enter') {
+																// setPassword(e.currentTarget.value);
+																handleSubmitPassword(e as unknown as React.FormEvent<HTMLInputElement>, ch.id);
+															}
+														}}
+													/>
+													<button type="submit" className="channel-request accept-request">submit</button>
+												</form>
+											) : (
+												<button
+													className="channel-request accept-request"
+													onClick={() => togglePasswordInput(ch.id)}
+												>
+													Join Room
+												</button>
+											)}
+										</>
+									) : ch.type === 'PUBLIC' ? (
+										<button
+											className="channel-request accept-request"
+											onClick={() => {
+												joinRoom(ch.id);
+												setId(ch.id);
+												setDisplay('Chat');
+											}}
+										>
+											Join Room
+										</button>
+									) : null}
+								</div>
 							</div>
-						</div>
-					)
-				))}
+						)
+					))}
 			</div>
 		</div>
 	);

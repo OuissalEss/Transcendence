@@ -66,15 +66,6 @@ const USER_DATA = `
             guest{id}
             createdAt
         }
-        getAllUsers {
-            id
-            username
-            avatar {
-                filename 
-            }
-            xp
-            winner{id}
-        }
     }
 `;
 
@@ -122,57 +113,59 @@ function App() {
 
 
 
-    // useEffect(() => {
-    //     if (!token) return; // If token is not available, do nothing
+    useEffect(() => {
+        if (!token) return; // If token is not available, do nothing
 
-    //     fetch('http://localhost:3000/graphql', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             Authorization: `Bearer ${token}`
-    //         },
-    //         body: JSON.stringify({
-    //             query: USER_DATA
-    //         })
-    //     })
-    //         .then(response => {
-    //             if (!response.ok) {
-    //                 throw new Error('Failed to fetch data');
-    //             }
-    //             return response.json();
-    //         })
-    //         .then(async ({ data }) => {
-    //             if (data) {
-    //                 setUserData(data.getUserInfo);
-    //                 setFriends(data.getUserFriends);
-    //                 setUsers(data.getAllUsers);
-    //                 // Simulate data fetching delay
-    //                 await new Promise(resolve => setTimeout(resolve, 800)); // 2000 milliseconds delay (2 seconds)
-    //                 // Set data fetched status to true
-    //                 setDataFetched(true);
-    //                 // setLoading(false);
-    //             }
-    //         }).catch(error => {
-    //             setLoading(false);
-    //             console.error('Error fetching friends:', error);
-    //         });
+        fetch('http://localhost:3000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                query: USER_DATA
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                return response.json();
+            })
+            .then(async ({ data }) => {
+                if (data) {
+                    setUserData(data.getUserInfo);
+                    setFriends(data.getUserFriends);
+                    setUsers(data.getAllUsers);
+                    localStorage.setItem('user', JSON.stringify({ id: data.getUserInfo.id, username: data.getUserInfo.username, icon: data.getUserInfo.filename || '/Avatars/default.jpeg', }));
 
-    //     // Cleanup function
-    //     return () => {
-    //         // Perform any cleanup here if necessary
-    //     };
-    // }, []);
+                    // Simulate data fetching delay
+                    await new Promise(resolve => setTimeout(resolve, 800)); // 2000 milliseconds delay (2 seconds)
+                    // Set data fetched status to true
+                    setDataFetched(true);
+                    // setLoading(false);
+                }
+            }).catch(error => {
+                setLoading(false);
+                console.error('Error fetching friends:', error);
+            });
 
-    // // Show loading indicator for 2 seconds before showing routes
-    // useEffect(() => {
-    //     if (dataFetched) {
-    //         // Set isLoading to false after 2 seconds
-    //         const timeoutId = setTimeout(() => setLoading(false), 800); // 2000 milliseconds (2 seconds)
+        // Cleanup function
+        return () => {
+            // Perform any cleanup here if necessary
+        };
+    }, []);
 
-    //         // Clear timeout to prevent memory leak
-    //         return () => clearTimeout(timeoutId);
-    //     }
-    // }, [dataFetched]);
+    // Show loading indicator for 2 seconds before showing routes
+    useEffect(() => {
+        if (dataFetched) {
+            // Set isLoading to false after 2 seconds
+            const timeoutId = setTimeout(() => setLoading(false), 800); // 2000 milliseconds (2 seconds)
+
+            // Clear timeout to prevent memory leak
+            return () => clearTimeout(timeoutId);
+        }
+    }, [dataFetched]);
 
     const contextValue = useMemo(() => ({ socket, connected, userData, friends, users }), [socket, connected, userData, friends, users]);
 
