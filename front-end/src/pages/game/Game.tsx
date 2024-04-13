@@ -8,16 +8,6 @@ import SearchBar from "../../components/SearchBar";
 import Notifications from "../../components/Notifications";
 
 
-const liveMatches = null;
-// [
-//     {
-//         host: "OuissalEs",
-//         guest: "OuissalEss",
-//         href: "#",
-//     },
-// ];
-
-
 export default function Game() {
     return (
         <div className="main-game-page">
@@ -111,52 +101,7 @@ export default function Game() {
                         <div>Play now</div>
                     </Link>
                 </div>
-                {/* <div className="p-4 game-mode watch">
-                        <div className="grid grid-cols-2">
-                            <div className="mode-text">
-                                <h3>Watch </h3>
-                                <p>Watch live plays!</p>
-                                <div className="mode-img live">
-
-                                    <ol className="matches">
-                                        {liveMatches &&
-                                            liveMatches.map(({ host, guest }, index) => {
-                                                return (
-                                                    <li key={index} className="match grid grid-cols-3">
-                                                        <div className="players col-span-2">
-                                                            <span className="text-white">{host}</span>
-                                                            <span> vs </span>
-                                                            <span className="text-white">{guest} </span>
-                                                        </div>
-                                                        <div>
-                                                            <Link to="" className="live-btn transition-all">
-                                                                <span title="watch">
-                                                                    <img className="eyesIcon" src="/Icons/eyes2.png" alt="character" />
-                                                                </span>
-                                                            </Link>
-                                                        </div>
-                                                    </li>
-                                                );
-                                            })
-                                        }
-                                        
-                                    </ol>
-
-                                </div>
-                            </div>
-                            <div className="mode-img">
-                                <img
-                                    className="mode-char"
-                                    src="/Characters/Aegon/GameR.png"
-                                    alt="character"
-                                />
-                            </div>
-
-                        </div>
-                    </div> */}
             </div>
-            {/* {isLoading && <LoadingSpinner />}
-      {selectedMode && !isLoading && <Pong mode={selectedMode} />} */}
         </div>
     );
 }

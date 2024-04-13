@@ -4,7 +4,7 @@ import '../assets/login.css';
 import Logo from '/logo.png';
 import Nova from '/Characters/Nova/04.png';
 import Pixie from '/Characters/Pixie/01.png';
-import Aegon from '/Characters/Aegon/03.png';
+import Aegon from '/Characters/Aegon/3.png';
 import { Link } from 'react-router-dom';
 import google_logo from '/Icons/GoogleLogo.png';
 
@@ -25,7 +25,7 @@ export default function Login() {
 
             <div className="flex flex-col">
                 <div className="grid grid-cols-3 gap-16">
-                    <div className='col-span-1  justify-bottom'>
+                    <div className='col-span-1  justify-bottom first'>
                         <span title="Character">
                             <img
                             className="right-character-login"
@@ -84,7 +84,7 @@ export default function Login() {
                     </div>
                     </div>
 
-                    <div className='col-span-1  justify-bottom'>
+                    <div className='col-span-1 justify-bottom last'>
                         <span title="Character">
                             <img
                             className="left-character-login"

@@ -39,7 +39,6 @@ body {
 
 .title-login {
     font-size: 32px;
-    font-weight: 450;
 }
 
 /* ------------------------ Characters ------------------------ */
@@ -47,6 +46,7 @@ body {
 .left-character-login,
 .right-character-login {
     width: 250px;
+    height: 710px;
 }
 
 .middle-character {
@@ -58,6 +58,11 @@ body {
     align-items: center;
 }
 
+    .justify-bottom {
+        min-height: calc(100vh - 10px);
+        display: flex;
+        align-items: flex-end;
+    }
 /* ----- S ----- */
 @media (max-width: 767.98px) {
     .login-page .grid-cols-3 {
@@ -68,8 +73,8 @@ body {
     .right-character-login {
         display: none;
     }
-    .justify-bottom {
-        min-height: 0px;
+    .login-page .last, .login-page .first{
+        display: none;
     }
 }
 
@@ -95,40 +100,19 @@ body {
     .title-login {
         font-size: 25px;
     }
-    .justify-bottom {
-        min-height: 0xp;
-        display: flex;
-        align-items: flex-end;
+    .login-page .last{
+        display: none;
     }
 }
 
 /* ----- L ----- */
 @media (min-width: 992px) and (max-width: 1299.98px) {
 
-    .left-character-login,
-    .right-character-login {
-        width: 250px;
-    }
-
-    .middle-character {
-        width: 300px;
-    }
-
     .title-login {
-        font-size: 23px;
-    }
-    .justify-bottom {
-        min-height: calc(100vh - 10px);
-        display: flex;
-        align-items: flex-end;
+        font-size: 27px;
     }
 }
 
 /* ----- XL ----- */
 @media (min-width: 1300px) {
-    .justify-bottom {
-        min-height: calc(100vh - 10px);
-        display: flex;
-        align-items: flex-end;
-    }
 }

@@ -60,8 +60,15 @@ export class Puck {
         this.y = this.height / 2;
 
         const angle = this.randomAngle(-Math.PI / 4, Math.PI / 4);
-        this.xspeed = 6 * Math.cos(angle) + this.speed;
-        this.yspeed = 6 * Math.cos(angle) + this.speed;
+
+        const angleX = this.randomAngle(-Math.PI / 4, Math.PI / 4);
+        const angleY = this.randomAngle(-Math.PI / 4, Math.PI / 4);
+        
+        this.xspeed = 6 * Math.cos(angleX) + (this.speed );
+        this.yspeed = 6 * Math.sin(angleY) + this.speed;
+
+        // this.xspeed = 6 * Math.cos(angle) + this.speed;
+        // this.yspeed = 6 * Math.cos(angle) + this.speed;
     }
 
     checkPaddleLeft(paddle: Paddle) {
@@ -94,8 +101,33 @@ export class Puck {
                 let angle = this.map(diff, 0, p.h, -rad, rad);
 
                 // Calculate the new x and y speeds based on the angle
-                this.xspeed = 6 * Math.cos(angle) + this.speed;;
-                this.yspeed = 6 * Math.sin(angle) + this.speed;;
+                // this.xspeed = 6 * Math.cos(angle) + this.speed;;
+                // this.yspeed = 6 * Math.sin(angle) + this.speed;;
+
+        // const angleX = this.randomAngle(-Math.PI / 4, Math.PI / 4);
+        // const angleY = this.randomAngle(-Math.PI / 4, Math.PI / 4);
+        
+        // let newX = 6 * Math.cos(angleX);
+        // newX = newX < 0 ? -(Math.abs(newX) + this.xspeed) : (Math.abs(newX) + this.xspeed);
+        // this.xspeed = newX;
+
+        // this.yspeed = 6 * Math.cos(angleY);
+        // this.yspeed = this.yspeed > 0 ? -Math.abs(this.yspeed) : Math.abs(this.yspeed);
+
+
+         // Calculate the angle based on the difference in y coordinates
+         let relativeIntersectY = (p.y + p.h / 2) - this.y;
+         let normalizedIntersectY = relativeIntersectY / (p.h / 2);
+         let bounceAngle = normalizedIntersectY * (Math.PI / 4); // Adjust as needed
+
+ // Adjust bounce angle for stability, especially for small angles
+ bounceAngle = Math.max(bounceAngle, -Math.PI / 4); // Ensure minimum angle
+
+         // Update speed based on bounce angle
+        let speed = Math.sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed);
+        this.xspeed = speed * Math.cos(bounceAngle) + (Math.abs(this.xspeed) / 2); // Always increase speed
+        this.yspeed = speed * Math.sin(bounceAngle);
+
 
                 this.x = p.x + p.w / 2 + this.r;
 
@@ -137,8 +169,33 @@ export class Puck {
                 let angle = this.map(diff, 0, p.h, this.radians(225), this.radians(135));
 
                 // Calculate the new x and y speeds based on the angle
-                this.xspeed = 6 * Math.cos(angle) + this.speed;
-                this.yspeed = 6 * Math.sin(angle) + this.speed;
+                // this.xspeed = 6 * Math.cos(angle) + this.speed;
+                // this.yspeed = 6 * Math.sin(angle) + this.speed;
+
+                // const angleX = this.randomAngle(-Math.PI / 4, Math.PI / 4);
+                // const angleY = this.randomAngle(-Math.PI / 4, Math.PI / 4);
+                
+                // let newX = 6 * Math.cos(angleX);
+                // newX = newX > 0 ? -(Math.abs(newX) + this.xspeed) : (Math.abs(newX) + this.xspeed);
+                // this.xspeed = newX;
+
+                // this.xspeed = newX;
+
+                // this.yspeed = 6 * Math.cos(angleY);
+                // this.yspeed = this.yspeed < 0 ? -Math.abs(this.yspeed) : Math.abs(this.yspeed);
+
+                // Calculate the angle based on the difference in y coordinates
+        let relativeIntersectY = (p.y + p.h / 2) - this.y;
+        let normalizedIntersectY = relativeIntersectY / (p.h / 2);
+        let bounceAngle = normalizedIntersectY * (Math.PI / 4); // Adjust as needed
+// Adjust bounce angle for stability, especially for small angles
+        bounceAngle = Math.min(bounceAngle, Math.PI / 4); // Ensure maximum angle
+
+        // Update speed based on bounce angle
+        let speed = Math.sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed);
+        this.xspeed = -speed * Math.cos(bounceAngle) - (Math.abs(this.xspeed) / 2); // Always increase speed
+        this.yspeed = speed * Math.sin(bounceAngle);
+
 
                 this.x = p.x - p.w / 2 - this.r;
 

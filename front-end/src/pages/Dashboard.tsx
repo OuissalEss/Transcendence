@@ -44,6 +44,7 @@ import Notifications from "../components/Notifications";
 // import { useSocket } from "../App.tsx";
 import User from "../types/user-interface";
 import { useAuth } from "../provider/authProvider";
+import Loading from "../components/Loading";
 
 
 const characters = [
@@ -121,6 +122,7 @@ export default function Dashboard() {
   const { token } = useAuth();
   const [topFive, setTopFive] = useState<TopFive[]>();
   const [userData, setUserData] = useState<User>();
+  const [isLoading, setLoading] = useState(true);
 
   console.log('dashboard');
   useEffect(() => {
@@ -167,9 +169,11 @@ export default function Dashboard() {
           setTopFive(topFiveTest);
           setUserData(data.getUserInfo);
         }
+        setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching friends:', error);
+        setLoading(false);
       });
 
   }, []);
@@ -177,6 +181,9 @@ export default function Dashboard() {
   const index = characters.findIndex(character => character.name === userData?.character);
   const myCharacter = characters[index];
   console.log("---User--- = ", userData);
+
+  if (isLoading)
+    return <Loading />
   return (
     <main className="flex flex-col mt-5 main-dashboard-page">
       <div className="grid grid-cols-3 header_dashboard">

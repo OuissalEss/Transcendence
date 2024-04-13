@@ -1,6 +1,6 @@
 .Start {
   /* position: relative; */
-  min-height: 100vh;
+  /* min-height: 100vh; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,12 +8,15 @@
   color: white;
   z-index: 1;
 }
-
+/* Logo styling */
+.LogoImageStart {
+  position: absolute;
+  left: 50px;
+  top: 30px;
+  width: 45px;
+}
 .Start::before {
   content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   filter: blur(5px);
@@ -21,20 +24,15 @@
 }
 
 .Texto {
-  position: absolute;
-  top: 40px;
-  left: 200px;
   color: #3E1256;
   z-index: 3;
   font-size: 40px;
   text-align: center;
+  margin-bottom: 40px;
 }
 
 .BlurryRectangle {
-  position: absolute;
-  top: 450px;
-  left: 730px;
-  transform: translate(-50%, -50%);
+  position: relative;
   width: 940px;
   height: 570px;
   background-color: rgba(114, 196, 255, 0.2);
@@ -43,7 +41,7 @@
   z-index: 2;
 }
 
-.Avatar1 {
+.AvatarStart {
   position: absolute;
   top: 90px;
   left: 150px;
@@ -112,10 +110,10 @@
 }
 
 
-.Name {
+.NameStart {
   position: absolute;
   top: 370px;
-  left: 615px;
+  left: 625px;
   color: #3E1256;
   z-index: 3;
   font-size: 40px;
@@ -124,22 +122,22 @@
   width: 150px;
 }
 
-.CharacterImage {
+.CharacterImageStart {
   position: absolute;
-  top: 80px;
-  left: 640px;
-  width: 100px;
+  top: 90px;
+  left: 650px;
+  width: 90px;
   z-index: 3;
   transition: transform 0.5s ease-in-out;
 }
 
-.CharacterImage.Selected {
+.CharacterImageStart.Selected {
   transform: scale(1.1);
   z-index: 4;
 
 }
 
-.CharacterInfos {
+.CharacterInfosStart {
   position: absolute;
   top: 430px;
   right: 50px;
@@ -161,6 +159,11 @@
   z-index: 3;
 }
 
+.CharacterNameStart {
+  color: rgba(62, 18, 86, 1);
+  margin-top: 5px;
+}
+
 .UsernameInput {
   position: absolute;
   top: 210px;
@@ -180,4 +183,69 @@
   border: none;
   outline: none;
   padding-left: 20px;
+}
+
+@media (max-width: 991.98px) {
+  .BlurryRectangle {
+    width: 700px;
+    height: 570px;
+  }
+  .AvatarStart {
+    top: 90px;
+    left: 80px;
+    width: 85px;
+  }
+  .UsernameInput {
+    top: 210px;
+    left: 30px;
+    width: 200px;
+    height: 47px;
+  }
+  .UsernameRectangle {
+    top: 210px;
+    left: 30px;
+    width: 200px;
+    height: 50px;
+    background-color: rgba(61, 55, 133, 0.34);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .StartRectangle {
+    top: 450px;
+    left: 55px;
+    width: 150px;
+    height: 45px;
+  }
+  .CharacterImageStart {
+    left: 450px;
+    width: 90px;
+  }
+  .NameStart {
+    /* top: 370px; */
+    left: 425px;
+    font-size: 35px;
+  }
+  .CharacterRectangle {
+    left: 360px;
+    height: 45px;
+  }
+  .CharacterInfosStart {
+    height: 100px;
+    right: 40px;
+  }
+  .ChevronLeftStart {
+    position: absolute;
+    top: 220px;
+    left: 350px;
+    z-index: 3;
+  }
+  .ChevronRightStart {
+    position: absolute;
+    top: 220px;
+    right: 55px;
+    z-index: 3;
+  }
 }

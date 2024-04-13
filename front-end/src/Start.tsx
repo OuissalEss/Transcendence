@@ -121,7 +121,8 @@ function Start() {
   };
 
   const handleUsernameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(event.target.value);
+    if (event.target.value.length < 11)
+      setUsername(event.target.value);
   };
 
   const handleUsernameInputEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -169,7 +170,6 @@ function Start() {
           if (res.ok) {
             const { accessToken } = await res.json();
             Cookies.set('token', accessToken.access_token)
-            alert('User Updated successfully');
             // Reload the page upon successful verification
             window.location.reload();
           } else {
@@ -194,57 +194,36 @@ function Start() {
 
   return (
     <div className="Start">
-      <header className="Start-header">
+        <img src={LogoImage} className="LogoImageStart" alt="LogoImage" />
+      <header className="Start-header mt-[50px]">
         <div className="Texto">
           <p className="Line">Welcome, Champion!</p>
         </div>
-        <img src={LogoImage} className="LogoImage" alt="LogoImage" />
         <div className="BlurryRectangle">
-        {showUsernameInput ? (
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={handleUsernameInputChange}
-            onKeyPress={handleUsernameInputEnter}
-            className="UsernameInput"
-          />
-        ) : (
-          <button className="UsernameRectangle" onClick={handleSetUsernameClick}>
-            <p className="UsernameText">{username || 'Set username'}</p>
+          {showUsernameInput ? (
+            <input type="text" placeholder="Enter your username" value={username}
+              onChange={handleUsernameInputChange} onKeyPress={handleUsernameInputEnter} className="UsernameInput" />
+          ) : (
+            <button className="UsernameRectangle" onClick={handleSetUsernameClick}>
+              <p className="UsernameText">{username || 'Set username'}</p>
+            </button>
+          )}
+          <button className={`StartRectangle ${(!username || !isCharacterSelected) && 'Disabled'}`} onClick={handleStartButtonClick} >
+            <p className="StartText">Let's go!</p>
           </button>
-        )}
-        <button
-          className={`StartRectangle ${(!username || !isCharacterSelected) && 'Disabled'}`}
-          onClick={handleStartButtonClick}
-        >
-          <p className="StartText">Let's go!</p>
-        </button>
-        <button className="CharacterRectangle" onClick={handleChooseCharacterClick}>
-          <p className="CharacterText">Click to choose your character</p>
-        </button>
-        <img src={userData.avatar.filename} className="Avatar1" alt="Avatar1" />
-        <div className="Name">
-          <p className="CharacterName">{currentCharacter.name}</p>
-        </div>
-        <img src={currentCharacter.image} className={`CharacterImage ${isCharacterSelected ? 'Selected' : ''}`} alt={currentCharacter.name} />
-        <img
-          src={currentCharacter.infos}
-          className="CharacterInfos"
-          alt={`${currentCharacter.name} Infos`}
-        />
-        <img
-          src={ChevronLeft}
-          className="ChevronLeftStart"
-          alt="ChevronLeftStart"
-          onClick={handleLeftChevronClick}
-        />
-        <img
-          src={ChevronRight}
-          className="ChevronRightStart"
-          alt="ChevronRightStart"
-          onClick={handleRightChevronClick}
-        />
+          <button className="CharacterRectangle" onClick={handleChooseCharacterClick}>
+            <p className="CharacterText">Click to choose your character</p>
+          </button>
+
+          <img src={userData.avatar.filename} className="AvatarStart" alt="Avatar" />
+          <div className="NameStart">
+            <p className="CharacterNameStart">{currentCharacter.name}</p>
+          </div>
+
+          <img src={currentCharacter.image} className={`CharacterImageStart ${isCharacterSelected ? 'Selected' : ''}`} alt={currentCharacter.name} />
+          <img src={currentCharacter.infos} className="CharacterInfosStart" alt={`${currentCharacter.name} Infos`} />
+          <img src={ChevronLeft} className="ChevronLeftStart" alt="ChevronLeftStart" onClick={handleLeftChevronClick} />
+          <img src={ChevronRight} className="ChevronRightStart" alt="ChevronRightStart" onClick={handleRightChevronClick} />
         </div>
       </header>
       {isShowAlert &&
