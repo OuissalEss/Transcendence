@@ -8,6 +8,7 @@ import { Message } from './message.entity';
 
 
 import { UserType } from '@prisma/client'; // Import the Prisma-generated UserType enum
+import { channel } from 'diagnostics_channel';
 
 @ObjectType()
 export class ChannelUser {
@@ -55,6 +56,9 @@ export class ChannelUser {
    */
   @Field(() => [Message], { description: 'Messages sent by the user in the channel' })
   message?: Message[];
+
+  @Field(() => Channel, { description: 'channel' })
+  channel?: Channel; 
 
   /**
    * The date when the channel user was created.

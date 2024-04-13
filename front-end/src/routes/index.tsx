@@ -5,7 +5,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import Home from '../pages/Dashboard';
 import Login from "../pages/Login";
 import About from '../pages/About';
-import Chat from "../pages/Chat";
+import Chat from "../pages/chat/ChatPage";
 import Game from "../pages/game/Game";
 import Pong from "../pages/game/pong/Pong";
 import GetStarted from '../pages/GetStarted';

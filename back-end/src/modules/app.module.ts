@@ -27,6 +27,8 @@ import { TwoFactorAuthModule } from './2fa.module';
 import { BlockModule } from './block.module';
 import { UserService } from 'src/services/user.service';
 import { AuthService } from 'src/services/auth.service';
+import { BanModule } from './ban.module';
+import { MuteModule } from './mute.module';
 
 @Module({
   imports: [
@@ -53,7 +55,9 @@ import { AuthService } from 'src/services/auth.service';
     ChannelUserModule,
     MessageModule,
     NotificationModule,
-    GameModule
+    GameModule,
+    BanModule,
+    MuteModule,
   ],
   controllers: [AppController],
   providers: [

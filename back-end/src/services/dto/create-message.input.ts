@@ -4,11 +4,6 @@ import { IsNotEmpty, IsString, IsDate } from 'class-validator';
 
 @InputType()
 export class CreateMessageInput {
-  @Field(() => ID)
-  @IsString({ message: 'Message ID must be a string' })
-  @IsNotEmpty({ message: 'Message ID cannot be empty' })
-  id: string;
-
   @Field({ description: 'Content of the message' })
   @IsString({ message: 'Content must be a string' })
   @IsNotEmpty({ message: 'Content cannot be empty' })
@@ -18,6 +13,9 @@ export class CreateMessageInput {
   @IsDate({ message: 'Time must be a date' })
   time?: Date;
     
-  @Field(() => String, { description: 'Channel User who sent the message' })
+  @Field(() => String, { description: 'User who sent the message' })
+  sender: string;
+
+  @Field(() => String, { description: 'Channel the message belongs to' })
   channelId: string;
 }

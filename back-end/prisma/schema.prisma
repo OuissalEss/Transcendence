@@ -81,6 +81,9 @@ model User {
 
 	user			ChannelUser[]		@relation(name: "user")
 
+	banned			Ban[]				@relation(name: "banned")
+	muted			Mute[]				@relation(name: "muted")
+
 	sender			Notification[]		@relation(name: "sender")
 	receiver		Notification[]		@relation(name: "receiver")
 
@@ -187,16 +190,49 @@ enum ChannelType {
   DM           // Direct Message
 }
 
+model Ban {
+	id		String				@id @default(uuid())
+
+	channelId 	String
+	userId		String
+
+	user		User		@relation(name: "banned", fields: [userId], references: [id])
+	channel		Channel		@relation(name: "banned", fields: [channelId], references: [id])
+
+	@@map("banned")
+}
+
+model Mute {
+	id		String				@id @default(uuid())
+
+  	duration    DateTime?
+  	finished    Boolean		@default(true)
+	permanent	Boolean		@default(false)
+
+	channelId 	String
+	userId		String
+
+	user		User		@relation(name: "muted", fields: [userId], references: [id])
+	channel		Channel		@relation(name: "muted", fields: [channelId], references: [id])
+
+	@@unique([userId, channelId])
+
+	@@map("muted")
+}
 
 model Channel {
 	id				String 			@id @default(uuid())
 
-	title			String			
+	title			String			@unique
 
 	type			ChannelType
 
 	password		String?
+	description		String?
+	profileImage	String?
 
+	banned			Ban[]			@relation(name: "banned")
+	muted			Mute[]			@relation(name: "muted")
 	channel			ChannelUser[]	@relation(name: "channel")
 
 	createdAt DateTime @default(now())
@@ -233,8 +269,9 @@ model ChannelUser {
 model Message {
 	id				String 			@id @default(uuid())
 
-	text			String?
+	text			String
 	time			DateTime?
+	read			Boolean			@default(false)
 
 	channelId		String
 
@@ -250,6 +287,7 @@ enum NotifType {
   MESSAGE       // Message notification
   FRIEND_REQUEST // Friend request notification
   ACHIEVEMENT   // Achievement notification
+  MATCH         // Match notification
 }
 
 model Notification {

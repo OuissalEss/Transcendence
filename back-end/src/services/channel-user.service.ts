@@ -18,6 +18,29 @@ export class ChannelUserService {
         });
     }
 
+    async getChannelUserByChannelId(channelId: string): Promise<ChannelUser[]> {
+        return this.prisma.channelUser.findMany({
+            where: { channelId: channelId },
+        });
+    }
+
+    async getChannelUserByUserId(userId: string): Promise<ChannelUser[]> {
+        return this.prisma.channelUser.findMany({
+            where: { userId: userId },
+            include: {
+                channel: true,
+            }
+        });
+    }
+
+    async getChannelUser(cid: string, uid: string): Promise<ChannelUser> {
+		return this.prisma.channelUser.findFirst({
+			where: {
+				AND: [{ userId: uid }, { channelId: cid }],
+			},
+		});
+    }
+
     async createChannelUser(createUserChannelInput: CreateChannelUserInput): Promise<ChannelUser> {
         try {
             return this.prisma.channelUser.create({
@@ -43,6 +66,16 @@ export class ChannelUserService {
     
     async deleteChannelUser(id: string): Promise<ChannelUser> {
         try {
+            const messages = await this.prisma.message.findMany({
+                where: {
+                    channelId: id,
+                },
+            });
+            for (let i = 0; i < messages.length; i++) {
+                await this.prisma.message.delete({
+                    where: { id: messages[i].id },
+                });
+            }
             return this.prisma.channelUser.delete({
                 where: { id: id },
             });

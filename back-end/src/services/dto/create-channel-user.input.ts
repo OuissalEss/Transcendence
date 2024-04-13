@@ -16,7 +16,7 @@ export class CreateChannelUserInput {
   @Field(() => String)
   @IsString({ message: 'Channel User ID must be a string' })
   @IsNotEmpty({ message: 'Channel User ID cannot be empty' })
-  id: string;
+  id?: string;
 
   /**
    * The user who initiated the block.
@@ -34,7 +34,7 @@ export class CreateChannelUserInput {
   @Field(() => String, { description: 'Channel ID' })
   @IsString({ message: 'Channel ID must be a string' })
   @IsNotEmpty({ message: 'Channel ID cannot be empty' })
-  channelId: string;
+  channelId?: string;
 
   /**
    * Type of user in the channel.
@@ -49,6 +49,6 @@ export class CreateChannelUserInput {
    * @type {Message[]}
    */
   @Field(() => [Message], { description: 'Messages sent by the user in the channel' })
-  message: Message[];
+  message?: Message[];
   
 }

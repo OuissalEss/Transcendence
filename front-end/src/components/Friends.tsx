@@ -6,22 +6,6 @@ import { useQuery, gql } from "@apollo/client";
 import { useAuth } from "../provider/authProvider.tsx";
 // import { useSocket } from "../App.tsx";
 
-const USER_DATA = gql`
-        query UserData {
-            getUserFriends {
-                id
-                username
-                status
-                avatar{filename}
-            }
-            getUserInfo {
-                id
-                username
-                avatar{filename}
-            }
-        }
-    `;
-
 interface Friend {
     id: string,
     username: string,
@@ -40,6 +24,12 @@ const USER_DATA_QUERY = `
                 filename
             }
             createdAt
+            blocked {
+                blockedUserId
+            }
+            blocking {
+                blockerId
+            }
         }
         getUserInfo {
             id
@@ -58,7 +48,12 @@ const USER_DATA_QUERY = `
                 achievement
                 createdAt
             }
-            blocking {id}
+            blocked {
+                blockedUserId
+            }
+            blocking {
+                blockerId
+            }
             winner{id}
             loser{id}
             host{id}
@@ -69,7 +64,7 @@ const USER_DATA_QUERY = `
 `;
 const Friends = () => {
     // const { userData } = useSocket();
-    const [userData, setUserData] = useState();
+    const [userData, setUserData] = useState<User>();
     const [FriendsList, setFriendsList] = useState<Friend[]>([]);
 
     const { token } = useAuth();
@@ -97,12 +92,23 @@ const Friends = () => {
             .then(({ data }) => {
                 if (data && data.getUserFriends) {
                     const friends = data.getUserFriends;
+
                     const updatedFriendsList: Friend[] = friends.map((friend: any) => ({
                         id: friend.id,
                         username: friend.username,
                         status: friend.status,
                         image: friend.avatar?.filename || ''
                     }));
+                    const friendsItems = friends?.map((user: { id: string, username: string, avatar: {filename: string}, status: string, xp: number, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[] }) => ({
+                      id: user.id,
+                      name: user.username,
+                      icon: user?.avatar?.filename || '/Avatars/default.jpeg', // Assuming avatarTest is the avatar URL
+                      status: user.status,
+                      xp: user.xp,
+                      blocked: user.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+                      blocken: user.blocking.map((blocker: { blockerId: string }) => blocker.blockerId)
+                    }));
+                    localStorage.setItem('friends', JSON.stringify(friendsItems));
                     setFriendsList(updatedFriendsList);
                 } if (data && data.getUserInfo) {
                     setUserData(data.getUserInfo);
@@ -113,6 +119,10 @@ const Friends = () => {
             });
     }, []);
 
+                    console.log(userData?.id + "hhh")
+                    localStorage.setItem('user', JSON.stringify({id: userData?.id, username: userData?.username, icon: userData?.avatar?.filename || '/Avatars/default.jpeg', }));
+                
+                    console.log("hhhh" + JSON.parse(localStorage.getItem('user') || '{42}'));
 
     return (
         <div>

@@ -1,9 +1,9 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
-import { ChannelUserService } from '../services/channel-user.service';
 import { ChannelUser } from '../entities/channel-user.entity';
 import { CreateChannelUserInput } from 'src/services/dto/create-channel-user.input';
 
 import { UserType} from "@prisma/client";
+import { ChannelUserService } from 'src/services/channel-user.service';
 
 @Resolver(() => ChannelUser)
 export class ChannelUserResolver {

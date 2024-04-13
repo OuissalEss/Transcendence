@@ -3,6 +3,7 @@ import { Character } from '@prisma/client';
 import { GetUser } from 'src/decorators/current-userid.decorator';
 import { AuthService } from 'src/services/auth.service';
 import { UserService } from 'src/services/user.service';
+import {Request} from 'express';
 
 @Controller()
 export class AppController {

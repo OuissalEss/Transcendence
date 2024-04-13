@@ -1,6 +1,6 @@
 // user.resolver.ts
 
-import { Resolver, Query, Args, Mutation, Context } from '@nestjs/graphql';
+import { Resolver, Query, Args, Mutation, Context, ResolveField, Parent } from '@nestjs/graphql';
 import { UserService } from 'src/services/user.service';
 import { User } from 'src/entities/user.entity';
 import { UpdateUserInput } from "../services/dto/update-user.input";
@@ -8,10 +8,15 @@ import { NotFoundException, Req } from "@nestjs/common";
 import { Status, Character, Avatar } from '@prisma/client'; // Import the Prisma-generated Status enum
 import { Request } from 'express';
 import { Payload } from 'src/services/types/auth.service';
+import { BlockService } from 'src/services/block.service';
+import { Block } from 'src/entities/block.entity';
 
 @Resolver(of => User)
 export class UserResolver {
-  constructor(private readonly userService: UserService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly block: BlockService
+  ) { }
 
   @Query(() => [User], {
     name: "getAllUsers",
@@ -162,6 +167,26 @@ export class UserResolver {
       throw new NotFoundException("User doesn't exist");
     }
     return this.userService.activate2Fa(userId, false);
+  }
+
+  @ResolveField(() => [Block], {
+    name: "blocked",
+    description: 'Get members blocked by a user'
+  })
+  async getBlockedUser(
+    @Parent() user: User,
+  ) {
+    return await this.block.getBlockedListByUid(user.id as string);
+  }
+
+  @ResolveField(() => [Block], {
+    name: "blocking",
+    description: 'Get members blocked by a user'
+  })
+  async getBlockenUser(
+    @Parent() user: User,
+  ) {
+    return await this.block.getBlockenListByUid(user.id as string);
   }
 }
 

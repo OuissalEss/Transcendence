@@ -15,14 +15,26 @@ export class CreateChannelInput {
   @IsString({ message: 'Password must be a string' })
   password?: string;
 
+  @Field({ nullable: true, description: 'Channel profile image' })
+  @IsOptional()
+  @IsString()
+  profile?: string;
+
   @Field(() => PrismaChannelType, { description: 'Channel type' })
   @IsEnum(PrismaChannelType, { message: 'Invalid channel type, must be one of these values: '+Object.values(PrismaChannelType).join(', ') })
   type: PrismaChannelType;
 
-  @Field(() => [ChannelUser], {
-        description: 'Users participating in the channel',
-        defaultValue: [],
-  })
-  @IsNotEmpty({ message: 'Users participating in the channel cannot be empty' })
-  channel?: ChannelUser[];
+  @Field({ nullable: true, description: 'Channel description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true, description: 'Channel profile' })
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
+
+  @Field({ description: 'Channel owner id' })
+  @IsString()
+  ownerId?: string;
 }

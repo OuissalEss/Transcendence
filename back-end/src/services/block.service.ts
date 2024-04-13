@@ -90,4 +90,51 @@ export class BlockService {
           }
     }
 
+    async getBlockenListByUid(uid: string): Promise<Block[]> {
+		return await this.prisma.block.findMany({
+			where: {
+				blockedUserId: uid,
+			},
+		});
+
+	}
+
+    async getBlockedListByUid(uid: string): Promise<Block[]> {
+		return await this.prisma.block.findMany({
+			where: {
+				blockerId: uid,
+			},
+		});
+
+	}
+
+	// get all the blocks
+	async getBlockList(): Promise<Block[]> {
+		return await this.prisma.block.findMany();
+	}
+
+	async blockUser(blockerId: string, blockedUserId: string): Promise<User> {
+		await  this.prisma.block.create({
+			data: {
+			blockerId: blockerId,
+			blockedUserId: blockedUserId,
+			},
+		});
+		return this.prisma.user.findUnique({
+			where: {
+			id: blockedUserId,
+			},
+		});
+	}
+
+	async isBlocked(blockerId: string, blockedUserId: string): Promise<boolean> {
+		const block = await this.prisma.block.findFirst({
+			where: {
+			blockerId: blockerId,
+			blockedUserId: blockedUserId,
+			},
+		});
+		return block != null;
+	}
+
 }
