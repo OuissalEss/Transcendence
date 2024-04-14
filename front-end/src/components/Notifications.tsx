@@ -6,6 +6,7 @@ import { useSocket } from "../App.tsx";
 import Leaderboard1 from "*.png";
 import { useAuth } from '../provider/authProvider.tsx';
 import { useMutation } from '@apollo/react-hooks'
+import { Socket, io } from 'socket.io-client';
 
 const USER_DATA_QUERY = `
     query {
@@ -59,14 +60,30 @@ const Notifications = () => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const { token } = useAuth();
     const { socket } = useSocket();
+    const [sock, setSocket] = useState<Socket>();
+
+    useEffect(() => {
+        const newSocket = io('ws://localhost:3003/chat');
+        setSocket(newSocket);
+
+
+        return () => {
+            newSocket.disconnect();
+        };
+    }, [setSocket]);
 
     useEffect(() => {
         if (socket == undefined) return;
 
-        socket.on('RequestReceived', ({ username, userId, image }: { username: string, userId: string, image: string }) => {
+        socket.on('RequestReceived', () => {
             setShowNotification(true);
         })
-    }, [socket]);
+
+        sock?.on('RequestGame', () => {
+            setShowNotification(true);
+        })
+
+    }, [socket, sock]);
     
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -103,6 +120,8 @@ const Notifications = () => {
                     newNotification.notif = `${notifications[i].sender.username} sent you a friend request`;
                 } else if (notifications[i].type === 'ACHIEVEMENT') {
                     newNotification.notif = 'New achievement';
+                } else if (notifications[i].type === 'MATCH') {
+                    newNotification.notif = `${notifications[i].sender.username} invites you to a game`;
                 }
                 notificationList.push(newNotification);
             }
@@ -127,7 +146,7 @@ const Notifications = () => {
     const updateIsRead = async (notifId: string) => {
         try {
             await updateNotifIsRead({ variables: { id: notifId } });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating Read:", error.message);
         }
     };
@@ -148,11 +167,15 @@ const Notifications = () => {
                     {notifications.length > 0 ? (
                         <ul className="notificationList">
                             {notifications.map((notification, index) => (
-                                notification ? (
+                                notification && notification.type == "MATCH" ? (
+                                    <Link key={index} to="/game/pong?mode=online" onClick={() => updateIsRead(notification.id)}>
+                                        <li className="notif" key={index}>{notification.notif}</li>
+                                    </Link>
+                                ) : (
                                     <Link key={index} to={`/profiles?id=${notification.userId}`} onClick={() => updateIsRead(notification.id)}>
                                         <li className="notif" key={index}>{notification.notif}</li>
                                     </Link>
-                                ) : null
+                                )
                             ))}
                         </ul>
                     ) : (

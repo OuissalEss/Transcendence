@@ -218,6 +218,7 @@ function Profile() {
               uniqueAchievements.add(a.enum);
           }
       });
+  // Interplays
       const myInterplays: Interplays[] = myAchievements.map((achievement) => {
           return {
               icon: '🏆',
@@ -280,7 +281,7 @@ function Profile() {
         setCurrentAchievementIndex(newIndex);
     };
 
-  if (isLoading)
+    if (isLoading)
     return <Loading />
   return (
     <div className="Profile mt-[30px] ml-[15px]">

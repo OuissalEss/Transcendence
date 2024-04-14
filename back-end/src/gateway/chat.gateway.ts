@@ -188,7 +188,7 @@ export class ChatGateway {
             this.logger.log(`Client is adding user: ${user} in room: ${room}`);
             const User = await this.channel.addMember(room, user);
             this.server.emit('addRoom', room);
-            this.server.to(room).emit('userAdded', { id: User.id, name: User.username, icon: undefined, status: User.status }, room, 1);
+            this.server.to(room).emit('userAdded', { id: User.id, name: User.username, icon: User.avatar.filename, status: User.status, xp: User.xp }, room, 1);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -236,7 +236,7 @@ export class ChatGateway {
         try {
             this.logger.log(`invite to game`);
             await this.notif.createNotification(data);
-            this.server.emit('game invitation sent created');
+            this.server.emit('RequestGame');
         } catch (e) {
             this.logger.error(e);
         } 
@@ -271,8 +271,9 @@ export class ChatGateway {
         try {
             const { messageId, userId, roomId } = data;
             this.logger.log(`Client is reading message: ${messageId}`);
-            await this.message.readMessage(messageId, userId, roomId);
-            this.server.emit('messageRead', data);
+           await this.message.readMessage(messageId, userId, roomId);
+           const senderId = await this.message.getMessageSender(messageId);
+            this.server.emit('messageRead', senderId);
         } catch (e) {
             this.logger.error(e);
         }

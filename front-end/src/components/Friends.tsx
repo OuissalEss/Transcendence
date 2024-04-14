@@ -5,7 +5,6 @@ import User from "../types/user-interface";
 import { useQuery, gql } from "@apollo/client";
 import { useAuth } from "../provider/authProvider.tsx";
 import { useSocket } from "../App.tsx";
-// import { useSocket } from "../App.tsx";
 
 interface Friend {
     id: string,
@@ -124,6 +123,8 @@ const Friends = () => {
             });
     }, []);
 
+    console.log(userData?.id + "hhh")
+
     useEffect(() => {
         function refetch(){
             if (!token) return; // If token is not available, do nothing
@@ -180,6 +181,7 @@ const Friends = () => {
             refetch();
         })
     }, [socket]);
+
 
     return (
         <div>

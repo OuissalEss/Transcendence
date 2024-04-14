@@ -326,6 +326,7 @@ function Profiles() {
     socket?.emit("removeFriend", { friendId: friendShipId })
   }
 
+  
   return (
     <div className="Profile">
       <div className="grid grid-cols-2 header_myProfile mb-[30px]">

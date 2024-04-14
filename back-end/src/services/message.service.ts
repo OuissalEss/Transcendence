@@ -100,6 +100,9 @@ export class MessageService {
                 throw new Error('Channel User not found');
             const user = await this.prisma.user.findUnique({
                 where: { id: channdlUser.userId },
+                include: {
+                    avatar: true,
+                }
             });
             return user;
         } catch (e) {

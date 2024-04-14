@@ -246,10 +246,13 @@ export class ChannelService {
                             id: uid,
                         },
                     },
-                },
+                }
             });
             return await this.prisma.user.findUnique({
-                where: {id: uid}
+                where: {id: uid},
+                include: {
+                    avatar: true,
+                }
             });
         } catch (e) {
             this.logger.error(`Unable to add Member to Channel: ${e.message} cid: ${cid} uid: ${uid}`);

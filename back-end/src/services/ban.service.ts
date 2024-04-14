@@ -25,6 +25,9 @@ export class BanService {
                 where: {
                     id: bans[i].userId,
                 },
+                include: {
+                    avatar: true,
+                }
             });
             users.push(user);
         }
@@ -43,6 +46,9 @@ export class BanService {
                 where: {
                     id: bans[i].userId,
                 },
+                include: {
+                    avatar: true,
+                }
             });
             users.push(user);
         }
@@ -57,6 +63,9 @@ export class BanService {
                 where: {
                     id: bans[i].userId,
                 },
+                include: {
+                    avatar: true,
+                }
             });
             users.push(user);
         }
@@ -85,13 +94,16 @@ export class BanService {
 	
     async banUser(cid: string, uid: string): Promise<User> {
         // check permissions
+        let ban = await this.prisma.ban.findFirst({where:{userId: uid, channelId: cid}})
+        if (ban) {
+            ban = await this.prisma.ban.create({
+                data: {
+                    userId: uid,
+                    channelId: cid,
+                },
+            });
+        }
         const user =this.channelService.removeMember(cid, uid);
-        const ban = await this.prisma.ban.create({
-            data: {
-                userId: uid,
-                channelId: cid,
-            },
-        });
         return await this.prisma.user.update({
             where: {id: uid},
             data: {
@@ -101,6 +113,9 @@ export class BanService {
                     },
                 },
             },
+            include: {
+                avatar: true,
+            }
         });
     }
 
@@ -114,6 +129,9 @@ export class BanService {
             where: {
                 id: uid,
             },
+            include: {
+                avatar: true,
+            }
         });
     }
 

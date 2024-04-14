@@ -32,6 +32,9 @@ export class MuteService {
 				where: {
 					id: mutes[i].userId,
 				},
+                include: {
+                    avatar: true,
+                }
 			});
 			users.push(user);
 		}
@@ -50,6 +53,9 @@ export class MuteService {
                 where: {
                     id: mutes[i].userId,
                 },
+                include: {
+                    avatar: true,
+                }
             });
             users.push(user);
         }

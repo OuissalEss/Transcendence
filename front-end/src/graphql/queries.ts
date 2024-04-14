@@ -25,6 +25,7 @@ export const ALL_CHANNELS = gql`
         username
         avatar{filename}
         status
+        xp
         blocked {
           blockedUserId
         }
@@ -87,6 +88,7 @@ export const CHANNEL_BY_ID = gql`
         username
         avatar{filename}
         status
+        xp
         blocked {
           blockedUserId
         }

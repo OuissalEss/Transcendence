@@ -26,7 +26,7 @@ function ChatPageContainer() {
   const [id, setId] = useState('');
   const [channels, setChannels] = useState<channelType[]>([]);
   const { loading, error, data } = useQuery(ALL_CHANNELS);
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
 
   useEffect(() => {
@@ -60,6 +60,7 @@ function ChatPageContainer() {
               name: member.username,
               icon: member.avatar?.filename,
               status: member.status,
+              // xp: member.xp,
               blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
               blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
             })),
@@ -93,7 +94,7 @@ function ChatPageContainer() {
       setChannels(temp.filter((channel: channelType) => channel.members.some((member) => member.name === user.username)));
       console.log('channels:', channels)
     }
-  }, [loading, error, data, user]);
+  }, [loading, error, data]);
 
   return (
     <>

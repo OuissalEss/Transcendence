@@ -1,12 +1,14 @@
 'use client'
-import {Link, Navigate} from "react-router-dom";
+import {Link, Navigate, useLocation} from "react-router-dom";
 import { redirect } from 'react-router-dom';
 
 //import {deleteCookie} from "cookies-next";
 import Cookies from "js-cookie";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import { useQuery, gql } from "@apollo/client";
 import { useMutation } from '@apollo/react-hooks'
+import { Socket, io } from "socket.io-client";
+import { useAuth } from "../provider/authProvider";
 
 const UPDATE_USER_STATUS = gql`
     mutation($new_status: String!) { 
@@ -51,10 +53,78 @@ const logoutItem = {
   icon: "/Icons/Logout.png",
 };
 
+const CHANNEL = gql`
+  query AllChannels {
+    AllChannels {
+      messages {
+        senderId
+        read
+      }
+    }
+  }
+`;
+
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+
 const Sidebar = () => {
   const pathname = "asd";
 
   const [updateUserStatus] = useMutation(UPDATE_USER_STATUS);
+  const [showNotification, setShowNotification] = useState(false);
+  const [socket, setSocket] = useState<Socket>();
+  const {data, loading} = useQuery(CHANNEL);
+  const { token } = useAuth();
+  let unreadMessageCount = 0;
+  const location = useLocation();
+  const fetch_data = () => {
+   
+
+  }
+  useEffect(() => {
+    if (data) {
+      if (data) {
+        data.AllChannels.forEach((channel: any) => {
+          // Check if the channel has unread messages
+          const filteredMessages = channel.messages.filter((message: any) => message.senderId !== user.id && !message.read);
+          unreadMessageCount += filteredMessages.length;
+        });
+      if (unreadMessageCount)
+        setShowNotification(true);
+    }
+  }
+
+  }, [data, loading]);
+
+  useEffect(() => {
+    const newSocket = io('ws://localhost:3003/chat');
+    setSocket(newSocket);
+
+    return () => {
+        newSocket.disconnect();
+    };
+  }, [setSocket]);
+
+  useEffect(() => {
+    socket?.on("messageUnread", (senderId: string) => {
+      if (senderId === user.id)
+        return ;
+      unreadMessageCount++;
+      if (unreadMessageCount)
+        setShowNotification(true);
+    })
+    socket?.on("messageRead", (senderId: string) => {
+      if (senderId === user.id)
+        return ;
+      unreadMessageCount--;
+      if (unreadMessageCount <= 0)
+        setShowNotification(false);
+      unreadMessageCount = unreadMessageCount < 0 ? 0 : unreadMessageCount; 
+    })
+    return () => {
+      socket?.off("messageRead");
+      socket?.off("messageUnread");
+		}
+  }, [socket])
 
   async function LogOut() {
     try {
@@ -84,6 +154,22 @@ const Sidebar = () => {
               {sidebarItems.map(({ name, href, icon }, index) => {
                 return (
                   <li className="sidebar__item" key={index} title={name}>
+                    {name === 'Chat' && (
+                      <div
+                        className={showNotification ? "visible" : "hidden"}
+                        style={{
+                          backgroundColor: "#f80505",
+                          width: "12px",
+                          height: "12px",
+                          zIndex: 2,
+                          position: "absolute",
+                          top: "355px",
+                          right: "18px",
+                          transform: "translate(0, -50%)",
+                          borderRadius: "50%",
+                        }}
+                      ></div>
+                    )}
                     <Link
                       className={`sidebar__link ${pathname === href
                         ? "sidebar__link--active"

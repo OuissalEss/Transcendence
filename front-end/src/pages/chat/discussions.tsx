@@ -229,6 +229,14 @@ const Discussions: React.FC<DiscussionsProps> = ({
 		};
 	}, [socket]);
 
+	// const isBlocked = (discussion: channelType, uid: string) => {
+	// 	const temp = discussion.members.find((m: any) => {
+	// 		if(m.blocken?.includes(uid) || m.blocked?.includes(uid))
+	// 			return m;
+	// 	})
+	// 	return temp ? true : false;
+	// }
+
     return (
         <div className="discussion-container z-10">
             <div className="fixed z-10 top-7 left-8">
@@ -266,7 +274,7 @@ const Discussions: React.FC<DiscussionsProps> = ({
 							) : (
 								<h4 className="name">{discussion.title}</h4>
 							)}
-							<p className="time unread">{discussion.messages.length === 0 ? new Date(discussion.updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : new Date(discussion.messages[discussion.messages?.length - 1]?.time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+							<p className="time unread">{discussion.messages?.length === 0 ? new Date(discussion.updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : new Date(discussion.messages[discussion.messages?.length - 1]?.time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
 						</div>
 						<div className="text-message">
 							<p className={(!discussion.messages.length || (discussion.messages[discussion.messages.length - 1].read === false && discussion.messages[discussion.messages.length - 1].senderId !== user.id) ) ? "unread" : ""}>

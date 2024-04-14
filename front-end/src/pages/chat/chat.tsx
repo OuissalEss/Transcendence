@@ -10,32 +10,17 @@ import { CiCamera, CiLock, CiUnlock } from "react-icons/ci";
 import { FaAngleDown, FaAngleUp, FaChevronLeft, FaChevronRight, FaPen } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { MdBlock } from "react-icons/md";
-import { chatProps, PasswordSettingsProps, ChannelSettingsProps, channel } from "./interfaces/props";
+import { chatProps, PasswordSettingsProps, ChannelSettingsProps } from "./interfaces/props";
 import {channelType} from "./interfaces/props";
 import io, { Socket } from 'socket.io-client';
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { UPDATE_CHANNEL_DESCRIPTION, UPDATE_CHANNEL_PASSWORD, UPDATE_CHANNEL_PROFILE_IMAGE, UPDATE_CHANNEL_TITLE, UPDATE_CHANNEL_TYPE, UPDATE_CHANNEL_TYPE_USER } from "../../graphql/mutations";
 import client from "../../apolloClient";
-import { CHANNEL_BY_ID, IS_BLOCKED } from "../../graphql/queries";
+import { CHANNEL_BY_ID } from "../../graphql/queries";
 import bcrypt from 'bcryptjs';
-
-// admins cant be muted but can mute ban and kick others except the owner
-// owner can do anything but can't be muted banned or kicked
-// members cant mute ban or kick others they only can leave the channel
-// only the owner can change the channels privacy
-
-/**
- * TODO:
- * admins should not have the option to kick mute or ban shown in the dropdown menu for the owner
- * user should be able to block or invite a user to a game in a channel or in dms 
- * 7eydi dm/block/invite to a game mn menu d settings w diri another meno that pops up when you left click on a user message fchi group chat
- * unable members to access the second page of the setting page where they can see the muted, banned and mod list without being 
- * able to change anything they shouldnt have the setting option displayed either in the first page
- * if a channel owner left the channel the oldest admin should be promoted to owner
- * if a user is blocked or blocken by someone they shouldnt be able to see each others messages in a room
- * in a dm if a user is blocked or blocken by someone they can't send messages to each other
- * check the owner of the channels queried ( dm channels have no owner )
- */
+import { useNavigate } from "react-router-dom";
+import { Cloudinary } from "@cloudinary/url-gen";
+import ImageCompressor from 'image-compressor.js';
 
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -145,7 +130,8 @@ const PasswordSettings: React.FC<PasswordSettingsProps> = ({
 									<button onClick={() => {
 										if (addPassword) {
 											channel.type = "PRIVATE";
-											channel.password = null;
+											channel.password = '';
+											updateChannel(channel, socket);
 										}
 										setShowPasswordContainer(false);
 										setPasswordMismatch(false);
@@ -190,16 +176,68 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 
 	const [updateTitle] = useMutation(UPDATE_CHANNEL_TITLE);
 	const [updateDescription] = useMutation(UPDATE_CHANNEL_DESCRIPTION);
-	const [updtaeProfile] = useMutation(UPDATE_CHANNEL_PROFILE_IMAGE);
-	function loadFile(event: ChangeEvent<HTMLInputElement>): void {
+	const [updateProfile] = useMutation(UPDATE_CHANNEL_PROFILE_IMAGE);
+
+	async function loadFile(event: ChangeEvent<HTMLInputElement>) {
 		const image = document.getElementById('output') as HTMLImageElement;
 		if (image && event.target.files) {
 			image.src = URL.createObjectURL(event.target.files[0]);
+			console.log(image.src + " hhhhhh");
+			console.log(event.target.files[0] + " FILE");
 			// channel.icon = `*/${event.target.files[0].name}`;
 			// console.log(channel.icon)
 			// console.log(image.src)
+			const uploadedImg = await uploadAvatar(event.target.files[0]);
+			await updateProfile({
+				variables: {
+					cid: channel.id,
+					profileImage: uploadedImg,
+				}
+			});
 		}
 	}
+
+    const cld = new Cloudinary({
+        cloud: {
+            cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+        }
+    });
+
+	const uploadAvatar = async (selectedFile: any) => {
+        const imageCompressor = new ImageCompressor(); // Instantiate ImageCompressor
+        const compressedFile = await imageCompressor.compress(selectedFile, { // Use compress method
+            maxWidth: 500,
+            maxHeight: 500,
+            quality: 0.5, // Adjust quality as needed
+        });
+        const data = new FormData();
+        data.append("file", compressedFile);
+        data.append(
+            "upload_preset",
+            import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+        );
+        data.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+        data.append("folder", "Cloudinary-React");
+
+
+        // Specify the image quality here (between 0 to 100)
+        // data.append("quality", '10');
+        try {
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+                {
+                    method: "POST",
+                    body: data,
+                }
+            );
+            const res = await response.json();
+            // setUploadUrl(res.public_id);
+            return (cld.image(res.public_id).toURL());
+        } catch (error) {
+            console.log("ERROR");
+            return '';
+        }
+    };
 
 	return (
 		<>
@@ -221,7 +259,6 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 										setAddPassword(true);
 										setShowPasswordContainer(true);							
 									} else if (lock) {
-										console.log("hhhh");
 										channel.type = "PUBLIC";
 										channel.password = '';
 										updateChannel(channel, socket);
@@ -329,7 +366,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 						<div key={index} className="friend-box">
 							<div className="friend-profile" style={{ backgroundImage: `url(${member.icon})` }}></div>
 							<div className="username-box">{`@${member.name}`}</div>
-							<div className="level-indicator">{`Level ${Math.floor(Math.random() * 50)}`}</div>
+							{/* <div className="level-indicator">{`Level ${member.xp / 100}`}</div> */}
 							<div className="settings">
 									<Dropdown
 										channel={channel}
@@ -598,14 +635,23 @@ const Dropdown = ({
 			  </a>
 			</li>
 			<li>
-			  <a className="block text-white border border-transparent rounded-tl-lg rounded-tr-lg hover:border-white" onClick={() => socket?.emit('inviteGame', {})}>
+			  <a className="block text-white border border-transparent rounded-tl-lg rounded-tr-lg hover:border-white" onClick={() => socket?.emit('inviteGame', {time: new Date(0), type: "MATCH", isRead: false, senderId: user.id, receiverId: memeberId})} href="/game/pong?mode=online">
 				Invite to game
 			  </a>
 			</li>
-			<li>
-			  <a href="#" className="block text-white border border-transparent rounded-tl-lg rounded-tr-lg hover:border-white">
+			{/* <li>
+			  <a
+			  	className="block text-white border border-transparent rounded-tl-lg rounded-tr-lg hover:border-white"
+				onClick={() => socket?.emit('blockUser', {blockerId: user.id, blockedUserId: memeberId})}
+			  >
 				Block
 			  </a>
+			</li> */}
+			<li>
+				<a className="block text-white border border-transparent hover:border-white" href={`/profiles?id=${memeberId}`}
+	>
+					Visite Profile
+				</a>
 			</li>
 			{(owner.name === user.username || admins.some(admin => admin.name === user.username)) && (
 				<><li>
@@ -642,7 +688,8 @@ const Dropdown = ({
 							</li>
 						</ul>
 					</div>
-				</li><li>
+				</li>
+				<li>
 						<a className="block text-white border border-transparent hover:border-white" onClick={() => socket?.emit('banUser', { room: channel.id, user: memeberId })}>
 							Ban
 						</a>
@@ -695,6 +742,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const [passwordMismatch, setPasswordMismatch] = useState(false);
 	const [updatePassword] = useMutation(UPDATE_CHANNEL_PASSWORD);
 	const [updateType] = useMutation(UPDATE_CHANNEL_TYPE);
+	const navigate = useNavigate();
 
 	const channel: channelType = channels.find((channel: { id: string; }) => channel.id === id) || channels[0];
 	if (!channel)
@@ -961,6 +1009,8 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 					// else if read is false emit an event to the server so that it can appear in the sidebar
 					if (message.read)
 						socket?.emit('readMessage', { messageId: message.id, userId: user.id, roomId: id });
+					else
+						socket?.emit("unreadMessage", data.senderId); // listen on this event in the sidebar component
 					channel.messages = [...channel.messages, message];
 					channel.messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
@@ -974,8 +1024,6 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 				return new Date(msg2).getTime() - new Date(msg1).getTime();
 			  })
 
-			// else
-			// 	socket?.emit("unreadMessage", data.senderId); // listen on this event in the sidebar component
 			return updatedChannels;
 		});
 	};
@@ -1030,7 +1078,15 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	};
 
 	const handleBlock = (data: { blockerId: string, blockedUserId: string }) => {
-		// if a user1 blocked user2 update the user2 blocken list with the user1 id and update the user1 blocked list with the user2 id
+		if (member) {
+			if (member.id === data.blockerId) {
+				member.blocken = member.blocken?.push(data.blockerId)
+			}
+			if (member.id === data.blockedUserId) {
+				member.blocked = member.blocked?.push(data.blockedUserId);
+			}
+			
+		}
 		setMembers((prevMembers: any) => {
 			const updatedMembers = prevMembers.map((member: { id: string, blocked: string[], blocken: string[] }) => {
 				if (member.id === data.blockerId) {
@@ -1043,54 +1099,49 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			});
 			return updatedMembers;
 		});
-		// setChannels((prevChannels: any) => {
-		// 	const updatedChannels = prevChannels.map((channel: any) => {
-		// 		if (channel.id === id) {
-		// 			const updatedMembers = [...channel.members, members];
-		// 			return { ...channel, members: updatedMembers };
-		// 		}
-		// 		return channel;
-		// 	});
-		// 	return updatedChannels;
-		// });
+		setChannels((prevChannels: any) => {
+			const updatedChannels = prevChannels.map((channel: any) => {
+				if (channel.id === id) {
+					return { ...channel, members: members };
+				}
+				return channel;
+			});
+			return updatedChannels;
+		});
 	};
 
 	const handleUnblock = (data: { blockerId: string, blockedUserId: string }) => {
 		if (member) {
-			console.log(" blocked : " + member.blocked[0] , " blocken " + member.blocken[0])
 			if (member.id === data.blockerId) {
-				member.blocked = member.blocked?.filter((blockedId: string) => blockedId !== data.blockedUserId);
+				member.blocken = member.blocken?.filter((blockedId: string) => blockedId !== data.blockedUserId);
 			}
 			if (member.id === data.blockedUserId) {
-				member.blocken = member.blocken?.filter((blockerId: string) => blockerId !== data.blockerId);
+				member.blocked = member.blocked?.filter((blockerId: string) => blockerId !== data.blockerId);
 			}
-			console.log("member ===> " + data.blockerId + " member ===> " + data.blockedUserId);
 			
 		}
-		// setMembers((prevMembers: any) => {
-		//   const updatedMembers = prevMembers.map((member: { id: string, blocked: string[], blocken: string[] }) => {
-		// 	if (member.id === data.blockerId) {
-		// 	  member.blocked = member.blocked?.filter((blockedId: string) => blockedId !== data.blockedUserId);
-		// 	}
-		// 	if (member.id === data.blockedUserId) {
-		// 	  member.blocken = member.blocken?.filter((blockerId: string) => blockerId !== data.blockerId);
-		// 	}
-		// 	return member;
-		//   });
-		//   return updatedMembers;
-		// });
+		setMembers((prevMembers: any) => {
+		  const updatedMembers = prevMembers.map((member: { id: string, blocked: string[], blocken: string[] }) => {
+			if (member.id === data.blockerId) {
+			  member.blocked = member.blocked?.filter((blockedId: string) => blockedId !== data.blockedUserId);
+			}
+			if (member.id === data.blockedUserId) {
+			  member.blocken = member.blocken?.filter((blockerId: string) => blockerId !== data.blockerId);
+			}
+			return member;
+		  });
+		  return updatedMembers;
+		});
 	  
-		// setChannels((prevChannels: any) => {
-		//   const updatedChannels = prevChannels.map((channel: any) => {
-		// 	if (channel.id === id) {
-		// 	  const updatedMembers = [...channel.members, members];
-		// 	  return { ...channel, members: updatedMembers };
-		// 	}
-		// 	return channel;
-		//   });
-		//   return updatedChannels;
-		// });
-		console.log("unblock event " + members )
+		setChannels((prevChannels: any) => {
+		  const updatedChannels = prevChannels.map((channel: any) => {
+			if (channel.id === id) {
+			  return { ...channel, members: members };
+			}
+			return channel;
+		  });
+		  return updatedChannels;
+		});
 	};
 
 	const handleChannelUpdates = (payload: {data: any, opt: number, room: string}) => {
@@ -1275,7 +1326,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 									<div className="relative w-10 h-10">
 										{channel.type === "DM" ? (
 											<>
-												<img src={member?.icon} className="rounded-full w-full h-full object-cover" />
+												<img src={member?.icon} className="rounded-full w-full h-full object-cover" onClick={() => navigate(`/profiles?id=${member?.id}`)}/>
 												<span className={`status ${getStatusColor(member?.status || '')}`} />
 											</>
 										) : (
@@ -1326,8 +1377,13 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 													<><li
 													onClick={() => {
 														socket?.emit('muteUser', { room: channel.id, user: member?.id, duration: null, permanent: true });
-													} }><IoVolumeMuteSharp className="w-10 h-10" /></li><li
+													} }><IoVolumeMuteSharp className="w-10 h-10" /></li>
+													<li
 														className="chat__details d-flex d-xl-none"
+														onClick={() => {
+															socket?.emit('inviteGame', {time: new Date(0), type: "MATCH", isRead: false, senderId: user.id, receiverId: member?.id});
+															navigate('/game/pong?mode=online');
+														}}
 													>
 														<GiPingPongBat className="w-10 h-10" />
 													</li></>

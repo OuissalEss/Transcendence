@@ -138,16 +138,22 @@ export class BlockService {
 	}
 
 	async blockUser(blockerId: string, blockedUserId: string): Promise<User> {
-		await  this.prisma.block.create({
-			data: {
-			blockerId: blockerId,
-			blockedUserId: blockedUserId,
-			},
-		});
+        if (!this.isBlocked(blockerId, blockedUserId)) {
+            await  this.prisma.block.create({
+                data: {
+                blockerId: blockerId,
+                blockedUserId: blockedUserId,
+                },
+            });
+        }
+
 		return this.prisma.user.findUnique({
 			where: {
 			id: blockedUserId,
 			},
+            include: {
+                avatar: true,
+            }
 		});
 	}
 
