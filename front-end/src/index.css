@@ -423,6 +423,7 @@ html {
   outline: none;
   color: rgb(255, 255, 255);
   width: 344px;
+  height: 25px;
 }
 
 .searchInput::placeholder {

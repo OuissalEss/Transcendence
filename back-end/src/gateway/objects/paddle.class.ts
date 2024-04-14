@@ -22,7 +22,7 @@ export class Paddle {
         this.h = canvasHeight / 5;
 
 
-        this.speed = 5;
+        this.speed = 10;
         this.ychange = 0;
 
         this.id = playerId;
@@ -45,7 +45,7 @@ export class Paddle {
         this.w = 14;
         this.h = this.height / 5;
 
-        this.speed = 5;
+        this.speed = 10;
         this.ychange = 0;
 
         this.x = this.isLeft ? this.w + 2 : this.width - this.w - 2;

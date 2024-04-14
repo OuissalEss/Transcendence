@@ -17,8 +17,16 @@ export class BlockService {
         let blockObject = this.prisma.block.findUnique({
           where: { id: blockId },
           include: {
-            blockedUser: true,
-            blocker: true,
+            blockedUser: {
+                include:{
+                    avatar: true,
+                }
+            },
+            blocker: {
+                include:{
+                    avatar: true,
+                }
+            },
         },
         });
         if (!blockObject) throw new NotFoundException("Block doesn't exist");
@@ -39,8 +47,16 @@ export class BlockService {
                 ]
             },
             include: {
-                blockedUser: true,
-                blocker: true,
+                blockedUser: {
+                    include:{
+                        avatar: true,
+                    }
+                },
+                blocker: {
+                    include:{
+                        avatar: true,
+                    }
+                },
             },
         });
     }
@@ -56,8 +72,16 @@ export class BlockService {
                 blockerId: userId,
             },
             include: {
-                blockedUser: true,
-                blocker: true,
+                blockedUser: {
+                    include:{
+                        avatar: true,
+                    }
+                },
+                blocker: {
+                    include:{
+                        avatar: true,
+                    }
+                },
             },
         });
     }

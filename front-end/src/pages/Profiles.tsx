@@ -328,75 +328,90 @@ function Profiles() {
 
   return (
     <div className="Profile">
-      <header className="Profile-header">
-        <div className="PlayerBar"></div>
-        <div className="PlayerProfile">{userData.username}'s Profile</div>
-        <div className="PlayerName">{userData.username}</div>
-        <img src={userData.avatar.filename} className="Riri" alt="Riri" />
-        {buttonText == 'add' &&
-          <div className="AddFriend" onClick={handleAddFriend}>Add Friend</div>
-        }
-        {buttonText == 'remove' &&
-          <div className="AddFriend" onClick={handleRemoveFriend}>Remove Friend</div>
-        }
-        {buttonText == 'accept' &&
-          <div className="AddFriend" onClick={handleAcceptRequest}>Accept Request</div>
-        }
-        {buttonText == 'cancel' &&
-          <div className="AddFriend" onClick={handleCancelRequest}>Cancel Request</div>
-        }
-        <img src={myLeaderboard} className="LB" alt="Leaderboard3" />
-        <div className="PLevelTube">
-          <div className="PLevelMarker">Lv.{currentLevel}</div>
-          <div className="PTube">
-            <div className="PLevelProgress" style={{ width: `${levelProgress}%` }}><span>{levelProgress.toFixed(0)}%</span></div>
-          </div>
-          <div className="PLevelMarker">Lv.{nextLevel}</div>
+      <div className="grid grid-cols-2 header_myProfile mb-[30px]">
+        <div className='col-span-1 text-while'>
+            <SearchBar />
         </div>
-        <div className="PStats">
-          <p className="PStatText">{myWins}&nbsp;Wins&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myDraws}&nbsp;Draw&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myLosses}&nbsp;Losses</p>
-        </div>
-        <div className="PAchievements">Achievements</div>
-        <div className="PAchievementBar">
-          <div className="PChevLeftC" onClick={handlePrevAchievement}>
-            <img src={ChevLeft} alt="Left Chevron" className="PChevLeft" />
-          </div>
-          <div className="PAchievementContainer">
-            <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" />
-            <span>{myAchievements[currentAchievementIndex]?.title}</span>
-          </div>
-          <div className="PChevRightC" onClick={handleNextAchievement}>
-            <img src={ChevRight} alt="Right Chevron" className="PChevRight" />
-          </div>
-        </div>
-        <div className="PPL">Playthrough Legacy</div>
-        <div className="PPLBar">
 
-        <ul >
-              {matches.map((match, index) => {
-                return (
-                  <li key={index} className="play">
-                    <div className="PlayerLeft">
-                      <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} />
-                      <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
-                    </div>
-                    <p className="ScoreP">{match.host_score_m} - {match.guest_score_m}</p>
-                    <div className="PlayerRight">
-                      <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} />
-                      <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
-                    </div>
-                  </li>
-                );
-              })}
-        </ul>
+        <div className='col-span-1'>
+            <Notifications />
         </div>
-        <div className="SearchBarP">
-          <SearchBar />
+      </div>
+      <div className="PlayerProfile">{userData.username}'s Profile</div>
+        <div className="PlayerBar">
+          
+          <div className="PlayerName">{userData.username}</div>
+          <img src={userData.avatar.filename} className="Riri" alt="Riri" />
+          {buttonText == 'add' &&
+            <div className="AddFriend" onClick={handleAddFriend}>Add Friend</div>
+          }
+          {buttonText == 'remove' &&
+            <div className="AddFriend" onClick={handleRemoveFriend}>Remove Friend</div>
+          }
+          {buttonText == 'accept' &&
+            <div className="AddFriend" onClick={handleAcceptRequest}>Accept Request</div>
+          }
+          {buttonText == 'cancel' &&
+            <div className="AddFriend" onClick={handleCancelRequest}>Cancel Request</div>
+          }
+          <img src={myLeaderboard} className="LB" alt="Leaderboard3" />
+          <div className="PLevelTube">
+            <div className="PLevelMarker">Lv.{currentLevel}</div>
+            <div className="PTube">
+              <div className="PLevelProgress" style={{ width: `${levelProgress}%` }}><span>{levelProgress.toFixed(0)}%</span></div>
+            </div>
+            <div className="PLevelMarker">Lv.{nextLevel}</div>
+          </div>
+          <div className="PStats">
+            <p className="PStatText">{myWins}&nbsp;Wins&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myDraws}&nbsp;Draw&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myLosses}&nbsp;Losses</p>
+          </div>
         </div>
-        <div className="NotificationBarP">
-          <Notifications />
+      <div className="PlayerResp grid grid-cols-2 mt-[30px]">
+        <div className='col-span-1 '>
+          <div className="PAchievements ">Achievements
+          </div>
+
+          <div className="PAchievementBar ">
+            <div className="PChevLeftC" onClick={handlePrevAchievement}>
+              <img src={ChevLeft} alt="Left Chevron" className="PChevLeft" />
+            </div>
+            <div className="PAchievementContainer">
+              <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" />
+              <span>{myAchievements[currentAchievementIndex]?.title}</span>
+            </div>
+            <div className="PChevRightC" onClick={handleNextAchievement}>
+              <img src={ChevRight} alt="Right Chevron" className="PChevRight" />
+            </div>
+          </div>
+          
         </div>
-      </header>
+
+      <div className='col-span-1  ml-[10px]'>
+        <div className="PPL ">Playthrough Legacy</div>
+          <div className="PPLBar">
+            <ul >
+                  {matches.map((match, index) => {
+                    return (
+                      <li key={index} className="play">
+                        <div className="PlayerLeft">
+                          <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} />
+                          <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
+                        </div>
+                        <p className="ScoreP">{match.host_score_m} - {match.guest_score_m}</p>
+                        <div className="PlayerRight">
+                          <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} />
+                          <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
+                        </div>
+                      </li>
+                    );
+                  })}
+            </ul>
+        
+        </div>
+
+      </div>
+
+        </div>
     </div>
   );
 }

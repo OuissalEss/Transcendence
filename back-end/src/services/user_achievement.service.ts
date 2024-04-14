@@ -22,6 +22,11 @@ export class AchievementService {
 
   async createAchievement(userId: string, achievement_title: Achievement): Promise<UserAchievement> {
     try {
+				const user = await this.userService.getUserById(userId);
+				const userAchievements = user.achievements.find(achievement => achievement.achievement === achievement_title);
+				if (userAchievements){
+          return userAchievements;
+				}
       const createdAchievement =  this.prisma.userAchievement.create({
         data: {
           userId: userId,
@@ -37,6 +42,20 @@ export class AchievementService {
       }
       this.notificationService.createNotification(notifData);
       return createdAchievement;
+    } catch (e) {
+      throw new ForbiddenException("Unable to Create Achievement");
+    }
+  }
+
+  async getUserAchievement(userId: string): Promise<UserAchievement[]> {
+    try {
+      const userAchievements =  this.prisma.userAchievement.findMany({
+        where: {
+          userId: userId,
+        },
+        include: achievementIncludes
+      });
+      return userAchievements;
     } catch (e) {
       throw new ForbiddenException("Unable to Create Achievement");
     }

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import User from "../types/user-interface";
 import { useQuery, gql } from "@apollo/client";
 import { useAuth } from "../provider/authProvider.tsx";
+import { useSocket } from "../App.tsx";
 // import { useSocket } from "../App.tsx";
 
 interface Friend {
@@ -68,8 +69,11 @@ const Friends = () => {
     const [FriendsList, setFriendsList] = useState<Friend[]>([]);
 
     const { token } = useAuth();
+    const { socket } = useSocket();
 
     console.log('friend');
+
+
     useEffect(() => {
         if (!token) return; // If token is not available, do nothing
 
@@ -120,7 +124,62 @@ const Friends = () => {
             });
     }, []);
 
-    console.log(userData?.id + "hhh")
+    useEffect(() => {
+        function refetch(){
+            if (!token) return; // If token is not available, do nothing
+            
+            fetch('http://localhost:3000/graphql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    query: USER_DATA_QUERY
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                return response.json();
+            })
+            .then(({ data }) => {
+                if (data && data.getUserFriends) {
+                    const friends = data.getUserFriends;
+
+                    const updatedFriendsList: Friend[] = friends.map((friend: any) => ({
+                        id: friend.id,
+                        username: friend.username,
+                        status: friend.status,
+                        image: friend.avatar?.filename || ''
+                    }));
+                    const friendsItems = friends?.map((user: { id: string, username: string, avatar: { filename: string }, status: string, xp: number, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({
+                        id: user.id,
+                        name: user.username,
+                        icon: user?.avatar?.filename || '/Avatars/default.jpeg', // Assuming avatarTest is the avatar URL
+                        status: user.status,
+                        xp: user.xp,
+                        blocked: user.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+                        blocken: user.blocking.map((blocker: { blockerId: string }) => blocker.blockerId)
+                    }));
+                    localStorage.setItem('friends', JSON.stringify(friendsItems));
+                    setFriendsList(updatedFriendsList);
+                } if (data && data.getUserInfo) {
+                    setUserData(data.getUserInfo);}
+            })
+            .catch(error => {
+                console.error('Error fetching friends:', error);
+            });
+        }
+        if (socket == undefined) return;
+        socket.on('RequestAccepted', ({}) => {
+            refetch();
+        })
+        socket.on('FriendRemoved', () => {
+            refetch();
+        })
+    }, [socket]);
 
     return (
         <div>

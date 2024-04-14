@@ -66,10 +66,6 @@ const Notifications = () => {
         socket.on('RequestReceived', ({ username, userId, image }: { username: string, userId: string, image: string }) => {
             setShowNotification(true);
         })
-
-        socket.on('RequestAccepted', ({ username, userId, image }: { username: string, userId: string, image: string }) => {
-            alert(`${username} Accepted your request`);
-        })
     }, [socket]);
     
     useEffect(() => {

@@ -218,7 +218,6 @@ function Profile() {
               uniqueAchievements.add(a.enum);
           }
       });
-  // Interplays
       const myInterplays: Interplays[] = myAchievements.map((achievement) => {
           return {
               icon: '🏆',
@@ -284,14 +283,19 @@ function Profile() {
   if (isLoading)
     return <Loading />
   return (
-    <div className="Profile">
-      <header className="Profile-header">
-        <div className="SearchBarP">
-          <SearchBar />
+    <div className="Profile mt-[30px] ml-[15px]">
+    <div className="grid grid-cols-2 header_myProfile mb-[30px]">
+        <div className='col-span-1 text-while'>
+            <SearchBar />
         </div>
-        <div className="NotificationBarP">
-          <Notifications />
+
+        <div className='col-span-1'>
+            <Notifications />
         </div>
+    </div>
+
+      <div className="Profile-body grid grid-cols-3 gap-9">
+    <div className='first col-span-1'>
         <div className="ProfileTitle">
           <h1>Profile</h1>
           <div className="ProfileBar">
@@ -310,7 +314,8 @@ function Profile() {
               </div>
           </div>
         </div>
-        <div className="CurrTitle">
+
+        <div className="CurrTitle mt-[40px]">
           <h1>Current Interplays</h1>
           <div className="CurrBar">
             <ul className="InterplaysList">
@@ -319,11 +324,13 @@ function Profile() {
                   <li key={index}><span>{icon}</span> {description}</li>
                 );
               })}
-              {/* <li><span>💰</span> Earned 50 points in a game</li> */}
             </ul>
 
           </div>
         </div>
+    </div>
+
+    <div className='first col-span-1'>
         <div className="FrLiTitle">
           <h1>Friends List</h1>
           <div className="FrLiBar">
@@ -342,9 +349,12 @@ function Profile() {
               })}
             </ul>
           </div>
-
         </div>
-        <div className="AchievementsTitle">
+    </div>
+
+
+    <div className='last col-span-1'>
+        <div className="AchievementsTitle col-span-1">
             <h1>Achievements</h1>
             <div className="AchievementsBar">
 
@@ -363,9 +373,10 @@ function Profile() {
 
             </div>
         </div>
-          <div className="PTtitle">
+
+        <div className="PTtitle col-span-1 mt-[40px]">
             <h1>Playthrough Legacy</h1>
-              <div className="PTBar">
+              <div className="PTBar ">
 
 
               <ul >
@@ -389,10 +400,10 @@ function Profile() {
                 <div className="play">
                 </div>
               </div>
-          </div>
-              
+        </div>
+    </div> 
                 
-      </header>
+      </div>
     </div>
   );
 }

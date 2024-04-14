@@ -9,10 +9,12 @@ import { UserService } from '../services/user.service';
 import { CreateMatchInput } from 'src/services/dto/create-match.input';
 import { PrismaService } from 'src/services/prisma.service';
 import { create } from 'domain';
-import { Character } from '@prisma/client';
+import { Achievement, Character } from '@prisma/client';
 import { CreateFriendInput } from 'src/services/dto/create-friend.input';
 import { FriendService } from 'src/services/friend.service';
 import { Friend } from 'src/entities/friend.entity';
+import { AchievementService } from 'src/services/user_achievement.service';
+import { Match } from "src/entities/match.entity";
 
 // Define a type for player information
 interface PlayerInfo {
@@ -38,6 +40,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	constructor(
 		private readonly matchService: MatchService,
 		private readonly userService: UserService,
+		private readonly achievementService: AchievementService,
 		private readonly jwtService: JwtService,
 		private readonly prismaService: PrismaService,
 		private readonly friendService: FriendService,
@@ -75,6 +78,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		return game;
 	}
 
+	private countMatchesWithOpponent(matches: Match[], playerId: string, opponentId: string) {
+		let matchCount = 0;
+		matches.forEach(match => {
+			if ( (match.guest.id === playerId && match.host.id === opponentId) ||
+				(match.host.id === playerId && match.guest.id === opponentId) )
+			{ matchCount++; }
+		});
+		return matchCount;
+	}
+	
 	// Method to clean up resources of disconnected client
 	private async cleanupDisconnectedClient(client) {
 		const clientId = client.id;
@@ -162,6 +175,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 						}
 					})
 					this.userService.addXp(winner, 500);
+				}
+				const host = await this.userService.getUserById(this.playerInfoMap.get(hostId)?.userId);
+				if (host.winner.length == 5){
+					this.achievementService.createAchievement(host.id, "winning");
+				}
+				const guest = await this.userService.getUserById(this.playerInfoMap.get(guesId)?.userId);
+				if (guest.winner.length == 5){
+					this.achievementService.createAchievement(guest.id, "winning");
+				}
+				const hostmatches = await this.matchService.getAllUserMatchs(host.id);
+				const opponentsCount = this.countMatchesWithOpponent(hostmatches, host.id, guest.id);
+				if (opponentsCount == 3){
+					this.achievementService.createAchievement(host.id, "loyal");
+					this.achievementService.createAchievement(guest.id, "loyal");
 				}
 			}
 
@@ -270,6 +297,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					}
 				});
 				this.userService.addXp(winner, 500);
+			}
+			const host = await this.userService.getUserById(this.playerInfoMap.get(game.getHostId()).userId);
+			if (host.winner.length == 5){
+				this.achievementService.createAchievement(host.id, "winning");
+			}
+			const guest = await this.userService.getUserById(this.playerInfoMap.get(game.getGuestId()).userId);
+			if (guest.winner.length == 5){
+				this.achievementService.createAchievement(guest.id, "winning");
+			}
+			const hostmatches = await this.matchService.getAllUserMatchs(host.id);
+			const opponentsCount = this.countMatchesWithOpponent(hostmatches, host.id, guest.id);
+			if (opponentsCount == 3){
+				this.achievementService.createAchievement(host.id, "loyal");
+				this.achievementService.createAchievement(guest.id, "loyal");
 			}
 		}
 		this.games.delete(game);
@@ -388,6 +429,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 						}
 					})
 					this.userService.addXp(winner, 500);
+				}
+				const host = await this.userService.getUserById(this.playerInfoMap.get(hostId)?.userId);
+				if (host.winner.length == 5){
+					this.achievementService.createAchievement(host.id, "winning");
+				}
+				const guest = await this.userService.getUserById(this.playerInfoMap.get(guestId)?.userId);
+				if (guest.winner.length == 5){
+					this.achievementService.createAchievement(guest.id, "winning");
+				}
+				const hostmatches = await this.matchService.getAllUserMatchs(host.id);
+				const opponentsCount = this.countMatchesWithOpponent(hostmatches, host.id, guest.id);
+				if (opponentsCount == 3){
+					this.achievementService.createAchievement(host.id, "loyal");
+					this.achievementService.createAchievement(guest.id, "loyal");
 				}
 			}
 
@@ -712,10 +767,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 			if (update) {
 				const userFriend = this.findPlayerInfo(newFriend.senderId);
+				const user = this.findPlayerInfo(newFriend.receiverId);
 
 				client.emit('AcceptedRequest', { friendId: data.friendId });
 				if (userFriend)
 					userFriend.playerSocket.emit("RequestAccepted", { username: user.username, userId: user.userId, image: user.image })
+				if (user)
+						user.playerSocket.emit("RequestAccepted", { username: user.username, userId: user.userId, image: user.image })
 			}
 		}
 	}

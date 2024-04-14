@@ -52,7 +52,6 @@ import Block from '../types/block-interface';
 import { useAuth } from '../provider/authProvider';
 import GameLoading from '../components/GameLoading';
 import Loading from '../components/Loading';
-import { Socket, io } from 'socket.io-client';
 
 const USER_DATA_QUERY = `
     query UserData {
@@ -159,7 +158,7 @@ function Settings() {
 
     const [characterChanged, setCharacterChanged] = useState(false);
     const [editedUsername, setEditedUsername] = useState('');
-    const [avatarImage, setAvatarImage] = useState<string | ArrayBuffer | null>(null);
+    const [avatarImage, setAvatarImage] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [loading1, setLoading1] = useState(false);
@@ -176,7 +175,6 @@ function Settings() {
     const [blocked, setBlocked] = useState<Block[]>();
     const [isLoading, setLoading] = useState(true);
     const [userData, setUserData] = useState<User>();
-    const [socket, setSocket] = useState<Socket>();
 
     useEffect(() => {
         if (!token) return; // If token is not available, do nothing
@@ -209,15 +207,6 @@ function Settings() {
                 console.error('Error fetching friends:', error);
             });
     }, []);
-
-    useEffect(() => {
-        const newSocket = io('ws://localhost:3003/chat');
-        setSocket(newSocket);
-
-        return () => {
-            newSocket.disconnect();
-        };
-    }, [setSocket]);
 
     const blockedList = blocked?.map((b: Block) => ({
         b_id: b.id,
@@ -257,9 +246,12 @@ function Settings() {
         setSelectedFile(file);
         const reader = new FileReader();
         reader.onload = () => {
-            setAvatarImage(reader.result);
+            if (typeof reader.result === 'string') {
+                setAvatarImage(reader.result);
+            }
         };
-        reader.readAsDataURL(file);
+        if (file)
+            reader.readAsDataURL(file);
     };
 
     const currentCharacter = characters[currentCharacterIndex];
@@ -276,37 +268,39 @@ function Settings() {
 
     const uploadAvatar = async () => {
         const imageCompressor = new ImageCompressor(); // Instantiate ImageCompressor
-        const compressedFile = await imageCompressor.compress(selectedFile, { // Use compress method
-            maxWidth: 500,
-            maxHeight: 500,
-            quality: 0.5, // Adjust quality as needed
-        });
-        const data = new FormData();
-        data.append("file", compressedFile);
-        data.append(
-            "upload_preset",
-            import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
-        );
-        data.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-        data.append("folder", "Cloudinary-React");
-
-
-        // Specify the image quality here (between 0 to 100)
-        // data.append("quality", '10');
-        try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-                {
-                    method: "POST",
-                    body: data,
-                }
+        if (selectedFile){
+            const compressedFile = await imageCompressor.compress(selectedFile, { // Use compress method
+                maxWidth: 500,
+                maxHeight: 500,
+                quality: 0.5, // Adjust quality as needed
+            });
+            const data = new FormData();
+            data.append("file", compressedFile);
+            data.append(
+                "upload_preset",
+                import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
             );
-            const res = await response.json();
-            setUploadUrl(res.public_id);
-            return (cld.image(res.public_id).toURL());
-        } catch (error) {
-            console.log("ERROR");
-            return '';
+            data.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+            data.append("folder", "Cloudinary-React");
+
+
+            // Specify the image quality here (between 0 to 100)
+            // data.append("quality", '10');
+            try {
+                const response = await fetch(
+                    `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+                    {
+                        method: "POST",
+                        body: data,
+                    }
+                );
+                const res = await response.json();
+                setUploadUrl(res.public_id);
+                return (cld.image(res.public_id).toURL());
+            } catch (error) {
+                console.log("ERROR");
+                return '';
+            }
         }
     };
 
@@ -331,7 +325,7 @@ function Settings() {
         try {
             await desactivate2Fa({ variables: {} });
             console.log("2fa updated successfully!");
-        } catch (error) {
+        } catch (error:any) {
             console.error("Error updating Username:", error.message);
         }
         alert('2FA desactivated successful');
@@ -350,7 +344,7 @@ function Settings() {
                 try {
                     await updateUserCharacter({ variables: { char_name: currentCharacter.name } });
                     console.log("Character updated successfully!");
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Error updating character:", error.message);
                 }
             }
@@ -359,7 +353,7 @@ function Settings() {
                 try {
                     await updateUserAvatar({ variables: { avatar_name: Url } });
                     console.log("Avatar updated successfully!");
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Error updating Avatar:", error.message);
                 }
 
@@ -368,7 +362,7 @@ function Settings() {
                 try {
                     await updateUserName({ variables: { user_name: editedUsername } });
                     console.log("Username updated successfully!");
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Error updating Username:", error.message);
                 }
             }
@@ -378,10 +372,8 @@ function Settings() {
     async function handleUnblock(id: string) {
         try {
             await unblockUser({ variables: { block_id: id } });
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            socket?.emit("unblockUser", {blockerId: user.id, blockedUserId: id});
             console.log("Username updated successfully!");
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating Username:", error.message);
         }
         window.location.reload();
@@ -390,32 +382,36 @@ function Settings() {
     if (isLoading)
         return <Loading />
     return (
-        <div className="Login">
-            <header className="Login-header">
-                <div className="SearchBarS">
-                    <SearchBar />
-                </div>
-                <div className="NotificationBarS">
-                    <Notifications />
-                </div>
-                <div className="Settings">
+        <div className="SettingsPage ml-[90px] mt-[20px]">
+        <div className="grid grid-cols-3 header_settings ml-[40px] mr-[70px]">
+            <div className='col-span-1 Settings mt-[10px]'>
                     <h1>Settings</h1>
                 </div>
-                <div className="SettingsBar"> </div>
-                <div className="ProfileS">
-                    {isEditing ? (
-                        <input type="text" value={editedUsername}
-                            onChange={handleUsernameChange}
-                            autoFocus className="EditInput" />
-                    ) : (
-                        <input type="text" value={userData?.username}
-                            onChange={handleUsernameChange}
-                            autoFocus className="EditInput" />
-                    )}
 
-                    <img src={UserIcon} alt="User Icon" className="UserIcon" />
-                    <img src={Edit} alt="Edit Icon" className="EditIcon" />
-                </div>
+          <div className='col-span-1 text-while'>
+              <SearchBar />
+          </div>
+
+          <div className='col-span-1'>
+              <Notifications />
+          </div>
+      </div>
+            <div className='SettingsRep mt-[100px] grid grid-cols-3'>
+            <div className="SettingsBar  col-span-2">
+                    <div className="ProfileS">
+                        {isEditing ? (
+                            <input type="text" value={editedUsername}
+                                onChange={handleUsernameChange}
+                                autoFocus className="EditInput" />
+                        ) : (
+                            <input type="text" value={userData?.username}
+                                onChange={handleUsernameChange}
+                                autoFocus className="EditInput" />
+                        )}
+
+                        <img src={UserIcon} alt="User Icon" className="UserIcon" />
+                        <img src={Edit} alt="Edit Icon" className="EditIcon" />
+                    </div>
 
                 <div className="AvatarEditCircle" >
                     <label htmlFor="avatarInput" className="AvatarEditText">
@@ -433,25 +429,7 @@ function Settings() {
                     <img src={avatarImage} className="AvatarBackground" alt="Avatar" />
                 ) : (
                     <img src={userAvatar} className="AvatarBackground" alt="AvatarBackground" />
-                )}
-                <div className="BlockedList">
-                    <div className="BlockedListTitle">
-                        <h1>Blocked List</h1>
-                    </div>
-                    <ul>
-                        {blockedList?.map((b, index) => {
-                            return (
-                                <li key={index} className="BlockedItem">
-                                    <img src={b.image} alt="Blocked Avatar" className="BlockedAvatar" />
-                                    <p className="BlockedName">{b.username}</p>
-                                    <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" onClick={() => handleUnblock(b.b_id)} />
-                                </li>
-                            );
-                        })}
-                    </ul>
-
-                </div>
-                <button className="CharacterRectangleSettings" onClick={handleChangeCharacterClick}>
+                )} <button className="CharacterRectangleSettings" onClick={handleChangeCharacterClick}>
                     <p className="CharacterTextSettings">Change your character</p>
                 </button>
 
@@ -497,7 +475,7 @@ function Settings() {
                     onClick={handleRightChevronClick}
                 />
 
-                {!userData.connection.is2faEnabled ? (
+                {!userData?.connection.is2faEnabled ? (
                     <div className="TFA" onClick={showTFA}>
                         <img src={TFAicon} alt="TFA Icon" className="TFAIcon" /><h1>Activate Two-factor authentication</h1>
                     </div>
@@ -517,8 +495,26 @@ function Settings() {
                         <p className="SaveTheChangesText">Save the changes!</p>
                     </button>
                 </div>
+            </div>
+                <div className="BlockedList col-span-1 ">
+                    <div className="BlockedListTitle">
+                        <h1>Blocked List</h1>
+                    </div>
+                    <ul>
+                        {blockedList?.map((b, index) => {
+                            return (
+                                <li key={index} className="BlockedItem">
+                                    <img src={b.image} alt="Blocked Avatar" className="BlockedAvatar" />
+                                    <p className="BlockedName">{b.username}</p>
+                                    <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" onClick={() => handleUnblock(b.b_id)} />
+                                </li>
+                            );
+                        })}
+                    </ul>
 
-            </header>
+                </div>
+                
+            </div>
             {isShowAlert &&
                 <div className="alertContainer">
                     <Alert message={alertMessage} onClose={closeAlert} />
@@ -529,7 +525,9 @@ function Settings() {
                     <TwoFactorAuthActivation onClose={closeTFA} />
                 </div>
             }
+
         </div>
+
     );
 }
 

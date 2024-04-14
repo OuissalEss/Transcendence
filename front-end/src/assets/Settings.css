@@ -1,49 +1,38 @@
 
 .SettingsBar {
-  position: absolute;
-  top: 150px;
-  left: 150px;
+  position: relative;
   width: 800px;
   height: 630px;
   background-color: rgba(114, 196, 255, 0.2);
   border-radius: 20px;
 }
 
-.SearchBarS {
-  position: absolute;
-  top: 25px; /* Adjust the top position as needed */
-  right: 20px; /* Position in the center */
-  transform: translateX(-50%);
-  width: 550px; /* Adjust the width as needed */
+.SettingsPage{
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 0 50px; /* Adjust padding as needed */
-  z-index: 4;
-}
-  
-.NotificationBarS {
-  position: absolute;
-  width: 60px; 
-  height: 60px; 
-  top: 25px; 
-  right: 360px;
-  transform: translateX(50%, 50%);
-  cursor: pointer;
+  justify-content: center;
 }
 
 .Settings {
-  position: absolute;
-  top: 25px;
-  left: 150px;
   font: 'Manrope', sans-serif;
   font-size: 40px;
   color: rgba(62, 18, 86, 1);
 }
-
+@media (max-width: 1200.98px) {
+  .Settings{
+      font-size: 32px;
+    }
+}
+@media (max-width: 770px) {
+  .header_settings{
+      margin: 0px 70px 0px 0px !important;
+    }
+}
 .CharacterRectangleSettings {
   position: absolute;
-  top: 180px;
-  left: 580px;
+  top: 30px;
+  left: 450px;
   width: 280px;
   height: 50px; 
   background-color: rgba(61, 55, 133, 0.34);
@@ -61,65 +50,56 @@
   font-size: 18px;
   font-family: 'Manrope', sans-serif;
 }
-
+.CharacterImageSettings {
+  position: absolute;
+  top: 90px;
+  left: 530px;
+  width: 120px;
+}
 .ChevronLeftSettings {
   position: absolute;
-  top: 410px;
-  left: 530px;
+  top: 270px;
+  left: 400px;
   width: 50px;
   height: 50px;
   cursor: pointer;
-
 }
-
 .ChevronRightSettings {
   position: absolute;
-  top: 410px;
-  left: 850px;
+  top: 270px;
+  left: 720px;
   width: 50px;
   height: 50px;
   cursor: pointer;
-
 }
-
 .NameS {
   position: absolute;
-  top: 600px;
-  left: 670px;
+  top: 460px;
+  left: 540px;
   color: #3E1256;
   font-size: 40px;
   text-align: center;
   justify-content: center;
   width: 150px;
 }
-
 .CharacterNameSettings {
   position: absolute;
-  /* top: 50px; */
   font-size: 30px;
   color: rgba(62, 18, 86, 1);
   font-family: 'Manrope', sans-serif;
 }
-
 .CharacterInfosSettings{
   position: absolute;
-  left: 560px;
-  top: 650px;
+  left: 430px;
+  top: 510px;
   width: 320px;
   height: 110px;
 }
 
-.CharacterImageSettings {
-  position: absolute;
-  top: 230px;
-  left: 660px;
-  width: 120px;
-}
+
 
 .BlockedList {
-  position: absolute;
-  top: 150px;
-  left: 980px;
+  position: relative;
   width: 310px;
   height: 630px;
   background-color: rgba(114, 196, 255, 0.2);
@@ -167,8 +147,8 @@
 
 .AvatarBackground{
   position: absolute;
-  top: 280px;
-  left: 270px;
+  top: 80px;
+  left: 120px;
   width: 110px;
   height: 110px;
   border-radius: 50%;
@@ -177,8 +157,8 @@
 
 .AvatarEditCircle {
   position: absolute;
-  top: 280px;
-  left: 270px;
+  top: 80px;
+  left: 120px;
   width: 110px;
   height: 110px;
   background-color: rgba(62, 55, 133, 0.446);
@@ -207,8 +187,8 @@
 
 .ProfileS {
   position: absolute;
-  top: 410px;
-  left: 220px;
+  top: 230px;
+  left: 65px;
   display: flex;
   align-items: center;
   width: 220px;
@@ -259,8 +239,8 @@
 
 .TFA {
   position: absolute;
-  top: 490px;
-  left: 190px;
+  top: 300px;
+  left: 40px;
   display: flex;
   align-items: center;
   width: 280px;
@@ -289,8 +269,8 @@
 
 .SaveTheChangesRectangle{
   position: absolute;
-  top: 700px;
-  left: 220px;
+  top: 520px;
+  left: 80px;
   width: 220px;
   height: 50px;
   background-color: rgba(61, 55, 133, 0.34);
@@ -315,4 +295,76 @@
   height: 100vh;
   top: 0%;
   left: 0%;
+}
+
+.SettingsRep{
+  column-gap: 10px;
+}
+
+@media (max-width: 1303px)
+{
+  .SettingsRep{
+    grid-template-columns: repeat(1, 1fr) !important;
+    row-gap: 20px;
+    margin-left: -70px;
+  }
+  .SettingsBar {
+    grid-column: span 1;
+  }
+  .BlockedList {
+    left: 30%;
+  }
+}
+
+@media (max-width: 1007px)
+{
+  .SettingsBar {
+    width: 500px;
+    height: 1150px;
+  }
+  .AvatarBackground,
+  .AvatarEditCircle
+  {
+    left: 190px;
+  }
+    .ProfileS{
+      left: 135px;
+    }
+    .TFA{
+      left: 110px;
+    }
+  .CharacterRectangleSettings {
+    top: 400px;
+    left: 115px;
+  }
+
+    .CharacterImageSettings {
+      top: 470px;
+      left: 190px;
+    }
+
+    .ChevronLeftSettings {
+      top: 650px;
+      left: 60px;
+    }
+    .ChevronRightSettings {
+      top: 650px;
+      left: 380px;
+    }
+    .NameS{
+      top: 840px;
+      left: 200px;
+    }
+    .CharacterInfosSettings{
+      top: 890px;
+      left: 90px;
+    }
+
+  .SaveTheChangesRectangle{
+    top: 1050px;
+    left: 155px;
+  }
+  .BlockedList {
+    left: 20%;
+  }
 }

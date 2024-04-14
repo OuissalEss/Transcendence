@@ -125,7 +125,7 @@ export class Puck {
 
          // Update speed based on bounce angle
         let speed = Math.sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed);
-        this.xspeed = speed * Math.cos(bounceAngle) + (Math.abs(this.xspeed) / 2); // Always increase speed
+        this.xspeed = speed * Math.cos(bounceAngle) + (Math.abs(this.xspeed) / 6); // Always increase speed
         this.yspeed = speed * Math.sin(bounceAngle);
 
 
@@ -193,7 +193,7 @@ export class Puck {
 
         // Update speed based on bounce angle
         let speed = Math.sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed);
-        this.xspeed = -speed * Math.cos(bounceAngle) - (Math.abs(this.xspeed) / 2); // Always increase speed
+        this.xspeed = -speed * Math.cos(bounceAngle) - (Math.abs(this.xspeed) / 6); // Always increase speed
         this.yspeed = speed * Math.sin(bounceAngle);
 
 
