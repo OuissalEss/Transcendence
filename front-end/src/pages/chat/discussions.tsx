@@ -28,7 +28,7 @@ const Discussions: React.FC<DiscussionsProps> = ({
 	) => {
 		let unread = 0;
 		messages.forEach((message) => {
-			console.log(message.sender, user.username, message.read, "unreadMessages", user.username);
+			// console.log(message.sender, user.username, message.read, "unreadMessages", user.username);
 			if (message.sender !== user.username && !message.read) {
 				unread++;
 			}
@@ -74,19 +74,19 @@ const Discussions: React.FC<DiscussionsProps> = ({
 					owner: {
 					  id: data.ChannelById.owner.id,
 					  name: data.ChannelById.owner.username,
-					  icon: data.ChannelById.owner.avatar.filename
+					  icon: data.ChannelById.owner.avatar?.filename
 					},
 					admins: data.ChannelById.admins
 					.map((admin: { id: string, username: string, avatar:{filename: string} }) => ({
 					  id: admin.id,
 					  name: admin.username,
-					  icon: admin.avatar.filename
+					  icon: admin.avatar?.filename
 					})),
 					members: data.ChannelById.members
 					.map((member: { id: string, username: string, avatar:{filename: string}, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
 					  id: member.id,
 					  name: member.username,
-					  icon: member.avatar.filename,
+					  icon: member.avatar?.filename,
 					  status: member.status,
 					  blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
 					  blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
@@ -94,12 +94,12 @@ const Discussions: React.FC<DiscussionsProps> = ({
 					banned: data.ChannelById.banned.map((banned: { id: string, username: string, avatar:{filename: string} }) => ({
 					  id: banned.id,
 					  name: banned.username,
-					  icon: banned.avatar.filename
+					  icon: banned.avatar?.filename
 					})),
 					muted: data.ChannelById.muted.map((muted: { id: string, username: string, avatar:{filename: string} }) => ({
 					  id: muted.id,
 					  name: muted.username,
-					  icon: muted.avatar.filename
+					  icon: muted.avatar?.filename
 					})),
 					messages: data.ChannelById.messages
 					.map((message: { id: string, text: string, time: Date, sender: string, senderId: string, read: boolean }) => ({
@@ -173,19 +173,19 @@ const Discussions: React.FC<DiscussionsProps> = ({
 				owner: {
 				  id: data.ChannelById.owner.id,
 				  name: data.ChannelById.owner.username,
-				  icon: data.ChannelById.owner.avatar.filename
+				  icon: data.ChannelById.owner.avatar?.filename
 				},
 				admins: data.ChannelById.admins
 				.map((admin: { id: string, username: string, avatar:{filename: string} }) => ({
 				  id: admin.id,
 				  name: admin.username,
-				  icon: admin.avatar.filename
+				  icon: admin.avatar?.filename
 				})),
 				members: data.ChannelById.members
 				.map((member: { id: string, username: string, avatar:{filename: string}, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
 				  id: member.id,
 				  name: member.username,
-				  icon: member.avatar.filename,
+				  icon: member.avatar?.filename,
 				  status: member.status,
 				  blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
 				  blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
@@ -193,12 +193,12 @@ const Discussions: React.FC<DiscussionsProps> = ({
 				banned: data.ChannelById.banned.map((banned: { id: string, username: string, avatar:{filename: string} }) => ({
 				  id: banned.id,
 				  name: banned.username,
-				  icon: banned.avatar.filename
+				  icon: banned.avatar?.filename
 				})),
 				muted: data.ChannelById.muted.map((muted: { id: string, username: string, avatar:{filename: string} }) => ({
 				  id: muted.id,
 				  name: muted.username,
-				  icon: muted.avatar.filename
+				  icon: muted.avatar?.filename
 				})),
 				messages: data.ChannelById.messages
 				.map((message: { id: string, text: string, time: Date, sender: string, senderId: string, read: boolean }) => ({
@@ -240,7 +240,7 @@ const Discussions: React.FC<DiscussionsProps> = ({
             </div>
             <div className="chat-list">
 			{channels.map((discussion: channelType, index: number) => (
-				<div key={index} className="chat-box" onClick={() => {
+				<div key={discussion.id} className="chat-box" onClick={() => {
 					setId(channels[index].id);
 					setDisplay("Chat");
 				}}>

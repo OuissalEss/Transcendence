@@ -68,7 +68,8 @@ const PasswordSettings: React.FC<PasswordSettingsProps> = ({
 	passwordMismatch,
 	setPasswordMismatch,
 	password,
-	updateChannel
+	updateChannel,
+	socket
 }) => {
 
 	const handlePasswordSubmit = async () => {
@@ -82,7 +83,7 @@ const PasswordSettings: React.FC<PasswordSettingsProps> = ({
 			const salt = bcrypt.genSaltSync(10);
 			channel.password =  bcrypt.hashSync(password, salt);
 			channel.type = "PROTECTED";
-			updateChannel(channel);
+			updateChannel(channel, socket);
 			setAddPassword(false);
 
 		} else if (ChangePwd) {
@@ -92,7 +93,7 @@ const PasswordSettings: React.FC<PasswordSettingsProps> = ({
 			}
 			const salt = bcrypt.genSaltSync(10);
 			channel.password =  bcrypt.hashSync(password, salt);
-			updateChannel(channel);
+			updateChannel(channel, socket);
 			setChangePwd(false);
 
 		} else {
@@ -222,8 +223,8 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 									} else if (lock) {
 										console.log("hhhh");
 										channel.type = "PUBLIC";
-										channel.password = null;
-										updateChannel(channel);
+										channel.password = '';
+										updateChannel(channel, socket);
 									}}}}
 								className="p-2 rounded-full bg-pink-200 hover:bg-pink-300 transition duration-300">
 								{lock ? <CiLock className="text-pink-500" /> : <CiUnlock className="text-pink-500" />}
@@ -252,6 +253,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 											title,
 										}										
 									});
+									socket?.emit("channelUpdate", {data : {title}, opt : 1, room : channel.id});
 									setTitle('');
 								}
 							}
@@ -291,6 +293,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 											description
 										}
 									});
+									socket?.emit("channelUpdate", {data: {description}, opt: 2, room: channel.id});
 									setDescription('');
 								}
 							}
@@ -703,7 +706,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const [modList, setModList] = useState<{ id: string, name: string, icon: string }[]>(channel.admins	|| []);
 	const [owner, setOwner] = useState<{ id: string, name: string, icon: string }>(channel.owner || {});
 
-	const updateChannel = async (channel: channelType) => {
+	const updateChannel = async (channel: channelType, socket: Socket | undefined) => {
 	
 		await updatePassword({
 			variables: {
@@ -717,6 +720,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 				type: channel.type
 			}
 		});
+		socket?.emit("channelUpdate", {data: {password: channel.password, type: channel.type}, opt: 3, room: channel.id});
 	}
 
 	/**
@@ -763,17 +767,17 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 						owner: {
 							id: data.channel.owner.id,
 							name: data.channel.owner.username,
-							icon: data.channel.owner.avatar.filename
+							icon: data.channel.owner.avatar?.filename
 						},
 						admins: data.channel.admins.map((admin: { id: string, username: string, avatar: {filename: string}}) => ({
 							id: admin.id,
 							name: admin.username,
-							icon: admin.avatar.filename
+							icon: admin.avatar?.filename
 						})),
 						members: data.channel.members.map((member: { id: string, username: string, avatar: {filename: string}, status: string, blocked: { blockedUserId: string }[], blocking: { blockerId: string }[] }) => ({
 							id: member.id,
 							name: member.username,
-							icon: member.avatar.filename,
+							icon: member.avatar?.filename,
 							status: member.status,
 							blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
 							blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
@@ -781,12 +785,12 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 						banned: data.channel.banned.map((banned: { id: string, username: string, avatar: {filename: string} }) => ({
 							id: banned.id,
 							name: banned.username,
-							icon: banned.avatar.filename
+							icon: banned.avatar?.filename
 						})),
 						muted: data.channel.muted.map((muted: { id: string, username: string, avatar: {filename: string} }) => ({
 							id: muted.id,
 							name: muted.username,
-							icon: muted.avatar.filename
+							icon: muted.avatar?.filename
 						})),
 						messages: data.channel.messages.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
 							text: message.text,
@@ -997,13 +1001,13 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 				.map((member: { id: string, username: string, avatar: {filename: string}, status: string }) => ({
 				  id: member.id,
 				  name: member.username,
-				  icon: member.avatar.filename,
+				  icon: member.avatar?.filename,
 				  status: member.status,
 				})),
 				muted: data.ChannelById.muted.map((muted: { id: string, username: string, avatar: {filename: string} }) => ({
 				  id: muted.id,
 				  name: muted.username,
-				  icon: muted.avatar.filename
+				  icon: muted.avatar?.filename
 				})),
 				messages: data.ChannelById.messages
 				.map((message: { id: string, text: string, time: Date, sender: string , senderId: string}) => ({
@@ -1039,7 +1043,73 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			});
 			return updatedMembers;
 		});
+		// setChannels((prevChannels: any) => {
+		// 	const updatedChannels = prevChannels.map((channel: any) => {
+		// 		if (channel.id === id) {
+		// 			const updatedMembers = [...channel.members, members];
+		// 			return { ...channel, members: updatedMembers };
+		// 		}
+		// 		return channel;
+		// 	});
+		// 	return updatedChannels;
+		// });
 	};
+
+	const handleUnblock = (data: { blockerId: string, blockedUserId: string }) => {
+		if (member) {
+			console.log(" blocked : " + member.blocked[0] , " blocken " + member.blocken[0])
+			if (member.id === data.blockerId) {
+				member.blocked = member.blocked?.filter((blockedId: string) => blockedId !== data.blockedUserId);
+			}
+			if (member.id === data.blockedUserId) {
+				member.blocken = member.blocken?.filter((blockerId: string) => blockerId !== data.blockerId);
+			}
+			console.log("member ===> " + data.blockerId + " member ===> " + data.blockedUserId);
+			
+		}
+		// setMembers((prevMembers: any) => {
+		//   const updatedMembers = prevMembers.map((member: { id: string, blocked: string[], blocken: string[] }) => {
+		// 	if (member.id === data.blockerId) {
+		// 	  member.blocked = member.blocked?.filter((blockedId: string) => blockedId !== data.blockedUserId);
+		// 	}
+		// 	if (member.id === data.blockedUserId) {
+		// 	  member.blocken = member.blocken?.filter((blockerId: string) => blockerId !== data.blockerId);
+		// 	}
+		// 	return member;
+		//   });
+		//   return updatedMembers;
+		// });
+	  
+		// setChannels((prevChannels: any) => {
+		//   const updatedChannels = prevChannels.map((channel: any) => {
+		// 	if (channel.id === id) {
+		// 	  const updatedMembers = [...channel.members, members];
+		// 	  return { ...channel, members: updatedMembers };
+		// 	}
+		// 	return channel;
+		//   });
+		//   return updatedChannels;
+		// });
+		console.log("unblock event " + members )
+	};
+
+	const handleChannelUpdates = (payload: {data: any, opt: number, room: string}) => {
+		const {data, opt, room} = payload;
+		if (opt === 1 && room === id) {
+			const {title} = data;
+			channel.title = title;
+			console.log("title event update " + title);
+		} else if (opt === 2 && room === id) {
+			const {description} = data;
+			channel.description = description;
+
+		} else if (opt === 3 && room === id) {
+			const {password, type} = data;
+			channel.password = password;
+			channel.type = type;
+		}
+		setChannels((prevChannels: any) => [channel, ...prevChannels]);
+	}
 
 	// handle the messages read status once the user access the channel
 
@@ -1056,6 +1126,8 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		socket?.on('mutedRemoved', mutedListner);
 		socket?.on('dmCreated', handleSendDm);
 		socket?.on('userBlocked', handleBlock);
+		socket?.on('userUnblocked', handleUnblock);
+		socket?.on('updateChannel', handleChannelUpdates);
 		return () => {
 			socket?.off('messageSent', messageListner);
 			socket?.off('userAdded', memberListner);
@@ -1068,8 +1140,10 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			socket?.off('mutedRemoved', mutedListner);
 			socket?.off('dmCreated', handleSendDm);
 			socket?.off('userBlocked', handleBlock);
+			socket?.off('userUnblocked', handleUnblock);
+			socket?.off('updateChannel', handleChannelUpdates);
 		}
-	}, [memberListner, adminListner, bannedListner, mutedListner, messageListner, handleSendDm, handleBlock]);
+	}, [handleUnblock, handleChannelUpdates, memberListner, adminListner, bannedListner, mutedListner, messageListner, handleSendDm, handleBlock]);
 
 	useEffect(() => {
 		setLock(channel.type !== "PUBLIC");
@@ -1129,7 +1203,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	}, [socket]);
 
 	useEffect(() => {
-		console.log("hna : ", channel.messages);
+		// console.log("hna : ", channel.messages);
 		if (channel.messages) {
 			// loop on the last unread message and set the read status to true
 			const lastUnread = channel.messages.findIndex((message: { sender: string; }) => message.sender !== user.username);
@@ -1192,6 +1266,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 						setPasswordMismatch={setPasswordMismatch} 
 						password={password}
 						updateChannel={updateChannel}
+						socket={socket}
 						/>
 					<div className="wrapper py-2 pt-mb-2 pb-md-3">
 						<div className="w-full border-b border-white flex justify-between items-center pb-2 pb-md-2 pl-2 pl-md-4 pr-2 ">

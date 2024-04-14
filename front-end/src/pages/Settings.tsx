@@ -52,6 +52,7 @@ import Block from '../types/block-interface';
 import { useAuth } from '../provider/authProvider';
 import GameLoading from '../components/GameLoading';
 import Loading from '../components/Loading';
+import { Socket, io } from 'socket.io-client';
 
 const USER_DATA_QUERY = `
     query UserData {
@@ -175,6 +176,7 @@ function Settings() {
     const [blocked, setBlocked] = useState<Block[]>();
     const [isLoading, setLoading] = useState(true);
     const [userData, setUserData] = useState<User>();
+    const [socket, setSocket] = useState<Socket>();
 
     useEffect(() => {
         if (!token) return; // If token is not available, do nothing
@@ -207,6 +209,15 @@ function Settings() {
                 console.error('Error fetching friends:', error);
             });
     }, []);
+
+    useEffect(() => {
+        const newSocket = io('ws://localhost:3003/chat');
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+        };
+    }, [setSocket]);
 
     const blockedList = blocked?.map((b: Block) => ({
         b_id: b.id,
@@ -367,6 +378,8 @@ function Settings() {
     async function handleUnblock(id: string) {
         try {
             await unblockUser({ variables: { block_id: id } });
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            socket?.emit("unblockUser", {blockerId: user.id, blockedUserId: id});
             console.log("Username updated successfully!");
         } catch (error) {
             console.error("Error updating Username:", error.message);

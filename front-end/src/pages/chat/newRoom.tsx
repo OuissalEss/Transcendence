@@ -93,7 +93,7 @@ const NewRoom: React.FC<NewRoomProps>= ({
         members: data.createChannel.members.map((member: { id: string, username: string, avatar:{filename: string}, status: string, blocked: {blockedUserId: string;}[], blocking: {blockerId: string;}[]}) => ({
           id: member.id,
           name: member.username,
-          icon: member.avatar.filename,
+          icon: member.avatar?.filename,
           status: member.status,
           blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
           blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)

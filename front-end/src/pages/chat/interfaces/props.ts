@@ -65,7 +65,8 @@ export interface PasswordSettingsProps {
 	passwordMismatch: boolean;
 	setPasswordMismatch: React.Dispatch<React.SetStateAction<boolean>>;
 	password: string;
-	updateChannel: (channel: channelType) => Promise<void>;  
+	updateChannel: (channel: channelType, socket: Socket | undefined) => Promise<void>;
+	socket?: Socket | undefined;
 };
 
 export interface ChannelSettingsProps {
@@ -101,7 +102,7 @@ export interface ChannelSettingsProps {
 		name: string;
 		icon: string;
 	};
-	updateChannel: (channel: channelType) => Promise<void>;  
+	updateChannel: (channel: channelType, socket: Socket | undefined) => Promise<void>;  
 
 };
 

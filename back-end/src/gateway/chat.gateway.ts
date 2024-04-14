@@ -1,5 +1,6 @@
 import { Logger } from "@nestjs/common";
 import {SubscribeMessage, MessageBody, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
+import { Payload } from "@prisma/client/runtime/library";
 import { subscribe } from "diagnostics_channel";
 import { Server, Socket } from 'socket.io';
 import { BanService } from "src/services/ban.service";
@@ -253,6 +254,18 @@ export class ChatGateway {
         }
     }
 
+    @SubscribeMessage('unblockUser')
+    async handleUnblockUser(@MessageBody() data: { blockerId: string, blockedUserId: string}) {
+        try {
+            const { blockerId, blockedUserId } = data;
+            this.logger.log(`Client is unblocking user: ${blockedUserId}`);
+            // await this.block.unblockUser(blockerId, blockedUserId);
+            this.server.emit('userUnblocked', data);
+        } catch (e) {
+            this.logger.error(e);
+        }
+    }
+
     @SubscribeMessage('readMessage')
     async handleReadMessage(@MessageBody() data: { messageId: string, userId: string, roomId: string }) {
         try {
@@ -264,6 +277,37 @@ export class ChatGateway {
             this.logger.error(e);
         }
     }
+
+    @SubscribeMessage('channelUpdate')
+    async handleUpdateChannel(@MessageBody() payload: { data: any, opt: number, room: string }) {
+        try {
+            const { data, opt, room } = payload;
+            this.logger.error(`${data} ${opt} ${room} ${payload}`);
+            
+            switch (opt) {
+                case 1:
+                    const { title } = data;
+                    this.server.emit("updateChannel", {data: { title }, opt: 1, room});
+                    this.logger.log(`Room ${room}'s title is being updated`);
+                    break;
+                case 2:
+                    const { description } = data;
+                    this.server.emit("updateChannel", {data: { description }, opt: 2, room});
+                    this.logger.log(`Room ${room}'s description is being updated`);
+                    break;
+                case 3:
+                    const { password, type } = data;
+                    this.server.emit("updateChannel", {data: { password, type }, opt: 3, room});
+                    this.logger.log(`Room ${room}'s privacy is being updated`);
+                    break;
+                default:
+                    break;
+            }
+        } catch (e) {
+            this.logger.error(e);
+        }
+    }
+    
 
     @SubscribeMessage('unreadMessage')
     async handleUnreadMessage(@MessageBody() userId: string) {

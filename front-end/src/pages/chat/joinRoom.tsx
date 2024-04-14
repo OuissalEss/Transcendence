@@ -57,19 +57,19 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 					owner: {
 						id: channel.owner.id,
 						name: channel.owner.username,
-						icon: channel.owner.avatar.filename
+						icon: channel.owner?.avatar?.filename
 					},
 					admins: channel.admins
 						.map((admin: { id: string, username: string, avatar: { filename: string } }) => ({
 							id: admin.id,
 							name: admin.username,
-							icon: admin.avatar.filename
+							icon: admin.avatar?.filename
 						})),
 					members: channel.members
 						.map((member: { id: string, username: string, avatar: { filename: string }, status: string, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({
 							id: member.id,
 							name: member.username,
-							icon: member.avatar.filename,
+							icon: member.avatar?.filename,
 							status: member.status,
 							blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
 							blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
@@ -77,12 +77,12 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 					banned: channel.banned.map((banned: { id: string, username: string, avatar: { filename: string } }) => ({
 						id: banned.id,
 						name: banned.username,
-						icon: banned.avatar.filename
+						icon: banned.avatar?.filename
 					})),
 					muted: channel.muted.map((muted: { id: string, username: string, avatar: { filename: string } }) => ({
 						id: muted.id,
 						name: muted.username,
-						icon: muted.avatar.filename
+						icon: muted.avatar?.filename
 					})),
 					messages: channel.messages
 						.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
@@ -123,7 +123,7 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 			newChannel?.members.push({
 				id: user.id,
 				name: user.username,
-				icon: user.avatar.filename,
+				icon: user.avatar?.filename,
 				status: user.status,
 				blocked: [], // to handle later
 				blocken: [],

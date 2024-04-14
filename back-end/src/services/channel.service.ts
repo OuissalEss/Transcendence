@@ -62,7 +62,10 @@ export class ChannelService {
                 if (channelUser[i].type === UserType.OWNER)
                     ownerId = channelUser[i].userId;
             return await this.prisma.user.findFirst({
-                where: {id: ownerId}
+                where: {id: ownerId},
+                include: {
+                    avatar: true,
+                }
             });
         } catch (e) {
             this.logger.error(`Unable to get Channel Owner: ${e.message} cid: ${cid}`);
@@ -75,7 +78,10 @@ export class ChannelService {
         for (let i = 0; i < channelUser.length; i++)
             if (channelUser[i].type == UserType.ADMIN)
                 admins.push(await this.prisma.user.findUnique({
-                    where: {id: channelUser[i].userId}
+                    where: {id: channelUser[i].userId},
+                    include: {
+                        avatar: true,
+                    }
                 }));
         return admins;
     }
@@ -98,7 +104,10 @@ export class ChannelService {
         let users: User[] = [];
         for (let i = 0; i < channelUser.length; i++)
             users.push(await this.prisma.user.findUnique({
-                where: {id: channelUser[i].userId}
+                where: {id: channelUser[i].userId},
+                include: {
+                    avatar: true,
+                }
             }));
         return users;
     }

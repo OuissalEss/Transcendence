@@ -152,6 +152,8 @@ export class Channel {
   @IsDate({ message: 'Channel updated at must be a date' })
   @Field(() => Date, { description: 'Date the channel was updated' })
   updatedAt: Date;
+
+  
 }
 
 

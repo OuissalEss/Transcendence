@@ -49,17 +49,17 @@ export const CREATE_CHANNEL = gql`
       owner {
         id
         username
-            avatar{filename}
+        avatar{filename}
       }
       admins {
         id
         username
-            avatar{filename}
+        avatar{filename}
       }
       members {
         id
         username
-            avatar{filename}
+        avatar{filename}
         status
         blocked {
           blockedUserId
@@ -71,12 +71,12 @@ export const CREATE_CHANNEL = gql`
       banned {
         id
         username
-            avatar{filename}
+        avatar{filename}
       }
       muted {
         id
         username
-            avatar{filename}
+        avatar{filename}
       }
       messages {
         id

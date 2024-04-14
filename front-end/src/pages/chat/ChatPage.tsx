@@ -4,20 +4,11 @@ import './chat.css';
 import { HiUserGroup } from "react-icons/hi";
 import { useEffect, useState } from 'react';
 import NewRoom from './newRoom';
-import JoinRoom from './joinRomm';
+import JoinRoom from './joinRoom';
 import { channel, channelType } from './interfaces/props';
 import { useQuery } from '@apollo/client';
 import { ALL_CHANNELS } from '../../graphql/queries';
 import React from 'react';
-
-// const MemoizedDiscussions = React.memo(({ setDisplay, setIndex, channels, setChannels } : {
-//     setDisplay: React.Dispatch<React.SetStateAction<string>>,
-//     setIndex: React.Dispatch<React.SetStateAction<number>>,
-//     channels: channelType[],
-//     setChannels: React.Dispatch<React.SetStateAction<channelType[]>>
-// }) => (
-//   <Discussions setDisplay={setDisplay} setIndex={setIndex} channels={channels} setChannels={setChannels} />
-// ));
 
 function NoChannelSelected() {
   return (
@@ -61,7 +52,7 @@ function ChatPageContainer() {
             .map((admin: { id: string, username: string, avatar: { filename: string } }) => ({
               id: admin.id,
               name: admin.username,
-              icon: admin.avatar.filename
+              icon: admin.avatar?.filename
             })),
           members: channel.members
             .map((member: { id: string, username: string, avatar: { filename: string }, status: string, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({

@@ -1,17 +1,5 @@
 import { gql } from "@apollo/client";
 
-export const SIGN_IN = gql`
-  query SignIn($email: String!, $username: String!) {
-    SignIn(email: $email, username: $username) {
-      id
-      email
-      username
-	    avatar{filename}
-      xp
-    }
-  }
-`;
-
 export const ALL_CHANNELS = gql`
   query AllChannels {
     AllChannels {
