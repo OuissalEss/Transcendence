@@ -653,7 +653,7 @@ const Dropdown = ({
 					Visite Profile
 				</a>
 			</li>
-			{(owner.name === user.username || admins.some(admin => admin.name === user.username)) && (
+			{(owner.id === user.id || (admins.some(admin => admin.name === user.username)) && memeberId !== owner.id) && (
 				<><li>
 					<button
 						id="doubleDropdownButton"
@@ -689,16 +689,18 @@ const Dropdown = ({
 						</ul>
 					</div>
 				</li>
-				<li>
+
+					<li>
 						<a className="block text-white border border-transparent hover:border-white" onClick={() => socket?.emit('banUser', { room: channel.id, user: memeberId })}>
 							Ban
 						</a>
-					</li><li>
+					</li>
+					<li>
 						<a className="block text-white border border-transparent hover:border-white" onClick={() => socket?.emit('kick', { room: channel.id, user: memeberId})}>
 							Kick
 						</a>
 					</li>
-					{owner.name === user.username && (
+					{owner.id === user.id && (
 						<li>
 							{admins.some((admin) => admin.id === memeberId) ? (
 								<a
@@ -753,6 +755,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const [muteList, setMuteList] = useState<{ id: string, name: string, icon: string }[]>(channel.muted || []);
 	const [modList, setModList] = useState<{ id: string, name: string, icon: string }[]>(channel.admins	|| []);
 	const [owner, setOwner] = useState<{ id: string, name: string, icon: string }>(channel.owner || {});
+	let channelUpdateNotif = '';
 
 	const updateChannel = async (channel: channelType, socket: Socket | undefined) => {
 	
@@ -777,9 +780,12 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	 * add a function to user service who takes uid and checks for 
 	 */
 	
-	let member: any = undefined;
-	if (channel.type === "DM")
+	let member: {id: string, name: string, icon: string, status: string, blocked: string[], blocken: string[]} | undefined = undefined
+	if (channel.type === "DM") {
+		// const find = channel.members.find((member: { name: string; }) => member.name !== user.username);
 		member = channel.members.find((member: { name: string; }) => member.name !== user.username);
+	}
+		
 	const memberListner = (
 		data: {
 			id: string;
@@ -911,6 +917,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 				});
 				return updatedChannels;
 			});
+			channelUpdateNotif="test test test";
 		}
 	}
 
@@ -1019,8 +1026,8 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			});
 			// to mark the message as seen , check if the user is the receiver is in the chat (display = chat) and the dm is opened id = room
 			updatedChannels.sort((a: any, b: any) => {
-				const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : new Date(0); // replace 0 with the last updated time
-				const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : new Date(0);
+				const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : a.updatedAt; // replace 0 with the last updated time
+				const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : b.updatedAt;
 				return new Date(msg2).getTime() - new Date(msg1).getTime();
 			  })
 
@@ -1080,12 +1087,11 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const handleBlock = (data: { blockerId: string, blockedUserId: string }) => {
 		if (member) {
 			if (member.id === data.blockerId) {
-				member.blocken = member.blocken?.push(data.blockerId)
+				member.blocken = member.blocken ? [...member.blocken, data.blockerId] : [data.blockerId];
 			}
 			if (member.id === data.blockedUserId) {
-				member.blocked = member.blocked?.push(data.blockedUserId);
+				member.blocked = member.blocked ? [...member.blocked, data.blockedUserId] : [data.blockedUserId];
 			}
-			
 		}
 		setMembers((prevMembers: any) => {
 			const updatedMembers = prevMembers.map((member: { id: string, blocked: string[], blocken: string[] }) => {
@@ -1225,8 +1231,8 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
         if (inputMessage.trim() !== '' && socket) {
             socket.emit('sendMessage', { room: channel.id, text: inputMessage, sender: user.id});
             setInputMessage('');
-			if (isTyping)
-				socket.emit('stopTyping', channel.id);
+			setIsTyping(false);
+			socket.emit('stopTyping', channel.id);
 			scrollToBottom()
         }
     };
@@ -1361,7 +1367,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 											</li>
 										</>
 									)}
-									{channel.type === "DM" && !(member?.blocken?.includes(user.id) || member?.blocked?.includes(user.id)) && (
+									{channel.type === "DM" && !(member?.blocken.includes(user.id) || member?.blocked.includes(user.id)) && (
 										<>
 											{channel.muted?.find((mute: any) => mute.id === member?.id)  ? (
 												<li
@@ -1475,6 +1481,11 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 									</div>
 									</li>
 								))}
+								{channelUpdateNotif !== '' && (
+									<>
+										<p>{channelUpdateNotif}</p>
+									</>
+								)}
 								{isTyping && (
 									<div className="bubble bubble--received">
 										<Typing />
@@ -1517,7 +1528,6 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 												onKeyDown={(e) => {
 													if (e.key === "Enter") {
 														handleSendMessage();
-														setIsTyping(false);
 												}}}
 											/>
 											<button

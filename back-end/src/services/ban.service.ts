@@ -94,15 +94,12 @@ export class BanService {
 	
     async banUser(cid: string, uid: string): Promise<User> {
         // check permissions
-        let ban = await this.prisma.ban.findFirst({where:{userId: uid, channelId: cid}})
-        if (ban) {
-            ban = await this.prisma.ban.create({
+        const ban = await this.prisma.ban.create({
                 data: {
                     userId: uid,
                     channelId: cid,
                 },
             });
-        }
         const user =this.channelService.removeMember(cid, uid);
         return await this.prisma.user.update({
             where: {id: uid},

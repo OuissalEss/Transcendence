@@ -141,8 +141,8 @@ const Discussions: React.FC<DiscussionsProps> = ({
 				return channel;
 			});
 			updatedChannels.sort((a: any, b: any) => {
-				const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : new Date(0); // replace 0 with the last updated time
-				const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : new Date(0);
+				const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : a.updatedAt; // replace 0 with the last updated time
+				const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : b.updatedAt;
 				return new Date(msg2).getTime() - new Date(msg1).getTime();
 			  })
 			return updatedChannels;
@@ -229,13 +229,13 @@ const Discussions: React.FC<DiscussionsProps> = ({
 		};
 	}, [socket]);
 
-	// const isBlocked = (discussion: channelType, uid: string) => {
-	// 	const temp = discussion.members.find((m: any) => {
-	// 		if(m.blocken?.includes(uid) || m.blocked?.includes(uid))
-	// 			return m;
-	// 	})
-	// 	return temp ? true : false;
-	// }
+	const isBlocked = (discussion: channelType, uid: string) => {
+		const temp = discussion.members.find((m: any) => {
+			if(m.blocken?.includes(uid) || m.blocked?.includes(uid))
+				return m;
+		})
+		return temp ? true : false;
+	}
 
     return (
         <div className="discussion-container z-10">
@@ -280,13 +280,15 @@ const Discussions: React.FC<DiscussionsProps> = ({
 							<p className={(!discussion.messages.length || (discussion.messages[discussion.messages.length - 1].read === false && discussion.messages[discussion.messages.length - 1].senderId !== user.id) ) ? "unread" : ""}>
 								{ isTyping && discussion.id === room ? (
 									"Typing..."
-								) : discussion.messages.length > 0 ? (
+								) : discussion.messages.length > 0 && isBlocked(discussion, user.id) ? (
+									"hidden msg"
+								) : discussion.messages.length > 0 && !isBlocked(discussion, user.id) ? (
 									`${discussion.messages[discussion.messages.length - 1].sender}: ${discussion.messages[discussion.messages.length - 1].text.length > 30 ? discussion.messages[discussion.messages.length - 1].text.slice(0, 30) + "..." : discussion.messages[discussion.messages.length - 1].text}`
 								) : (
 									discussion.type === 'DM' ? "Say hi to your friend" : "Say hi to your friends"
 								)}
 							</p>
-							{discussion.messages.length > 0 && unreadMessages(discussion.messages) > 0 && (
+							{discussion.messages.length > 0 && unreadMessages(discussion.messages) > 0 && isBlocked(discussion, user.id) && (
 								<b>{unreadMessages(discussion.messages)}</b>
 							)}
 						</div>

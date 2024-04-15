@@ -8,7 +8,6 @@ import JoinRoom from './joinRoom';
 import { channel, channelType } from './interfaces/props';
 import { useQuery } from '@apollo/client';
 import { ALL_CHANNELS } from '../../graphql/queries';
-import React from 'react';
 
 function NoChannelSelected() {
   return (
@@ -85,8 +84,8 @@ function ChatPageContainer() {
             })).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
         }))
       temp.sort((a: any, b: any) => {
-        const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : new Date(0);
-        const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : new Date(0);
+        const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : a.updatedAt;
+        const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : b.updatedAt;
         return new Date(msg2).getTime() - new Date(msg1).getTime();
       })
       console.log("USER: ", user);
