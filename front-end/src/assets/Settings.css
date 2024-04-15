@@ -37,8 +37,7 @@
   height: 50px; 
   background-color: rgba(61, 55, 133, 0.34);
   border-radius: 20px;
-  cursor: pointer;
-
+  cursor: default;
 }
 
 .CharacterTextSettings {

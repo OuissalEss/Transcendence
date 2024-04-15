@@ -158,6 +158,7 @@ const Notifications = () => {
                     className="bellImg"
                     src="/Icons/Bell.png"
                     alt="search"
+                    referrerPolicy="no-referrer"
                 />
                 <div className={showNotification ? "cercleNotif visible" : "cercleNotif"}></div>
             </div>
@@ -181,7 +182,7 @@ const Notifications = () => {
                     ) : (
                         <div className="noNotificationsContainer">
                             <p className="noNotificationsMessage">No notifications yet</p>
-                            <img className="noNotificationsImage" src="/Icons/noNotifs.png" alt="No notifications" />
+                            <img className="noNotificationsImage" src="/Icons/noNotifs.png" alt="No notifications" referrerPolicy="no-referrer"/>
                         </div>
                     )}
                 </div>

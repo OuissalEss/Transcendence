@@ -131,7 +131,7 @@ const TwoFactorAuthentication = ({ onClose }: {onClose: any}) => {
                                 <div className="codeValue">{secret}</div>
                                 <div className="icon" onClick={copyCodeToClipboard}>
                                     <span title="Copy">
-                                        <img src={copyIcon} alt="Copy Icon" />
+                                        <img src={copyIcon} alt="Copy Icon" referrerPolicy="no-referrer"/>
                                     </span>
                                 </div>
                             </div>

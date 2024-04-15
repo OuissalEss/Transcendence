@@ -4,8 +4,10 @@ import { IoIosAddCircleOutline, IoIosAddCircle } from "react-icons/io";
 import { MdOutlineAddModerator, MdOutlineCheckCircle, MdOutlineCancel, MdAddModerator } from "react-icons/md";
 import { channelType, NewRoomProps } from "./interfaces/props";
 import { useMutation } from '@apollo/client';
-import { CREATE_CHANNEL, ADD_MEMBER, ADD_ADMIN } from "../../graphql/mutations";
+import { CREATE_CHANNEL, ADD_MEMBER, ADD_ADMIN, UPDATE_CHANNEL_PROFILE_IMAGE } from "../../graphql/mutations";
 import bcrypt from 'bcryptjs';
+import { Cloudinary } from "@cloudinary/url-gen";
+import ImageCompressor from 'image-compressor.js';
 
 
 /**
@@ -13,12 +15,14 @@ import bcrypt from 'bcryptjs';
  */
 
 const NewRoom: React.FC<NewRoomProps>= ({
+	channel,
   setDisplay,
   setChannels,
 }) => {
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [title, setTitle] = useState('');
+  const [pfp, setpfp] = useState('');
   const [description, setDescription] = useState('');
   const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [addModerator, setAddModerator] = useState<string[]>([]);
@@ -58,7 +62,6 @@ const NewRoom: React.FC<NewRoomProps>= ({
   const handleCreateChannel = async () => {
     if (!title) return;
     try {
-      console.log("hhhh" + JSON.parse(localStorage.getItem('user') || '{}'));
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(password, salt);
       const createChannelInput = {
@@ -66,12 +69,13 @@ const NewRoom: React.FC<NewRoomProps>= ({
         description: description || null,
         type: (lock ? "PUBLIC" : (password != '' ? "PROTECTED" : "PRIVATE")),
         password: hashedPassword || null,
-        profileImage: document.getElementById('output')?.getAttribute('src') || '/Chat/chatBanner.png',
+        profileImage:  pfp || '/Chat/chatBanner.png',
         ownerId: JSON.parse(localStorage.getItem('user') || '{}').id,
       };
       const { data } = await createChannelMutation({
         variables: { createChannelInput }
       });
+      console.log(data);
       let channel: channelType = {
         id: data.createChannel.id,
         title: data.createChannel.title,
@@ -164,8 +168,8 @@ const NewRoom: React.FC<NewRoomProps>= ({
 
       channel.admins = admins;
       channel.members = members;
-      if (channel.icon === null)
-        channel.icon = '/Chat/chatBanner.png';
+      // if (channel.icon === null)
+      //   channel.icon = '/Chat/chatBanner.png';
       setChannels((prevChannels: any) => [channel, ...prevChannels]);
       setPassword('');
       setTitle('');
@@ -173,17 +177,62 @@ const NewRoom: React.FC<NewRoomProps>= ({
       setPassword2('');
       setAddMember([]);
       setAddModerator([]);
+      setpfp('');
     } catch (e) {
       console.log("Error: ", e);
     }
   };
 
-  function loadFile(event: ChangeEvent<HTMLInputElement>): void {
-		const image = document.getElementById('output') as HTMLImageElement;
-		if (image && event.target.files) {
-			image.src = URL.createObjectURL(event.target.files[0]);
-		}
-	}
+  const cld = new Cloudinary({
+    cloud: {
+        cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+    }
+});
+
+const uploadAvatar = async (selectedFile: any) => {
+    const imageCompressor = new ImageCompressor(); // Instantiate ImageCompressor
+    const compressedFile = await imageCompressor.compress(selectedFile, { // Use compress method
+        maxWidth: 500,
+        maxHeight: 500,
+        quality: 0.5, // Adjust quality as needed
+    });
+    const data = new FormData();
+    data.append("file", compressedFile);
+    data.append(
+        "upload_preset",
+        import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+    );
+    data.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+    data.append("folder", "Cloudinary-React");
+
+
+    // Specify the image quality here (between 0 to 100)
+    // data.append("quality", '10');
+    try {
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: "POST",
+                body: data,
+            }
+        );
+        const res = await response.json();
+        // setUploadUrl(res.public_id);
+        return (cld.image(res.public_id).toURL());
+    } catch (error) {
+        console.log("ERROR");
+        return '';
+    }
+};
+
+async function loadFile(event: ChangeEvent<HTMLInputElement>) {
+  const image = document.getElementById('output') as HTMLImageElement;
+  if (image && event.target.files) {
+    image.src = URL.createObjectURL(event.target.files[0]);
+    const uploadedImg = await uploadAvatar(event.target.files[0]);
+    setpfp(uploadedImg);
+  }
+}
 
   
   return (
@@ -197,7 +246,7 @@ const NewRoom: React.FC<NewRoomProps>= ({
                   <span>Change Image</span>
                 </label>
                 <input id="file" type="file" onChange={(event) => loadFile(event)}/>
-                <img src="/Chat/chatBanner.png" id="output" width="200" />
+                <img src="/Chat/chatBanner.png" id="output" width="200" referrerPolicy="no-referrer"/>
                 <div className="lock-icon">
                   <button onClick={toggleLock} className="p-2 rounded-full bg-pink-200 hover:bg-pink-300 transition duration-300">
                     {!lock ? <CiLock className="text-pink-500" /> : <CiUnlock className="text-pink-600" />}

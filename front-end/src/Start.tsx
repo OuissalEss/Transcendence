@@ -194,7 +194,7 @@ function Start() {
 
   return (
     <div className="Start">
-        <img src={LogoImage} className="LogoImageStart" alt="LogoImage" />
+        <img src={LogoImage} className="LogoImageStart" alt="LogoImage" referrerPolicy="no-referrer" />
       <header className="Start-header mt-[50px]">
         <div className="Texto">
           <p className="Line">Welcome, Champion!</p>
@@ -220,10 +220,10 @@ function Start() {
             <p className="CharacterNameStart">{currentCharacter.name}</p>
           </div>
 
-          <img src={currentCharacter.image} className={`CharacterImageStart ${isCharacterSelected ? 'Selected' : ''}`} alt={currentCharacter.name} />
-          <img src={currentCharacter.infos} className="CharacterInfosStart" alt={`${currentCharacter.name} Infos`} />
-          <img src={ChevronLeft} className="ChevronLeftStart" alt="ChevronLeftStart" onClick={handleLeftChevronClick} />
-          <img src={ChevronRight} className="ChevronRightStart" alt="ChevronRightStart" onClick={handleRightChevronClick} />
+          <img src={currentCharacter.image} className={`CharacterImageStart ${isCharacterSelected ? 'Selected' : ''}`} alt={currentCharacter.name} referrerPolicy="no-referrer"/>
+          <img src={currentCharacter.infos} className="CharacterInfosStart" alt={`${currentCharacter.name} Infos`} referrerPolicy="no-referrer"/>
+          <img src={ChevronLeft} className="ChevronLeftStart" alt="ChevronLeftStart" onClick={handleLeftChevronClick} referrerPolicy="no-referrer"/>
+          <img src={ChevronRight} className="ChevronRightStart" alt="ChevronRightStart" onClick={handleRightChevronClick} referrerPolicy="no-referrer"/>
         </div>
       </header>
       {isShowAlert &&

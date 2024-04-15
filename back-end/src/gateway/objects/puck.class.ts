@@ -96,6 +96,8 @@ export class Puck {
             this.y + this.r > p.y - p.h / 2 &&
             this.x - this.r < p.x + p.w / 2) {
             if (this.x > p.x) {
+                this.xspeed = Math.abs(this.xspeed); // Ensure puck moves to the right after collision
+                this.x = p.x + p.w / 2 + this.r;
                 let diff = this.y - (p.y - p.h / 2);
                 let rad = this.radians(45);
                 let angle = this.map(diff, 0, p.h, -rad, rad);
@@ -165,6 +167,8 @@ export class Puck {
             this.x + this.r > p.x - p.w / 2) {
 
             if (this.x < p.x) {
+                this.xspeed = -Math.abs(this.xspeed);
+                this.x = p.x - p.w / 2 - this.r;
                 let diff = this.y - (p.y - p.h / 2);
                 let angle = this.map(diff, 0, p.h, this.radians(225), this.radians(135));
 

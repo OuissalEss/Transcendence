@@ -207,9 +207,9 @@ export default function Dashboard() {
               <h1>Character</h1>
               <div className="CharacterBar">
                   <p>{myCharacter?.name}</p>
-                  <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" />
-                  <img src={myCharacter?.Right} className="DashRight" alt="DashRight" />
-                  <img src={myCharacter?.infos} className="CharacterInfos" alt="CharacterInfos" />
+                  <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" referrerPolicy="no-referrer"/>
+                  <img src={myCharacter?.Right} className="DashRight" alt="DashRight" referrerPolicy="no-referrer"/>
+                  <img src={myCharacter?.infos} className="CharacterInfos" alt="CharacterInfos" referrerPolicy="no-referrer"/>
               </div>
             </div>
 
@@ -225,7 +225,7 @@ export default function Dashboard() {
                     <h3>Play now</h3>
                   </div>
                 </Link>
-                <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" />
+                <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" referrerPolicy="no-referrer"/>
 
               </div>
               <div className="GameModeBar">
@@ -236,7 +236,7 @@ export default function Dashboard() {
                     <h3>Play now</h3>
                   </div>
                 </Link>
-                <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" />
+                <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" referrerPolicy="no-referrer"/>
               </div>
               <div className="GameModeBar">
                 <h1>Robot</h1>
@@ -246,7 +246,7 @@ export default function Dashboard() {
                     <h3>Play now</h3>
                   </div>
                 </Link>
-                <img src={Robot} alt="Robot" className="RobotPic" />
+                <img src={Robot} alt="Robot" className="RobotPic" referrerPolicy="no-referrer"/>
               </div>
               
           </div>
@@ -267,11 +267,13 @@ export default function Dashboard() {
                       src={player.image}
                       alt='Top'
                       className='Top'
+                      referrerPolicy="no-referrer"
                     />
                       <img
                         src={player.leaderboard}
                         className='Leaderboard'
                         alt='Leaderboard'
+                        referrerPolicy="no-referrer"
                       />
                   </div>
                 </Link>

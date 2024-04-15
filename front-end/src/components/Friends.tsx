@@ -173,11 +173,15 @@ const Friends = () => {
                 console.error('Error fetching friends:', error);
             });
         }
-        if (socket == undefined) return;
-        socket.on('RequestAccepted', ({}) => {
+        // if (socket == undefined) return;
+        socket?.on('RequestAccepted', ({}) => {
             refetch();
         })
-        socket.on('FriendRemoved', () => {
+        socket?.on('FriendRemoved', () => {
+            refetch();
+        })
+        socket?.on('Disconnected', () => {
+            console.log("HEEEEREEEE");
             refetch();
         })
     }, [socket]);
@@ -190,7 +194,7 @@ const Friends = () => {
                     <div className="friends_top">
                         <Link className='' to='/myprofile' >
                             <span className="my-pic" title='My Profile'>
-                                <img className="friend-img" src={userData?.avatar?.filename} alt={""} />
+                                <img className="friend-img" src={userData?.avatar?.filename} alt={""} referrerPolicy="no-referrer"/>
                             </span>
                         </Link>
                     </div>
@@ -202,7 +206,7 @@ const Friends = () => {
                                         <div className="relative">
                                             <div className="friend-icon">
                                                 <span >
-                                                    <img className={`friend-img ${status}`} src={image} alt={""} />
+                                                    <img className={`friend-img ${status}`} src={image} alt={""} referrerPolicy="no-referrer"/>
                                                 </span>
                                             </div>
                                             <div className="friend-name" title={username}>

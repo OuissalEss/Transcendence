@@ -131,6 +131,7 @@ const GameEnded = ({ gameMode, gameData }: { gameMode: any, gameData: FinishedGa
                                 className="player-img"
                                 src={leftPlayer.image}
                                 alt=""
+                                referrerPolicy="no-referrer"
                             />
                         </span>
                         <span className="player-name">
@@ -151,6 +152,7 @@ const GameEnded = ({ gameMode, gameData }: { gameMode: any, gameData: FinishedGa
                                 className="player-img"
                                 src={rightPlayer.image}
                                 alt=""
+                                referrerPolicy="no-referrer"
                             />
                         </span>
                         <span className="player-name">

@@ -50,6 +50,13 @@
   cursor: pointer;
 }
 
+.AddFriend.r{
+  top: 60px;
+}
+.AddFriend.s{
+  top: 120px;
+}
+
 .LB {
   position: absolute;
   top: -10px;

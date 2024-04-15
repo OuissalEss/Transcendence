@@ -8,6 +8,7 @@ import Start from "../Start.tsx";
 import React from "react";
 import Sidebar from "../components/Sidebar.tsx";
 import Friends from "../components/Friends.tsx";
+import { useSocket } from "../App.tsx";
 
 
 import '../App.css'
@@ -22,6 +23,7 @@ export interface Payload {
 }
 
 export const ProtectedRoute = () => {
+    const { socket } = useSocket();
 	const { token }: { token: string | undefined } = useAuth();
 	const navigate = useNavigate();
 
@@ -36,6 +38,9 @@ export const ProtectedRoute = () => {
 	if (!token) {
 		// If not authenticated, redirect to the login page
 		return <Navigate to="/" />;
+	}
+	else {
+		socket?.emit("friendDisconnected");
 	}
 
 	const decodedToken: Payload = jwtDecode(token);

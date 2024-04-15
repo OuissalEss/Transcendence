@@ -19,6 +19,7 @@ export default function Login() {
                         className="sidebar__logo"
                         src={Logo}
                         alt="logo"
+                        referrerPolicy="no-referrer"
                     />
                 </span>
             </div>
@@ -31,6 +32,7 @@ export default function Login() {
                             className="right-character-login"
                                 src={Nova}
                                 alt=""
+                                referrerPolicy="no-referrer"
                             />
                         </span>
                     </div>
@@ -66,6 +68,7 @@ export default function Login() {
                                         className="sidebar__logo inline w-5 h-5 mr-2 ml-2"
                                         src={google_logo}
                                         alt="logo"
+                                        referrerPolicy="no-referrer"
                                     />
                                 </Link>
                             </div>
@@ -77,6 +80,7 @@ export default function Login() {
                                     <img
                                         src={Pixie}
                                         alt=""
+                                        referrerPolicy="no-referrer"
                                     />
                                 </span>
                             </div>
@@ -90,6 +94,7 @@ export default function Login() {
                             className="left-character-login"
                                 src={Aegon}
                                 alt=""
+                                referrerPolicy="no-referrer"
                             />
                         </span>
                     </div>

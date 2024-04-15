@@ -306,22 +306,22 @@ export class ChannelService {
                 },
                 include: channelIncludes,
             });
+            let ch = undefined;
             console.log(1)
             if (createChannelInput.description)
-                await this.updateChannelDescription(channel.id, createChannelInput.description);
+                ch = await this.updateChannelDescription(channel.id, createChannelInput.description);
             if (createChannelInput.profileImage)
-                await this.updateChannelProfileImage(channel.id, createChannelInput.profileImage);
+                ch = await this.updateChannelProfileImage(channel.id, createChannelInput.profileImage);
             if (createChannelInput.password)
-                await this.updateChannelPassword(channel.id, createChannelInput.password);
+                ch = await this.updateChannelPassword(channel.id, createChannelInput.password);
             if (createChannelInput.ownerId) {
-                console.log(0.5)
                 await this.channelUserService.createChannelUser({
                     userId: createChannelInput.ownerId,
                     channelId: channel.id, type: (createChannelInput.type === 'DM')? UserType.USER : UserType.OWNER,
                 });
                 console.log(2)
             }
-            return channel;
+            return !ch ? channel : ch;
         } catch (e) {
             this.logger.error(e.message);
         }
@@ -440,8 +440,11 @@ export class ChannelService {
             if (!channelUser)
                 throw new ForbiddenException("User is not in channel");
             await this.channelUserService.deleteChannelUser(channelUser.id);
-            
-
+            const members = await this.channelUserService.getChannelUserByChannelId(cid);
+            this.logger.error(members);
+            if (!members.length) {
+                await this.deleteChannel(cid);
+            }
             return await this.prisma.user.findUnique({
                 where: {id: uid}
             });

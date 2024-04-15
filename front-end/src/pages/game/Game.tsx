@@ -36,6 +36,7 @@ export default function Game() {
                                 className="mode-char"
                                 src="/Characters/Aurora/GameR.png"
                                 alt="character"
+                                referrerPolicy="no-referrer"
                             />
                         </div>
 
@@ -55,6 +56,7 @@ export default function Game() {
                                 className="mode-char"
                                 src="/Characters/Pixie/GameR2.png"
                                 alt="character"
+                                referrerPolicy="no-referrer"
                             />
                         </div>
 
@@ -74,6 +76,7 @@ export default function Game() {
                                 className="mode-char"
                                 src="/Characters/Lumina/GameL.png"
                                 alt="character"
+                                referrerPolicy="no-referrer"
                             />
                         </div>
 
@@ -93,6 +96,7 @@ export default function Game() {
                                 className="mode-char"
                                 src="/Characters/Aegon/GameR.png"
                                 alt="character"
+                                referrerPolicy="no-referrer"
                             />
                         </div>
 

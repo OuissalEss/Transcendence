@@ -300,9 +300,9 @@ function Profile() {
         <div className="ProfileTitle">
           <h1>Profile</h1>
           <div className="ProfileBar">
-              <img src={userData?.avatar.filename} className="AvatarPro" alt="Avatar" />
+              <img src={userData?.avatar.filename} className="AvatarPro" alt="Avatar" referrerPolicy="no-referrer"/>
               <div className="ProfileName"><p>{userData?.username}</p></div>
-              <img src={myLeaderboard} className="LeaderboardPro" alt="Leaderboard" />
+              <img src={myLeaderboard} className="LeaderboardPro" alt="Leaderboard" referrerPolicy="no-referrer"/>
               <div className="LevelTube">
                   <div className="LevelMarker">Lv.{currentLevel}</div>
                   <div className="Tube">
@@ -340,9 +340,9 @@ function Profile() {
                 return (
                   <div key={index}>
                       <li>
-                          <img src={image} className="FriendAvatar" alt="Friend1" />
+                          <img src={image} className="FriendAvatar" alt="Friend1" referrerPolicy="no-referrer"/>
                           <span className="FriendName">{username}</span>
-                          <Link to={`/profiles?id=${id}`}><img src={CircleSettings} className="CircleSettings" alt="Settings" /></Link>
+                          <Link to={`/profiles?id=${id}`}><img src={CircleSettings} className="CircleSettings" alt="Settings" referrerPolicy="no-referrer"/></Link>
                       </li>
                       <hr className="Separator" />
                   </div>
@@ -361,14 +361,14 @@ function Profile() {
 
 
                 <div className="ChevLeftC" onClick={handlePrevAchievement}>
-                  <img src={ChevLeft} alt="Left Chevron" className="ChevLeft" />
+                  <img src={ChevLeft} alt="Left Chevron" className="ChevLeft" referrerPolicy="no-referrer"/>
                 </div>
                 <div className="AchievementContainer">
-                    <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" />
+                    <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" referrerPolicy="no-referrer"/>
                     <span>{myAchievements[currentAchievementIndex]?.title}</span>
                 </div>
                 <div className="ChevRightC" onClick={handleNextAchievement}>
-                  <img src={ChevRight} alt="Right Chevron" className="ChevRight" />
+                  <img src={ChevRight} alt="Right Chevron" className="ChevRight" referrerPolicy="no-referrer"/>
                 </div>
 
 
@@ -385,12 +385,12 @@ function Profile() {
                 return (
                   <li key={index} className="play">
                     <div className="PlayerLeft">
-                      <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} />
+                      <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} referrerPolicy="no-referrer"/>
                       <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
                     </div>
                     <p className="ScoreP">{match.host_score_m}&nbsp;&nbsp;-&nbsp;&nbsp;{match.guest_score_m}</p>
                     <div className="PlayerRight">
-                      <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} />
+                      <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} referrerPolicy="no-referrer"/>
                       <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
                     </div>
                   </li>

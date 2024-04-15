@@ -13,6 +13,7 @@ const AlreadyInGame = () => {
             <img 
                 src='/MickeyMouse.png'
                 alt=''
+                referrerPolicy="no-referrer"
             />
             
         </div>

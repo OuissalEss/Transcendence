@@ -11,7 +11,7 @@ export default function GetStarted() {
         <div className="flex home-page">
             <div className='logo-home'>
                 <span title="Logo">
-                    <img className="sidebar__logo" src={Logo} alt="logo" />
+                    <img className="sidebar__logo" src={Logo} alt="logo" referrerPolicy="no-referrer"/>
                 </span>
             </div>
 
@@ -20,7 +20,7 @@ export default function GetStarted() {
                     <div className='col-span-1 left-side'>
                         <div className="spin-smash">
                             <span title="Character">
-                                <img className="spin-img" src={SpinSmash} alt="" />
+                                <img className="spin-img" src={SpinSmash} alt="" referrerPolicy="no-referrer"/>
                             </span>
                         </div>
 
@@ -40,7 +40,7 @@ export default function GetStarted() {
                         <div className='flex mc'>
                             <div className='right-side'>
                                 <span title="Character">
-                                    <img src={HomeBackground} alt="" />
+                                    <img src={HomeBackground} alt="" referrerPolicy="no-referrer"/>
                                 </span>
                             </div>
                         </div>

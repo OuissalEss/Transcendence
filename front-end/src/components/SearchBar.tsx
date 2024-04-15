@@ -77,6 +77,7 @@ const SearchBar = () => {
                     src="/Icons/Search.png"
                     alt="search"
                     style={{ width: '100%', height: "auto" }}
+                    referrerPolicy="no-referrer"
                 />
             </div>
 
@@ -98,7 +99,7 @@ const SearchBar = () => {
                         {searchResults.map((user: User) => (
                             <li key={user.id}>
                                 <Link to={`/profiles?id=${user.id}`}>
-                                    <img src={user.avatar.filename} alt="search" />
+                                    <img src={user.avatar.filename} alt="search" referrerPolicy="no-referrer"/>
                                     <span> {user.username}</span>
                                 </Link>
                             </li>

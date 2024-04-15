@@ -256,11 +256,11 @@ const Discussions: React.FC<DiscussionsProps> = ({
 					{discussion.type === 'DM' ? (
 						discussion.members.map((member) => (
 							member.name !== user.username && (
-								<img key={member.id} className="w-full h-full object-cover" src={member.icon} alt={member.name} />
+								<img key={member.id} className="w-full h-full object-cover" src={member.icon} alt={member.name} referrerPolicy="no-referrer"/>
 							)
 						))
 					) : (
-						<img className="w-full h-full object-cover" src={discussion.icon} alt={discussion.title} />
+						<img className="w-full h-full object-cover" src={discussion.icon} alt={discussion.title} referrerPolicy="no-referrer"/>
 					)}
 					</div>
 					<div className="chat-details">

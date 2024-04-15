@@ -49,6 +49,7 @@ export interface joinRoomProps {
 }
 
 export interface NewRoomProps {
+	channel: channelType;
 	setDisplay: React.Dispatch<React.SetStateAction<string>>;
 	setChannels: React.Dispatch<React.SetStateAction<channelType[]>>;
 }

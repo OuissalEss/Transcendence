@@ -97,6 +97,7 @@ export class ChatGateway {
                 this.server.socketsJoin(room);
                 this.logger.log(`Client joined room: ${room}`);   
                 this.server.to(room).emit('dmCreated', room);
+                this.server.emit("addRoom", room);
             } else {
                 let room = await this.channel.createChannel({
                     title: "",
@@ -107,6 +108,7 @@ export class ChatGateway {
                 this.server.socketsJoin(room.id  as string);
                 this.logger.log(`Client joined room: ${room.id}`);   
                 this.server.to(room.id as string).emit('dmCreated', room.id);
+                this.server.emit("addRoom", room.id as string);
             }
         } catch (e) {
             this.logger.error(e.message);

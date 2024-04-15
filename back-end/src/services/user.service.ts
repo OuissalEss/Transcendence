@@ -26,9 +26,14 @@ export class UserService {
      * @returns {Promise<User[]>}
      */
     async getAllUsers(): Promise<User[]> {
-        return this.prisma.user.findMany({
-            include: userIncludes,
-        });
+        try {
+            return this.prisma.user.findMany({
+                include: userIncludes,
+            });
+        } catch (error) {
+            console.error('Error searching users:', error);
+            throw error;
+        }
     }
 
     /**
@@ -37,14 +42,19 @@ export class UserService {
      * @returns {Promise<User>}
      */
     async getUserById(id: string): Promise<User> {
-        const user = await this.prisma.user.findUnique({
-            where: {
-                id: id
-            },
-            include: userIncludes,
-        });
-        if (!user) throw new NotFoundException("User not found");
-        return user;
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    id: id
+                },
+                include: userIncludes,
+            });
+            if (!user) throw new NotFoundException("User not found");
+            return user;
+        } catch (error) {
+            console.error('Error searching users:', error);
+            throw error;
+        }
     }
 
     /**

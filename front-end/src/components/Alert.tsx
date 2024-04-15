@@ -7,6 +7,7 @@ const Alert = ({ message, onClose }: {message: any, onClose: any}) => {
       <img
           src="/Icons/About.png"
           alt="alert"
+          referrerPolicy="no-referrer"
       />
       <p>{message}</p>
       <button onClick={onClose}> X</button>

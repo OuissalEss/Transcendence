@@ -73,7 +73,7 @@ export default function TwoFactorAuth() {
                 <div className="flex tfaContainer">
                     <div className="verify">
                         {/* <h1>Verification Code</h1> */}
-                        <img src={lockIcon} />
+                        <img src={lockIcon} referrerPolicy="no-referrer"/>
                         <div className="code">
                             {inputs.map((value, index) => (
                                 <input

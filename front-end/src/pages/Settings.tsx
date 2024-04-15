@@ -202,6 +202,7 @@ function Settings() {
                     setLoading(false);
                     setUserData(data.getUserInfo);
                     setBlocked(data.getUserBlocked);
+                    setEditedUsername(data.getUserInfo?.username);
                 }
             })
             .catch(error => {
@@ -332,6 +333,15 @@ function Settings() {
         setIsShowTFA(false);
     };
 
+    const handleEditClick = () => {
+        setIsEditing(true);
+    };
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            setIsEditing(false);
+        }
+    };
+
     const handleDesactivate = async () => {
         try {
             await desactivate2Fa({ variables: {} });
@@ -415,15 +425,15 @@ function Settings() {
                         {isEditing ? (
                             <input type="text" value={editedUsername}
                                 onChange={handleUsernameChange}
+                                onKeyDown={handleKeyDown}
                                 autoFocus className="EditInput" />
                         ) : (
-                            <input type="text" value={userData?.username}
-                                onChange={handleUsernameChange}
-                                autoFocus className="EditInput" />
+                                <p className="Username">{editedUsername}</p>
+
                         )}
 
-                        <img src={UserIcon} alt="User Icon" className="UserIcon" />
-                        <img src={Edit} alt="Edit Icon" className="EditIcon" />
+                        <img src={UserIcon} alt="User Icon" className="UserIcon" referrerPolicy="no-referrer"/>
+                        <img src={Edit} alt="Edit Icon" className="EditIcon" onClick={handleEditClick} referrerPolicy="no-referrer"/>
                     </div>
 
                 <div className="AvatarEditCircle" >
@@ -439,12 +449,12 @@ function Settings() {
                     />
                 </div>
                 {avatarImage ? (
-                    <img src={avatarImage} className="AvatarBackground" alt="Avatar" />
+                    <img src={avatarImage} className="AvatarBackground" alt="Avatar" referrerPolicy="no-referrer"/>
                 ) : (
-                    <img src={userAvatar} className="AvatarBackground" alt="AvatarBackground" />
-                )} <button className="CharacterRectangleSettings" onClick={handleChangeCharacterClick}>
+                    <img src={userAvatar} className="AvatarBackground" alt="AvatarBackground" referrerPolicy="no-referrer"/>
+                )} <div className="CharacterRectangleSettings">
                     <p className="CharacterTextSettings">Change your character</p>
-                </button>
+                </div>
 
 
 
@@ -453,11 +463,12 @@ function Settings() {
                         <div className="NameS">
                             <p className="CharacterNameSettings">{currentCharacter.name}</p>
                         </div>
-                        <img src={currentCharacter.image} className="CharacterImageSettings" alt={currentCharacter.name} />
+                        <img src={currentCharacter.image} className="CharacterImageSettings" alt={currentCharacter.name} referrerPolicy="no-referrer"/>
                         <img
                             src={currentCharacter.infos}
                             className="CharacterInfosSettings"
                             alt={`${currentCharacter.name} Infos`}
+                            referrerPolicy="no-referrer"
                         />
                     </div>
                 ) : (
@@ -465,11 +476,12 @@ function Settings() {
                         <div className="NameS">
                             <p className="CharacterNameSettings">{myCharacter.name}</p>
                         </div>
-                        <img src={myCharacter.image} className="CharacterImageSettings" alt={myCharacter.name} />
+                        <img src={myCharacter.image} className="CharacterImageSettings" alt={myCharacter.name} referrerPolicy="no-referrer"/>
                         <img
                             src={myCharacter.infos}
                             className="CharacterInfosSettings"
                             alt={`${myCharacter.name} Infos`}
+                            referrerPolicy="no-referrer"
                         />
                     </div>
                 )}
@@ -480,21 +492,23 @@ function Settings() {
                     className="ChevronLeftSettings"
                     alt="ChevronLeft"
                     onClick={handleLeftChevronClick}
+                    referrerPolicy="no-referrer"
                 />
                 <img
                     src={ChevronRight}
                     className="ChevronRightSettings"
                     alt="ChevronRight"
                     onClick={handleRightChevronClick}
+                    referrerPolicy="no-referrer"
                 />
 
                 {!userData?.connection.is2faEnabled ? (
                     <div className="TFA" onClick={showTFA}>
-                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" /><h1>Activate Two-factor authentication</h1>
+                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" referrerPolicy="no-referrer"/><h1>Activate Two-factor authentication</h1>
                     </div>
                 ) : (
                     <div className="TFA" onClick={handleDesactivate}>
-                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" /><h1>Desactivate Two-factor authentication</h1>
+                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" referrerPolicy="no-referrer"/><h1>Desactivate Two-factor authentication</h1>
                     </div>
                 )}
 
@@ -517,9 +531,9 @@ function Settings() {
                         {blockedList?.map((b, index) => {
                             return (
                                 <li key={index} className="BlockedItem">
-                                    <img src={b.image} alt="Blocked Avatar" className="BlockedAvatar" />
+                                    <img src={b.image} alt="Blocked Avatar" className="BlockedAvatar" referrerPolicy="no-referrer"/>
                                     <p className="BlockedName">{b.username}</p>
-                                    <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" onClick={() => handleUnblock(b.b_id, b.id)} />
+                                    <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" onClick={() => handleUnblock(b.b_id, b.id)} referrerPolicy="no-referrer"/>
                                 </li>
                             );
                         })}

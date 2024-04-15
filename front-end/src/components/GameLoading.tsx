@@ -44,6 +44,7 @@ const GameLoading = () => {
                             className="image"
                             src="/loading.gif"
                             alt="Loading"
+                            referrerPolicy="no-referrer"
                         />
                         <h1 className="text-loading">Your next challenge is loading!!</h1>
                         <p className="par"> Meanwhile, discover our characters' captivating stories.</p>
@@ -51,9 +52,9 @@ const GameLoading = () => {
                 </div>
                 <div className="stories col-span-3">
                     <div className='images flex'>
-                        <img src={stories[previousStoryIndex]} className="previous_storie" onClick={handlePrevStory} alt="stories" />
-                        <img src={stories[currentStoryIndex]} className="current_storie" alt="stories" />
-                        <img src={stories[nextStoryIndex]} className="next_stories" onClick={handleNextStory} alt="stories" />
+                        <img src={stories[previousStoryIndex]} className="previous_storie" onClick={handlePrevStory} alt="stories" referrerPolicy="no-referrer"/>
+                        <img src={stories[currentStoryIndex]} className="current_storie" alt="stories" referrerPolicy="no-referrer"/>
+                        <img src={stories[nextStoryIndex]} className="next_stories" onClick={handleNextStory} alt="stories" referrerPolicy="no-referrer"/>
                     </div>
 
                     <span></span>

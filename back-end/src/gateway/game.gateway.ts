@@ -809,6 +809,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
+	@SubscribeMessage('friendDisconnected')
+	async friendDisconnected(client: Socket) {
+		const user = this.playerInfoMap.get(client.id);
+		const friendsList = await this.friendService.getFriendList(user.userId);
+		this.server.emit("Disconnected");
+	}
+
 	private startGameLoop() {
 		setInterval(() => {
 			this.updateAndBroadcastGameState();

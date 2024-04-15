@@ -123,6 +123,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any,
                             <img
                                 src={`/Characters/${leftPlayer.character}/GameL.png`}
                                 alt=""
+                                referrerPolicy="no-referrer"
                             />
                         </span>
                     </div>
@@ -134,6 +135,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any,
                                     className="player-img"
                                     src={leftPlayer.image}
                                     alt=""
+                                    referrerPolicy="no-referrer"
                                 />
                             </span>
                             <span className="player-name">
@@ -154,6 +156,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any,
                                     className="player-img"
                                     src={rightPlayer.image}
                                     alt=""
+                                    referrerPolicy="no-referrer"
                                 />
                             </span>
                             <span className="player-name">
@@ -168,6 +171,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any,
                                 <img
                                     src={`/Characters/${rightPlayer.character}/GameR.png`}
                                     alt=""
+                                    referrerPolicy="no-referrer"
                                 // style={{ width: '200px', height: '120px' }}
                                 />
 
@@ -175,6 +179,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any,
                                 <img
                                     src={`/Characters/${rightPlayer.character}/GameR.png`}
                                     alt=""
+                                    referrerPolicy="no-referrer"
                                 />
                             )}
                         </span>

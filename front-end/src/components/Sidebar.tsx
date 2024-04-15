@@ -9,6 +9,7 @@ import { useQuery, gql } from "@apollo/client";
 import { useMutation } from '@apollo/react-hooks'
 import { Socket, io } from "socket.io-client";
 import { useAuth } from "../provider/authProvider";
+import { useSocket } from '../App';
 
 const UPDATE_USER_STATUS = gql`
     mutation($new_status: String!) { 
@@ -71,7 +72,8 @@ const Sidebar = () => {
 
   const [updateUserStatus] = useMutation(UPDATE_USER_STATUS);
   const [showNotification, setShowNotification] = useState(false);
-  const [socket, setSocket] = useState<Socket>();
+  const [sock, setSocket] = useState<Socket>();
+  const { socket } = useSocket();
   const {data, loading} = useQuery(CHANNEL);
   const { token } = useAuth();
   let unreadMessageCount = 0;
@@ -105,14 +107,14 @@ const Sidebar = () => {
   }, [setSocket]);
 
   useEffect(() => {
-    socket?.on("messageUnread", (senderId: string) => {
+    sock?.on("messageUnread", (senderId: string) => {
       if (senderId === user.id)
         return ;
       unreadMessageCount++;
       if (unreadMessageCount)
         setShowNotification(true);
     })
-    socket?.on("messageRead", (senderId: string) => {
+    sock?.on("messageRead", (senderId: string) => {
       if (senderId === user.id)
         return ;
       unreadMessageCount--;
@@ -121,20 +123,20 @@ const Sidebar = () => {
       unreadMessageCount = unreadMessageCount < 0 ? 0 : unreadMessageCount; 
     })
     return () => {
-      socket?.off("messageRead");
-      socket?.off("messageUnread");
+      sock?.off("messageRead");
+      sock?.off("messageUnread");
 		}
-  }, [socket])
+  }, [sock])
 
   async function LogOut() {
     try {
         await updateUserStatus({ variables: { new_status: "OFFLINE" } });
         console.log("Username updated successfully!");
-      } catch (error) {
+    } catch (error) {
         console.error("Error updating Username:", error.message);
-      }
+    }
+    socket?.emit("friendDisconnected");
     Cookies.remove('token');
-
     // Redirect to '/' after removing token
     window.location.reload();
   }
@@ -146,30 +148,14 @@ const Sidebar = () => {
           <aside className="sidebar items-center">
             <div className="sidebar__top">
               <Link to="/">
-                <img title="Logo" className="sidebar__logo"
-                  src="/logo.png" alt="logo" style={{ width: "100%", height: "auto" }} />
+                <img title="Logo" className="sidebar__logo" 
+                  src="/logo.png" alt="logo" style={{ width: "100%", height: "auto" }} referrerPolicy="no-referrer"/>
               </Link>
             </div>
             <ul className="sidebar__list">
               {sidebarItems.map(({ name, href, icon }, index) => {
                 return (
                   <li className="sidebar__item" key={index} title={name}>
-                    {name === 'Chat' && (
-                      <div
-                        className={showNotification ? "visible" : "hidden"}
-                        style={{
-                          backgroundColor: "#f80505",
-                          width: "12px",
-                          height: "12px",
-                          zIndex: 2,
-                          position: "absolute",
-                          top: "355px",
-                          right: "18px",
-                          transform: "translate(0, -50%)",
-                          borderRadius: "50%",
-                        }}
-                      ></div>
-                    )}
                     <Link
                       className={`sidebar__link ${pathname === href
                         ? "sidebar__link--active"
@@ -177,14 +163,18 @@ const Sidebar = () => {
                         }`}
                       to={href}
                     >
-                      <span className="sidebar__icon">
+                      <span className="sidebar__icon relative">
                         <img
                           src={icon}
                           alt={`${name} icon`}
                           style={{ width: "100%", height: "auto" }}
                           width={10}
                           height={10}
+                          referrerPolicy="no-referrer"
                         />
+                        {name === 'Chat' && (
+                          <div className={showNotification ? "cercleNotif visible" : "cercleNotif"}></div>
+                        )}
                       </span>
                     </Link>
                   </li>
@@ -200,6 +190,7 @@ const Sidebar = () => {
                   style={{ width: "100%", height: "auto" }}
                   width={500}
                   height={500}
+                  referrerPolicy="no-referrer"
                 />
               </button>
             </div>

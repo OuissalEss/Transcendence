@@ -249,7 +249,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps>  = ({
 							<span>Change Image</span>
 						</label>
 						<input id="file" type="file" onChange={(event) => loadFile(event)}/>
-						<img src={channel.icon} id="output" width="200" />
+						<img src={channel.icon} id="output" width="200" referrerPolicy="no-referrer"/>
 						<div className="lock-icon">
 							<button 
 							onClick={async () => { 
@@ -1326,11 +1326,11 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 									<div className="relative w-10 h-10">
 										{channel.type === "DM" ? (
 											<>
-												<img src={member?.icon} className="rounded-full w-full h-full object-cover" onClick={() => navigate(`/profiles?id=${member?.id}`)}/>
+												<img src={member?.icon} className="rounded-full w-full h-full object-cover" onClick={() => navigate(`/profiles?id=${member?.id}`)} referrerPolicy="no-referrer"/>
 												<span className={`status ${getStatusColor(member?.status || '')}`} />
 											</>
 										) : (
-											<img src={channel.icon}  className="rounded-full w-full h-full object-cover" />
+											<img src={channel.icon}  className="rounded-full w-full h-full object-cover" referrerPolicy="no-referrer"/>
 										)}
 									</div>
 									<div className="member--details">

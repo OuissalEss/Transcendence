@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, gql } from "@apollo/client";
 import { useMutation } from '@apollo/react-hooks'
 
@@ -29,6 +29,8 @@ import ChevLeft from '/Icons/ChevronLeft.png';
 
 import Friend from '../types/friend-interface';
 import { useSocket } from '../App';
+import { Socket, io } from 'socket.io-client';
+import Match from '../types/match-interface';
 
 const USER_DATA = `
 query($user_id: String!) {
@@ -143,6 +145,17 @@ function Profiles() {
   const userId = decodedToken.sub;
 
   const { socket } = useSocket();
+  const [sock, setSocket] = useState<Socket>();
+
+  useEffect(() => {
+    const newSocket = io('ws://localhost:3003/chat');
+    setSocket(newSocket);
+
+
+    return () => {
+        newSocket.disconnect();
+    };
+  }, [setSocket]);
 
   useEffect(() => {
     if (id == userId) {
@@ -325,6 +338,11 @@ function Profiles() {
   const handleCancelRequest = () => {
     socket?.emit("removeFriend", { friendId: friendShipId })
   }
+  const handleSendMessage = () => {
+    sock?.emit('DM', {id1: id, id2: userId});
+    navigate('/chat');
+    console.log("CREATE CHANNEL !!!");
+  }
 
   
   return (
@@ -342,12 +360,15 @@ function Profiles() {
         <div className="PlayerBar">
           
           <div className="PlayerName">{userData.username}</div>
-          <img src={userData.avatar.filename} className="Riri" alt="Riri" />
+          <img src={userData.avatar.filename} className="Riri" alt="Riri" referrerPolicy="no-referrer"/>
           {buttonText == 'add' &&
             <div className="AddFriend" onClick={handleAddFriend}>Add Friend</div>
           }
           {buttonText == 'remove' &&
-            <div className="AddFriend" onClick={handleRemoveFriend}>Remove Friend</div>
+            <div>
+              <div className="AddFriend r" onClick={handleRemoveFriend}>Remove Friend</div>
+              <div className="AddFriend s" onClick={handleSendMessage}>Send Message</div>
+            </div>
           }
           {buttonText == 'accept' &&
             <div className="AddFriend" onClick={handleAcceptRequest}>Accept Request</div>
@@ -355,7 +376,7 @@ function Profiles() {
           {buttonText == 'cancel' &&
             <div className="AddFriend" onClick={handleCancelRequest}>Cancel Request</div>
           }
-          <img src={myLeaderboard} className="LB" alt="Leaderboard3" />
+          <img src={myLeaderboard} className="LB" alt="Leaderboard3" referrerPolicy="no-referrer"/>
           <div className="PLevelTube">
             <div className="PLevelMarker">Lv.{currentLevel}</div>
             <div className="PTube">
@@ -374,14 +395,14 @@ function Profiles() {
 
           <div className="PAchievementBar ">
             <div className="PChevLeftC" onClick={handlePrevAchievement}>
-              <img src={ChevLeft} alt="Left Chevron" className="PChevLeft" />
+              <img src={ChevLeft} alt="Left Chevron" className="PChevLeft" referrerPolicy="no-referrer"/>
             </div>
             <div className="PAchievementContainer">
-              <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" />
+              <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" referrerPolicy="no-referrer"/>
               <span>{myAchievements[currentAchievementIndex]?.title}</span>
             </div>
             <div className="PChevRightC" onClick={handleNextAchievement}>
-              <img src={ChevRight} alt="Right Chevron" className="PChevRight" />
+              <img src={ChevRight} alt="Right Chevron" className="PChevRight" referrerPolicy="no-referrer"/>
             </div>
           </div>
           
@@ -395,12 +416,12 @@ function Profiles() {
                     return (
                       <li key={index} className="play">
                         <div className="PlayerLeft">
-                          <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} />
+                          <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} referrerPolicy="no-referrer"/>
                           <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
                         </div>
                         <p className="ScoreP">{match.host_score_m} - {match.guest_score_m}</p>
                         <div className="PlayerRight">
-                          <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} />
+                          <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} referrerPolicy="no-referrer"/>
                           <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
                         </div>
                       </li>
