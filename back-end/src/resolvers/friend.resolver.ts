@@ -26,7 +26,6 @@ export class FriendResolver {
         const payload: Payload = context.req['user'];
 
         const friendList: User[] = await this.friendService.getFriendList(payload.sub);
-        // console.log("friend list = ", friendList);
         return friendList;
     }
 

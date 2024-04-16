@@ -6,15 +6,17 @@ import { useSocket } from "../App.tsx";
 import { useMutation } from '@apollo/react-hooks'
 import { Socket, io } from 'socket.io-client';
 
-
 const NOTIF_QUERY = gql`
     query {
-        getUserNotifications{
+        getUserNotifications {
             id
             time
             type
             isRead
-            receiver{id}
+            inviteCode
+            receiver{
+                id
+            }
             sender{
                 id
                 username
@@ -36,12 +38,13 @@ const UPDATE_READ = gql`
 const Notifications = () => {
     const [updateNotifIsRead] = useMutation(UPDATE_READ);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [notifications, setNotifications] = useState<{ id: string, userId: string, type: string, isRead: Boolean, notif: string, time:Date }[]>([]);
+    const [notifications, setNotifications] = useState<{ id: string, userId: string, type: string, isRead: Boolean, notif: string, time: Date, inviteCode: string }[]>([]);
     const [showNotification, setShowNotification] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const { socket } = useSocket();
     const [sock, setSocket] = useState<Socket>();
 
+    console.log(notifications);
     useEffect(() => {
         const newSocket = io('ws://localhost:3003/chat');
         setSocket(newSocket);
@@ -59,7 +62,7 @@ const Notifications = () => {
             setShowNotification(true);
         })
 
-        sock?.on('RequestGame', () => {
+        socket.on('RequestGame', () => {
             setShowNotification(true);
         })
 
@@ -85,7 +88,7 @@ const Notifications = () => {
 
     if (notifData) notifData;
     const updateNotifications = (notifications: Notifs[]) => {
-        let notificationList: { id: string; userId: string; type: string; isRead: Boolean; notif: string; time: Date}[] = [];
+        let notificationList: { id: string; userId: string; type: string; isRead: Boolean; notif: string; time: Date; inviteCode: string }[] = [];
         for (let i = 0; i < notifications.length; i++) {
             if (!notifications[i].isRead) {
                 let newNotification = {
@@ -94,6 +97,7 @@ const Notifications = () => {
                     type: notifications[i].type,
                     isRead: notifications[i].isRead,
                     time: notifications[i].time,
+                    inviteCode: notifications[i].inviteCode,
                     notif: ''
                 };
                 if (notifications[i].type === 'FRIEND_REQUEST') {
@@ -163,7 +167,7 @@ const Notifications = () => {
                         <ul className="notificationList">
                             {notifications.map((notification, index) => (
                                 notification && notification.type == "MATCH" ? (
-                                    <Link key={index} to="/game/pong?mode=online" onClick={() => updateIsRead(notification.id)}>
+                                    <Link key={index} to={`/game/pong?mode=invite&inviteCode=${notification?.inviteCode}`} onClick={() => updateIsRead(notification.id)}>
                                         <li className="notif" key={index}>🏓 {notification.notif}</li>
                                     </Link>
                                 ) : (

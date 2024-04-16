@@ -69,9 +69,6 @@ const Friends = () => {
     const { token } = useAuth();
     const { socket } = useSocket();
 
-    console.log('friend');
-
-
     useEffect(() => {
         if (!token) return; // If token is not available, do nothing
 
@@ -121,8 +118,6 @@ const Friends = () => {
                 console.error('Error fetching friends:', error);
             });
     }, []);
-
-    console.log(userData?.id + "hhh")
 
     useEffect(() => {
         function refetch() {
@@ -181,7 +176,6 @@ const Friends = () => {
             refetch();
         })
         socket?.on('Disconnected', () => {
-            console.log("HEEEEREEEE");
             refetch();
         })
     }, [socket]);

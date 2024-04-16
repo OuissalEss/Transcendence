@@ -9,12 +9,15 @@ import { UserService } from '../services/user.service';
 import { CreateMatchInput } from 'src/services/dto/create-match.input';
 import { PrismaService } from 'src/services/prisma.service';
 import { create } from 'domain';
-import { Achievement, Character } from '@prisma/client';
+import { Achievement, Character, NotifType } from '@prisma/client';
 import { CreateFriendInput } from 'src/services/dto/create-friend.input';
 import { FriendService } from 'src/services/friend.service';
 import { Friend } from 'src/entities/friend.entity';
 import { AchievementService } from 'src/services/user_achievement.service';
 import { Match } from "src/entities/match.entity";
+import { isRFC3339 } from 'class-validator';
+import { CreateNotificationInput } from 'src/services/dto/create-notification.input';
+import { NotificationService } from 'src/services/notification.service';
 
 // Define a type for player information
 interface PlayerInfo {
@@ -44,12 +47,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private readonly jwtService: JwtService,
 		private readonly prismaService: PrismaService,
 		private readonly friendService: FriendService,
+		private readonly notificationService: NotificationService,
 	) {
 	}
 
 	@WebSocketServer() server: Server;
 	private games: Map<GameState, { hostId: string, guestId: string }> = new Map(); // Map to store game instances for each client
 	private onlinePlayersQueue: Socket[] = [];
+	private invitePlayersQueue: { inviteCode: string, socket: Socket }[] = [];
+	private inviteGame: Map<string, { senderSocket: Socket, senderId: string, isSenderWaiting: boolean, receiverId: string, receiverSocket: Socket, isReceiverWaiting: boolean }> = new Map();
 	private alterPlayersQueue: Socket[] = [];
 	private playerInfoMap: Map<string, PlayerInfo> = new Map(); // Map to store player info
 	private activeRooms: Map<string, RoomData> = new Map(); // Map to store active room data
@@ -81,13 +87,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	private countMatchesWithOpponent(matches: Match[], playerId: string, opponentId: string) {
 		let matchCount = 0;
 		matches.forEach(match => {
-			if ( (match.guest.id === playerId && match.host.id === opponentId) ||
-				(match.host.id === playerId && match.guest.id === opponentId) )
-			{ matchCount++; }
+			if ((match.guest.id === playerId && match.host.id === opponentId) ||
+				(match.host.id === playerId && match.guest.id === opponentId)) { matchCount++; }
 		});
 		return matchCount;
 	}
-	
+
 	// Method to clean up resources of disconnected client
 	private async cleanupDisconnectedClient(client) {
 		const clientId = client.id;
@@ -133,7 +138,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			// Forfient Client
 
 			// Handle if online to disconnect the Oppenent
-			if (game.getMode() === "online" || game.getMode() === 'alter') {
+			if (game.getMode() === "online" || game.getMode() === 'alter' || 'invite') {
 				// Disconnect the Opponenet from the game
 				const oppSocket = this.playerInfoMap.get(guesId);
 
@@ -177,22 +182,33 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					this.userService.addXp(winner, 500);
 				}
 				const host = await this.userService.getUserById(this.playerInfoMap.get(hostId)?.userId);
-				if (host.winner.length == 5){
+				if (host.winner.length == 5) {
 					this.achievementService.createAchievement(host.id, "winning");
 				}
 				const guest = await this.userService.getUserById(this.playerInfoMap.get(guesId)?.userId);
-				if (guest.winner.length == 5){
+				if (guest.winner.length == 5) {
 					this.achievementService.createAchievement(guest.id, "winning");
 				}
 				const hostmatches = await this.matchService.getAllUserMatchs(host.id);
 				const opponentsCount = this.countMatchesWithOpponent(hostmatches, host.id, guest.id);
-				if (opponentsCount == 3){
+				if (opponentsCount == 3) {
 					this.achievementService.createAchievement(host.id, "loyal");
 					this.achievementService.createAchievement(guest.id, "loyal");
 				}
 			}
 
 			this.games.delete(game);
+
+			if (game.getMode() === 'invite') {
+				let inviteCode = null;
+
+				this.inviteGame.forEach((value, key) => {
+					if (value.receiverSocket == client || value.senderSocket == client)
+						inviteCode = key;
+				});
+				if (inviteCode != null)
+					this.inviteGame.delete(inviteCode);
+			}
 		}
 		// Remove player from playerInfoMap
 		this.playerInfoMap.delete(clientId);
@@ -203,7 +219,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const hostId = clientStats.hostId;
 			const guestId = clientStats.guestId;
 
-			if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && (game.getMode() === 'online' || game.getMode() === 'alter')) {
+			if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && (game.getMode() === 'online' || game.getMode() === 'alter' || game.getMode() === 'invite')) {
 				console.log("Game Ended");
 				// Emit 'gameFinished' event to the client associated with this game
 
@@ -232,7 +248,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				// if (clientId == game.getHostId() && !game.getGameEnded())
 				this.handleFinishedGame(game);
 				game.setGameEnded(true);
-			} else if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && game.getMode() != 'online' && game.getMode() != 'alter') {
+			} else if ((game.getHostScore() === 3 || game.getGuestScore() === 3) && !game.getGameEnded() && game.getMode() != 'online' && game.getMode() != 'alter' && game.getMode() != 'invite') {
 				console.log("Game Ended");
 
 				this.server.to(hostId).emit('gameFinished', {
@@ -255,7 +271,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				const gameStats = game.getGameState();
 				// If the game is still ongoing, emit the updated game state
 				this.server.to(hostId).emit('updateGameState', gameStats);
-				if (game.getMode() === 'online' || game.getMode() === 'alter')
+				if (game.getMode() === 'online' || game.getMode() === 'alter' || game.getMode() === 'invite')
 					this.server.to(guestId).emit('updateGameState', gameStats);
 
 			}
@@ -264,7 +280,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	// Method to handle actions after a game finishes
 	private async handleFinishedGame(game: GameState) {
-		if (game.getMode() == 'online' || game.getMode() === 'alter') {
+		if (game.getMode() == 'online' || game.getMode() === 'alter' || game.getMode() === 'invite') {
 			if (game.getGuestScore() == game.getHostScore()) {
 				const match = await this.prismaService.match.create({
 					data: {
@@ -299,21 +315,37 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				this.userService.addXp(winner, 500);
 			}
 			const host = await this.userService.getUserById(this.playerInfoMap.get(game.getHostId()).userId);
-			if (host.winner.length == 5){
+			if (host.winner.length == 5) {
 				this.achievementService.createAchievement(host.id, "winning");
 			}
 			const guest = await this.userService.getUserById(this.playerInfoMap.get(game.getGuestId()).userId);
-			if (guest.winner.length == 5){
+			if (guest.winner.length == 5) {
 				this.achievementService.createAchievement(guest.id, "winning");
 			}
 			const hostmatches = await this.matchService.getAllUserMatchs(host.id);
 			const opponentsCount = this.countMatchesWithOpponent(hostmatches, host.id, guest.id);
-			if (opponentsCount == 3){
+			if (opponentsCount == 3) {
 				this.achievementService.createAchievement(host.id, "loyal");
 				this.achievementService.createAchievement(guest.id, "loyal");
 			}
 		}
 		this.games.delete(game);
+		if (game.getMode() === 'invite') {
+			let inviteCode = null;
+
+			const host = this.playerInfoMap.get(game.getHostId());
+
+			if (host) {
+				const clientSocket = host.playerSocket;
+				this.inviteGame.forEach((value, key) => {
+					if (value.receiverSocket == clientSocket || value.senderSocket == clientSocket)
+						inviteCode = key;
+				});
+			}
+
+			if (inviteCode != null)
+				this.inviteGame.delete(inviteCode);
+		}
 	}
 
 	// Middleware to handle JWT authentication
@@ -367,6 +399,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		const game = this.findGame(clientId);
 		if (game) {
+			console.log("HERE");
 			const clientStats = this.games.get(game);
 			const guestId = clientStats.guestId;
 			const hostId = clientStats.hostId;
@@ -395,7 +428,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			await this.userService.updateStatus(this.playerInfoMap.get(game.getHostId()).userId, "ONLINE");
 			await this.userService.updateStatus(this.playerInfoMap.get(game.getGuestId()).userId, "ONLINE");
 
-			if (game.getMode() == 'online' || game.getMode() == 'alter') {
+			if (game.getMode() == 'online' || game.getMode() == 'alter' || game.getMode() == 'invite') {
 				// Create match in database
 				if (game.getGuestScore() == game.getHostScore()) {
 					const match = await this.prismaService.match.create({
@@ -431,16 +464,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					this.userService.addXp(winner, 500);
 				}
 				const host = await this.userService.getUserById(this.playerInfoMap.get(hostId)?.userId);
-				if (host.winner.length == 5){
+				if (host.winner.length == 5) {
 					this.achievementService.createAchievement(host.id, "winning");
 				}
 				const guest = await this.userService.getUserById(this.playerInfoMap.get(guestId)?.userId);
-				if (guest.winner.length == 5){
+				if (guest.winner.length == 5) {
 					this.achievementService.createAchievement(guest.id, "winning");
 				}
 				const hostmatches = await this.matchService.getAllUserMatchs(host.id);
 				const opponentsCount = this.countMatchesWithOpponent(hostmatches, host.id, guest.id);
-				if (opponentsCount == 3){
+				if (opponentsCount == 3) {
 					this.achievementService.createAchievement(host.id, "loyal");
 					this.achievementService.createAchievement(guest.id, "loyal");
 				}
@@ -453,13 +486,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 			this.games.delete(game);
 		}
-	}
+		let inviteCode = null;
 
+		this.inviteGame.forEach((value, key) => {
+			if (value.receiverSocket == client || value.senderSocket == client)
+				inviteCode = key;
+		});
+		if (inviteCode != null)
+			this.inviteGame.delete(inviteCode);
+	}
 
 	// Handler for starting a match
 	@SubscribeMessage('startMatch')
-	startMatch(client: Socket, mode: string) {
+	startMatch(client: Socket, data: { mode: string, inviteCode: string }) {
 
+		const mode = data[0];
+		const inviteCode = data[1];
+		console.log(mode, inviteCode);
 		const userInfo = this.playerInfoMap.get(client.id);
 
 		if (userInfo) {
@@ -476,6 +519,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 					if ((mode === 'online' || mode === 'alter') && this.onlinePlayersQueue.some(socket => socket.id === playerId)) {
 						console.log(`Player ${client.id} is already waiting for an online game.`);
+						client.emit('alreadyWaiting');
+						return;
+					}
+
+					let isInvite = false;
+					this.inviteGame.forEach((value, key) => {
+						if ((value.senderId === userInfo.userId && value.isSenderWaiting) || (value.receiverId === userInfo.userId && value.isReceiverWaiting)) {
+							isInvite = true;
+							return;
+						}
+					});
+
+					if (isInvite) {
+						console.log(`Player ${client.id} is already waiting for an invite game.`);
 						client.emit('alreadyWaiting');
 						return;
 					}
@@ -499,6 +556,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		if (mode === 'online') {
 			this.handleOnlineMatch(client);
+		} else if (mode === 'invite' && inviteCode) {
+			this.handleInviteMatch(client, inviteCode);
 		} else if (mode === 'alter') {
 			this.handleAlterMatch(client);
 		} else if (mode === 'ai') {
@@ -508,6 +567,96 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		} else {
 			client.send("Unavailable mode");
 		}
+	}
+
+	// Handler for starting invite match
+	private handleInviteMatch(client: Socket, inviteCode: string) {
+		// Verify InviteCode
+		const inviteInfo = this.inviteGame.get(inviteCode);
+		const userInfo = this.playerInfoMap.get(client.id);
+
+		if (!inviteInfo || !userInfo) {
+			client.emit("Error", { message: 'Invalid Invitation Code' });
+			return;
+		}
+
+		// Check if the player is in the list of invite
+		if (inviteInfo.receiverId !== userInfo.userId && inviteInfo.senderId !== userInfo.userId) {
+			client.emit("Error", { message: '404 Invitation Not Found' });
+			return;
+		}
+
+		console.log(`Player ${client.id} is waiting for invite game.`);
+		client.emit('matchStatus', { matchStatus: false });
+
+		if (inviteInfo.receiverId === userInfo.userId) {
+			inviteInfo.isReceiverWaiting = true;
+			inviteInfo.receiverSocket = client;
+		} else if (inviteInfo.senderId === userInfo.userId) {
+			inviteInfo.isSenderWaiting = true;
+			inviteInfo.senderSocket = client;
+		}
+
+		if (inviteInfo.isReceiverWaiting && inviteInfo.isSenderWaiting)
+			this.createInviteMatch(inviteCode);
+	}
+
+	// Method to create an online match
+	private async createInviteMatch(inviteCode: string) {
+		const inviteInfo = this.inviteGame.get(inviteCode);
+
+		const player1 = inviteInfo.senderSocket;
+		const player2 = inviteInfo.receiverSocket;
+
+		console.log(`Starting a game between ${player1.id} : ${player2.id}`)
+
+		const game = new GameState(width, height, "invite", player1, player2);
+
+		this.games.set(game, { hostId: player1.id, guestId: player2.id });
+
+		game.initLeftPaddle(player1.id);
+		game.initRightPaddle(player2.id);
+
+		game.setHostId(player1.id);
+		game.setGuestId(player2.id);
+
+		player1.emit('matchStatus', { matchStatus: true });
+		player2.emit('matchStatus', { matchStatus: true });
+
+		const player1Data = this.playerInfoMap.get(player1.id);
+		const player2Data = this.playerInfoMap.get(player2.id);
+
+		await this.userService.updateStatus(player2Data?.userId, "INGAME");
+		await this.userService.updateStatus(player1Data?.userId, "INGAME");
+
+		player1.emit('oppenentData', {
+			userId: player2Data?.userId,
+			username: player2Data?.username,
+			image: player2Data?.image,
+			character: player2Data?.character,
+			host: true,
+		});
+
+		player2.emit('oppenentData', {
+			userId: player1Data?.userId,
+			username: player1Data?.username,
+			image: player1Data?.image,
+			character: player1Data?.character,
+			host: false,
+		});
+
+		const roomName = `inviteRoom_${player1.id}${player2.id}`;
+		const roomData: RoomData = {
+			roomId: roomName,
+			players: [player1.id, player2.id],
+		};
+
+		this.activeRooms.set(roomName, roomData);
+
+		player1.join(roomName);
+		player2.join(roomName);
+
+		this.updateAndBroadcastGameState();
 	}
 
 	// Handler for starting an online match
@@ -682,6 +831,25 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
+	@SubscribeMessage('inviteGame')
+	async HandleInviteGame(client: Socket, data: { time: Date, type: NotifType, isRead: boolean, senderId: string, receiverId: string, inviteCode: string }) {
+		try {
+			this.server.emit('RequestGame', data.inviteCode);
+			const notification: CreateNotificationInput = {
+				time: data.time,
+				type: data.type,
+				isRead: data.isRead,
+				senderId: data.senderId,
+				receiverId: data.receiverId,
+				inviteCode: data.inviteCode
+			}
+			await this.notificationService.createNotification(notification);
+			this.inviteGame.set(data.inviteCode, { senderId: data.senderId, senderSocket: client, isSenderWaiting: false, receiverId: data.receiverId, receiverSocket: null, isReceiverWaiting: false });
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
 	// Handler for updating paddle movement
 	@SubscribeMessage('updatePaddleMovement')
 	updatePaddleMovement(client: Socket, sideMovement: string) {
@@ -732,7 +900,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 			const newData = await this.friendService.createFriend(data);
 
-			console.log("Request Sent");
 			// send notification to the receiver friend
 			if (newData) {
 				client.emit("RequestSent", { friendId: newData.id });
@@ -773,7 +940,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				if (userFriend)
 					userFriend.playerSocket.emit("RequestAccepted", { username: user.username, userId: user.userId, image: user.image })
 				if (user)
-						user.playerSocket.emit("RequestAccepted", { username: user.username, userId: user.userId, image: user.image })
+					user.playerSocket.emit("RequestAccepted", { username: user.username, userId: user.userId, image: user.image })
 			}
 		}
 	}

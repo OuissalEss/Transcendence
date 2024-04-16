@@ -110,8 +110,7 @@ const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any,
         rightPlayer.image = userData?.avatar?.filename;
         rightPlayer.character = userData?.character;
     }
-    console.log("left character = ", userData);
-    console.log("right character = ", gameData?.p2Character);
+
     return (
         <div className="players-container grid grid-cols-9">
             {isLoading ? (

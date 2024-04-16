@@ -7,4 +7,5 @@ export default interface Notifs {
     isRead: Boolean,
     sender: User,
     receiver: User,
+    inviteCode: string,
 }

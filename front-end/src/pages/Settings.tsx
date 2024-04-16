@@ -292,7 +292,6 @@ function Settings() {
                 setUploadUrl(res.public_id);
                 return (cld.image(res.public_id).toURL());
             } catch (error) {
-                console.log("ERROR");
                 return '';
             }
         }

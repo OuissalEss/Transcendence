@@ -31,8 +31,8 @@ export class FriendService {
         include: friendIncludes
       });
     } catch (error) {
-        console.error('Error:', error);
-        throw error;
+      console.error('Error:', error);
+      throw error;
     }
   }
 
@@ -50,8 +50,8 @@ export class FriendService {
 
       return friendObject
     } catch (error) {
-        console.error('Error:', error);
-        throw error;
+      console.error('Error:', error);
+      throw error;
     }
   }
 
@@ -81,9 +81,9 @@ export class FriendService {
 
   async getFriendSender(userId): Promise<Friend[]> {
     try {
-    // Check if the provided userId is a valid id
-    let userObject: User = await this.userService.getUserById(userId);
-    if (!userObject) throw new NotFoundException("User does't exist");
+      // Check if the provided userId is a valid id
+      let userObject: User = await this.userService.getUserById(userId);
+      if (!userObject) throw new NotFoundException("User does't exist");
       const friendSender: Friend[] = await this.prisma.friend.findMany({
         where: {
           senderId: userObject.id
@@ -99,9 +99,9 @@ export class FriendService {
 
   async getFriendReceiver(userId): Promise<Friend[]> {
     try {
-    // Check if the provided userId is a valid id
-    let userObject: User = await this.userService.getUserById(userId);
-    if (!userObject) throw new NotFoundException("User does't exist");
+      // Check if the provided userId is a valid id
+      let userObject: User = await this.userService.getUserById(userId);
+      if (!userObject) throw new NotFoundException("User does't exist");
       const friendReceiver: Friend[] = await this.prisma.friend.findMany({
         where: {
           receiverId: userObject.id
@@ -130,6 +130,7 @@ export class FriendService {
         isRead: false,
         senderId: createFriendInput.senderId,
         receiverId: createFriendInput.receiverId,
+        inviteCode: ''
       }
       this.notificationService.createNotification(notifData);
       return createdFriendShip;
@@ -140,13 +141,13 @@ export class FriendService {
 
   async updateAccept(userId: string, friendId: string): Promise<Friend> {
     try {
-    // Check if the provided friendId is a valid id
-    let userObject: User = await this.userService.getUserById(userId);
-    if (!userObject) throw new NotFoundException("User doesn't exist");
+      // Check if the provided friendId is a valid id
+      let userObject: User = await this.userService.getUserById(userId);
+      if (!userObject) throw new NotFoundException("User doesn't exist");
 
-    // Check if the provided friendId is a valid id
-    let friendObject: Friend = await this.getFriendById(friendId);
-    if (!friendObject) throw new NotFoundException("Friend doesn't exist");
+      // Check if the provided friendId is a valid id
+      let friendObject: Friend = await this.getFriendById(friendId);
+      if (!friendObject) throw new NotFoundException("Friend doesn't exist");
       const friendship = await this.prisma.friend.update({
         where: {
           id: friendId,
@@ -177,15 +178,15 @@ export class FriendService {
 
   async deleteFriend(userId: string, friendId: string): Promise<Friend> {
     try {
-    // Check if the provided friendId is a valid id
-    let userObject: User = await this.userService.getUserById(userId);
-    if (!userObject) throw new NotFoundException("User doesn't exist");
+      // Check if the provided friendId is a valid id
+      let userObject: User = await this.userService.getUserById(userId);
+      if (!userObject) throw new NotFoundException("User doesn't exist");
 
-    // Check if the provided friendId is a valid id
-    let friendObject: Friend = await this.getFriendById(friendId);
-    if (!friendObject) throw new NotFoundException("Friend doesn't exist");
+      // Check if the provided friendId is a valid id
+      let friendObject: Friend = await this.getFriendById(friendId);
+      if (!friendObject) throw new NotFoundException("Friend doesn't exist");
 
-    console.log(userId, friendId);
+      console.log(userId, friendId);
       return this.prisma.friend.delete({
         where: {
           id: friendId,

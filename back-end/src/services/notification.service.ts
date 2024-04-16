@@ -82,6 +82,7 @@ export class NotificationService {
                     isRead: createNotificationInput.isRead,
                     senderId: createNotificationInput.senderId,
                     receiverId: createNotificationInput.receiverId,
+                    inviteCode: createNotificationInput.inviteCode,
                 },
             });
         } catch (e) {

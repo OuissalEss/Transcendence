@@ -179,7 +179,6 @@ function Profiles() {
       })
       .then(({ data }) => {
         if (data && data.getAllUsers) {
-          console.log("data = ", data)
           setUserData(data.getUserById);
           setUsers(data.getAllUsers);
           setFriends(data.getUserFriends);
@@ -344,7 +343,6 @@ function Profiles() {
   const handleSendMessage = () => {
     sock?.emit('DM', { id1: id, id2: userId });
     navigate('/chat');
-    console.log("CREATE CHANNEL !!!");
   }
 
 

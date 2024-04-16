@@ -34,7 +34,6 @@ const USER_DATA_QUERY = `
 `;
 
 const GameEnded = ({ gameMode, gameData }: { gameMode: any, gameData: FinishedGameData | null }) => {
-    console.log("data = ", gameData);
     const [userData, setUserData] = useState<User>();
     const [isLoading, setLoading] = useState(true);
     const { token } = useAuth();

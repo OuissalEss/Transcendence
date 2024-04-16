@@ -24,7 +24,6 @@ export class MatchResolver {
 		description: "Retrieves all matches associated with a specific user.",
 	})
 	async getAllMatches(@Args('userId') userId: string) {
-		// console.log("matchs = ", this.matchService.getAllUserMatchs(userId))
 		return this.matchService.getAllUserMatchs(userId);
 	}
 

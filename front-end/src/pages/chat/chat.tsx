@@ -21,6 +21,8 @@ import bcrypt from 'bcryptjs';
 import { useNavigate } from "react-router-dom";
 import { Cloudinary } from "@cloudinary/url-gen/index";
 import ImageCompressor from 'image-compressor.js';
+import { useSocket } from "../../App";
+import Loading from "../../components/Loading";
 
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -580,6 +582,8 @@ const Dropdown = ({
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isDoubleOpen, setIsDoubleOpen] = useState(false);
+	const { socket: gameSocket } = useSocket();
+	const [isLoading, setLoading] = useState(false);
 	const toggleDropdown = () => {
 		setIsOpen(!isOpen);
 		setIsDoubleOpen(false);
@@ -594,7 +598,18 @@ const Dropdown = ({
 		else
 			socket?.emit('muteUser', { room: channel.id, user: memeberId, duration: setHoursDuration({ hours }), permanent: false });
 	};
+	function generateInviteCode(length: number) {
+		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		let code = '';
+		for (let i = 0; i < length; i++) {
+			const randomIndex = Math.floor(Math.random() * characters.length);
+			code += characters.charAt(randomIndex);
+		}
+		return code;
+	}
+	const navigate = useNavigate();
 
+	if (isLoading) return <Loading />
 	return (
 		<div className="relative">
 			<button className="settings-button" id="multiLevelDropdownButton" data-dropdown-toggle="multi-dropdown" onClick={toggleDropdown}>
@@ -612,7 +627,19 @@ const Dropdown = ({
 						</a>
 					</li>
 					<li>
-						<a className="block text-white border border-transparent rounded-tl-lg rounded-tr-lg hover:border-white" onClick={() => socket?.emit('inviteGame', { time: new Date(0), type: "MATCH", isRead: false, senderId: user.id, receiverId: memeberId })} href="/game/pong?mode=online">
+						<a className="block text-white border border-transparent rounded-tl-lg rounded-tr-lg hover:border-white" onClick={() => {
+							const inviteCode = generateInviteCode(24);
+							console.log('Invite CODE', inviteCode);
+							gameSocket?.emit('inviteGame', { time: new Date(0), type: "MATCH", isRead: false, senderId: user.id, receiverId: memeberId, inviteCode: inviteCode })
+							setLoading(true);
+							// Add a delay of 1 second (1000 milliseconds) before navigating
+							setTimeout(() => {
+								setLoading(false);
+								navigate(`/game/pong?mode=invite&inviteCode=${inviteCode}`);
+							}, 1000);
+						}
+
+						}>
 							Invite to game
 						</a>
 					</li>
@@ -719,6 +746,8 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const [passwordMismatch, setPasswordMismatch] = useState(false);
 	const [updatePassword] = useMutation(UPDATE_CHANNEL_PASSWORD);
 	const [updateType] = useMutation(UPDATE_CHANNEL_TYPE);
+	const { socket: gameSocket } = useSocket();
+	const [isLoading, setLoading] = useState(false);
 	const navigate = useNavigate();
 
 	const channel: channelType = channels.find((channel: { id: string; }) => channel.id === id) || channels[0];
@@ -748,7 +777,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		socket?.emit("channelUpdate", { data: { password: channel.password, type: channel.type }, opt: 3, room: channel.id });
 	}
 
-	let member: {id: string, name: string, icon: string, status: string, blocked: string[], blocken: string[]} | undefined = undefined
+	let member: { id: string, name: string, icon: string, status: string, blocked: string[], blocken: string[] } | undefined = undefined
 	if (channel.type === "DM")
 		member = channel.members.find((member: { name: string; }) => member.name !== user.username);
 	const memberListner = (
@@ -1251,6 +1280,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		}
 	}, [id, socket]);
 
+	if (isLoading) return <Loading />
 	// console.log("is typing : ", isTyping);
 
 	const scrollToBottom = () => {
@@ -1268,7 +1298,15 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		}
 		return isBlocked;
 	}
-
+	function generateInviteCode(length: number) {
+		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		let code = '';
+		for (let i = 0; i < length; i++) {
+			const randomIndex = Math.floor(Math.random() * characters.length);
+			code += characters.charAt(randomIndex);
+		}
+		return code;
+	}
 	return (
 		<>
 			<div className="w-full h-full col-12 col-md-8 col-lg-7 col-xl-6 px-0 pl-md-1 z-10">
@@ -1348,18 +1386,25 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 													<li
 														className="chat__details d-flex d-xl-none"
 														onClick={() => {
-															socket?.emit('inviteGame', { time: new Date(0), type: "MATCH", isRead: false, senderId: user.id, receiverId: member?.id });
-															navigate('/game/pong?mode=online');
+															const inviteCode = generateInviteCode(24);
+															console.log('Invite CODE', inviteCode);
+															gameSocket?.emit('inviteGame', { time: new Date(0), type: "MATCH", isRead: false, senderId: user.id, receiverId: member?.id, inviteCode: inviteCode })
+															setLoading(true);
+															// Add a delay of 1 second (1000 milliseconds) before navigating
+															setTimeout(() => {
+																setLoading(false);
+																navigate(`/game/pong?mode=invite&inviteCode=${inviteCode}`);
+															}, 1000);
 														}}
 													>
 														<GiPingPongBat className="w-10 h-10" />
 													</li>
 													<li
-													onClick={() => {
-														socket?.emit('muteUser', { room: channel.id, user: member?.id, duration: null, permanent: true });
-													}}><IoVolumeMuteSharp className="w-10 h-10" />
-												</li>
-													</>
+														onClick={() => {
+															socket?.emit('muteUser', { room: channel.id, user: member?.id, duration: null, permanent: true });
+														}}><IoVolumeMuteSharp className="w-10 h-10" />
+													</li>
+												</>
 											) : (
 												<li
 													onClick={() => {

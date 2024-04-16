@@ -152,7 +152,6 @@ function Profile() {
       })
       .then(({ data }) => {
         if (data) {
-          console.log("data = ", data)
           setLoading(false);
           setUserData(data.getUserInfo);
           setUsers(data.getAllUsers);
@@ -166,7 +165,6 @@ function Profile() {
       });
   }, []);
   if (!users || !friends || !userData || !matches) return;
-  console.log("matches = ", matches);
 
   let updatedFriendsList: Friend[] = [{
     id: '',

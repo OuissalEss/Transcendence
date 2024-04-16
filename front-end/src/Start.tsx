@@ -213,7 +213,7 @@ function Start() {
             <p className="CharacterText">Click to choose your character</p>
           </button>
 
-          <img src={userData.avatar.filename} className="AvatarStart" alt="Avatar"referrerPolicy="no-referrer"/>
+          <img src={userData.avatar.filename} className="AvatarStart" alt="Avatar" referrerPolicy="no-referrer" />
           <div className="NameStart">
             <p className="CharacterNameStart">{currentCharacter.name}</p>
           </div>

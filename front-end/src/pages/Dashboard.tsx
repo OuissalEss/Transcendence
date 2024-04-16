@@ -124,7 +124,6 @@ export default function Dashboard() {
   const [userData, setUserData] = useState<User>();
   const [isLoading, setLoading] = useState(true);
 
-  console.log('dashboard');
   useEffect(() => {
     fetch('http://localhost:3000/graphql', {
       method: 'POST',
@@ -181,7 +180,6 @@ export default function Dashboard() {
 
   const index = characters.findIndex(character => character.name === userData?.character);
   const myCharacter = characters[index];
-  console.log("---User--- = ", userData);
 
   if (isLoading)
     return <Loading />

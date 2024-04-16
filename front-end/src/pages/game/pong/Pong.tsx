@@ -193,11 +193,13 @@ const Pong = () => {
 	const [gameData, setGameData] = useState<GameData | null>(null);
 	const [finishedGameData, setFinishedGameData] = useState<FinishedGameData | null>(null);
 	const [alreadyInGame, setAlreadyInGame] = useState(false);
-
+	const [error, setError] = useState<string | null>(null);
 	const urlParams = new URLSearchParams(window.location.search);
 	let mode = urlParams.get('mode') || '';
+	let inviteCode = urlParams.get('inviteCode') || '';
 
-	if (!["online", "offline", "ai", "alter"].includes(mode)) {
+	console.log('MODE', mode, inviteCode);
+	if (!["online", "offline", "ai", "alter", "invite"].includes(mode)) {
 		mode = "400";
 	}
 
@@ -206,7 +208,7 @@ const Pong = () => {
 	useEffect(() => {
 		if (!socket) return;
 
-		socket.emit('startMatch', mode);
+		socket.emit('startMatch', mode, inviteCode);
 
 		socket.on("OnGoal", () => {
 			audio.loop = false;
@@ -224,6 +226,7 @@ const Pong = () => {
 		})
 
 		socket.on("matchStatus", (status: any) => {
+			console.log("STATUS", status);
 			if (!status.matchStatus)
 				setLoading(true);
 			else
@@ -240,6 +243,7 @@ const Pong = () => {
 		})
 
 		socket.on('gameFinished', ({ userId, username, image, character, host, hostScore, guestScore }: { userId: string, username: string, image: string, character: string, host: boolean, hostScore: number, guestScore: number }) => {
+			console.log(username);
 			// Game Finished
 			let data: FinishedGameData = {
 				Id: userId,
@@ -254,7 +258,6 @@ const Pong = () => {
 			setGameLive(false);
 		});
 		socket.on('oppenentData', ({ userId, username, image, character, host }: { userId: string, username: string, image: string, character: string, host: boolean }) => {
-
 			let data: GameData = {
 				p2Id: userId,
 				p2Username: username,
@@ -263,10 +266,16 @@ const Pong = () => {
 				p2Host: host,
 			}
 			setGameData(data);
+		});
+
+		socket.on('Error', ({ message }: { message: string }) => {
+			console.log(message);
+			setError(message);
 		})
+
 		return () => {
 			// Clean up socket listeners if component unmounts
-			socket.emit('endMatch')
+			socket.emit('endMatch');
 		};
 	}, [socket]);
 
@@ -282,6 +291,8 @@ const Pong = () => {
 		);
 	}
 
+	if (error)
+		return error;
 	if (isLoading)
 		return <GameLoading />
 

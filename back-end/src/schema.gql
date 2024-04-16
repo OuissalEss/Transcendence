@@ -225,6 +225,9 @@ input CreateMessageInput {
 }
 
 input CreateNotificationInput {
+  """Invite Code"""
+  inviteCode: String!
+
   """Read status of the notification"""
   isRead: Boolean! = false
 
@@ -432,6 +435,9 @@ type Notification {
   """Date the notification was created"""
   createdAt: DateTime!
   id: ID!
+
+  """InviteCode"""
+  inviteCode: String!
 
   """Read status of the notification"""
   isRead: Boolean!

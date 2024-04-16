@@ -31,7 +31,6 @@ export class Puck {
         this.guestSocket = guestSocket;
         this.mode = mode;
         this.speed = 0;
-        console.log("Mode: ", mode);
     }
 
     getpuck(): Ball {

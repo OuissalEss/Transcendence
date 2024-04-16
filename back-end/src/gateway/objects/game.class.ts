@@ -124,9 +124,9 @@ export class GameState {
 	}
 
 	updatePaddleMovement(playerId: string, side: string, movement: string) {
-		if (side === 'L' && this.leftPaddle.getPaddle().id == playerId && (this.mode === 'online' || this.mode == 'alter')) {
+		if (side === 'L' && this.leftPaddle.getPaddle().id == playerId && (this.mode === 'online' || this.mode == 'alter' || this.mode === 'invite')) {
 			this.leftPaddle.updateMovement(movement);
-		} else if (side === 'L' && this.rightPaddle.getPaddle().id == playerId && (this.mode === 'online' || this.mode == 'alter')) {
+		} else if (side === 'L' && this.rightPaddle.getPaddle().id == playerId && (this.mode === 'online' || this.mode == 'alter' || this.mode === 'invite')) {
 			this.rightPaddle.updateMovement(movement);
 		} else if (side == 'R' && this.mode == "offline") {
 			this.leftPaddle.updateMovement(movement);

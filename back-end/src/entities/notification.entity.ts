@@ -1,11 +1,11 @@
 // notification.entity.ts
-import { Field, ObjectType, ID, registerEnumType} from '@nestjs/graphql';
-import {IsNotEmpty, IsDate, IsEnum, IsString} from 'class-validator';
+import { Field, ObjectType, ID, registerEnumType } from '@nestjs/graphql';
+import { IsNotEmpty, IsDate, IsEnum, IsString } from 'class-validator';
 //import { NotificationType } from 'src/enums/notification.enum';
 import { User } from 'src/entities/user.entity';
 
 
-import {NotifType as NotificationType } from '@prisma/client'; // Import the Prisma-generated Status enum
+import { NotifType as NotificationType } from '@prisma/client'; // Import the Prisma-generated Status enum
 
 @ObjectType()
 export class Notification {
@@ -39,8 +39,8 @@ export class Notification {
    * @type {boolean}
    */
   @Field(() => Boolean, {
-   defaultValue: false,
-   description: 'Read status of the notification'
+    defaultValue: false,
+    description: 'Read status of the notification'
   })
   isRead: boolean;
 
@@ -61,6 +61,16 @@ export class Notification {
   @IsString({ message: 'Receiver ID must be a string' })
   @IsNotEmpty({ message: 'Receiver ID cannot be empty' })
   receiverId: String;
+
+
+  /**
+   * User who sent the notification.
+   * @type {String}
+   */
+  @Field(() => String, { description: 'InviteCode' })
+  @IsString({ message: 'InviteCode must be a string' })
+  @IsNotEmpty({ message: 'InviteCode cannot be empty' })
+  inviteCode?: String;
 
   @Field(() => User, { description: 'User who receive the notification' })
   sender?: User;
@@ -89,6 +99,6 @@ export class Notification {
 
 
 registerEnumType(NotificationType, {
- name: 'NotificationType',
- description: 'The type of the notification',
+  name: 'NotificationType',
+  description: 'The type of the notification',
 });

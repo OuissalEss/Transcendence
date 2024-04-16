@@ -111,6 +111,7 @@ function App() {
     useEffect(() => {
         if (!token) return; // If token is not available, do nothing
 
+        setLoading(true);
         fetch('http://localhost:3000/graphql', {
             method: 'POST',
             headers: {
@@ -132,7 +133,8 @@ function App() {
                     setUserData(data.getUserInfo);
                     setFriends(data.getUserFriends);
                     setUsers(data.getAllUsers);
-                    localStorage.setItem('user', JSON.stringify({ id: data.getUserInfo.id, username: data.getUserInfo.username, icon: data.getUserInfo.filename || '/Avatars/default.jpeg', }));
+                    console.log(data.getUserInfo);
+                    localStorage.setItem('user', JSON.stringify({ id: data.getUserInfo.id, username: data.getUserInfo.username, icon: data.getUserInfo.avatar.filename || '/Avatars/default.jpeg', }));
 
                     // Simulate data fetching delay
                     await new Promise(resolve => setTimeout(resolve, 800)); // 2000 milliseconds delay (2 seconds)

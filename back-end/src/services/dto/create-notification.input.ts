@@ -14,8 +14,8 @@ export class CreateNotificationInput {
   type: NotificationType;
 
   @Field(() => Boolean, {
-        defaultValue: false,
-        description: 'Read status of the notification',
+    defaultValue: false,
+    description: 'Read status of the notification',
   })
   @IsBoolean({ message: 'Is read must be a boolean' })
   isRead: boolean;
@@ -29,4 +29,9 @@ export class CreateNotificationInput {
   @IsString({ message: 'Receiver ID must be a string' })
   @IsNotEmpty({ message: 'Receiver ID cannot be empty' })
   receiverId: string;
+
+  @Field(() => String, { description: 'Invite Code' })
+  @IsString({ message: 'InviteCode must be a string' })
+  @IsNotEmpty({ message: 'InviteCode cannot be empty' })
+  inviteCode?: string;
 }
