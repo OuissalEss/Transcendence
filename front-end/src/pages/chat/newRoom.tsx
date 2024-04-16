@@ -2,7 +2,7 @@ import { ChangeEvent, useState } from "react";
 import { CiCamera, CiLock, CiUnlock } from "react-icons/ci";
 import { IoIosAddCircleOutline, IoIosAddCircle } from "react-icons/io";
 import { MdOutlineAddModerator, MdOutlineCheckCircle, MdOutlineCancel, MdAddModerator } from "react-icons/md";
-import { channelType } from "./interfaces/props";
+import { admins, channelType, members } from "./utils/types";
 import { useMutation } from '@apollo/client';
 import { CREATE_CHANNEL, ADD_MEMBER, ADD_ADMIN } from "../../graphql/mutations";
 import bcrypt from 'bcryptjs';
@@ -37,8 +37,8 @@ const NewRoom: React.FC<{
     const [lock, setLock] = useState(true);
     const [showPasswordContainer, setShowPasswordContainer] = useState(false);
     const friendsItems = JSON.parse(localStorage.getItem('friends') || '{}');
-    const admins: { id: string; name: string; icon: string; }[] = [];
-    const members: { id: string; name: string; icon: string; status: string; blocked: string[]; blocken: string[]; }[] = [];
+    const admins: admins = [];
+    const members: members = [];
 
     const toggleLock = () => {
       setLock((prevState: any) => !prevState);
@@ -93,16 +93,17 @@ const NewRoom: React.FC<{
             name: data.createChannel.owner.username,
             icon: data.createChannel.owner.avatar?.filename
           },
-          admins: data.createChannel.admins.map((admin: { id: string, username: string, avatar: { filename: string } }) => ({
+          admins: data.createChannel.admins.map((admin: any) => ({
             id: admin.id,
             name: admin.username,
             icon: admin.avatar?.filename
           })),
-          members: data.createChannel.members.map((member: { id: string, username: string, avatar: { filename: string }, status: string, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({
+          members: data.createChannel.members.map((member: any) => ({
             id: member.id,
             name: member.username,
             icon: member.avatar?.filename,
             status: member.status,
+            xp: member.xp,
             blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
             blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
           })),
@@ -111,12 +112,12 @@ const NewRoom: React.FC<{
             name: banned.username,
             icon: banned.avatar?.filename
           })),
-          muted: data.createChannel.muted.map((muted: { id: string, username: string, avatar: { filename: string } }) => ({
+          muted: data.createChannel.muted.map((muted: any) => ({
             id: muted.id,
             name: muted.username,
             icon: muted.avatar?.filename
           })),
-          messages: data.createChannel.messages.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
+          messages: data.createChannel.messages.map((message: any) => ({
             text: message.text,
             sender: message.sender,
             senderId: message.senderId,
@@ -162,6 +163,7 @@ const NewRoom: React.FC<{
                 id: result.data.addMember.id,
                 name: result.data.addMember.username,
                 icon: result.data.addMember.avatar?.filename,
+                xp: result.data.addMember.xp,
                 status: result.data.addMember.status,
                 blocked: result.data.addMember.blocked?.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
                 blocken: result.data.addMember.blocking?.map((blocking: { blockerId: string }) => blocking.blockerId),

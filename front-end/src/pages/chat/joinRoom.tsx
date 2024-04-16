@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { IoLockClosed } from "react-icons/io5";
-import { channelType, joinRoomProps, channel } from "./interfaces/props";
+import { joinRoomProps } from "./utils/props";
 import { ALL_CHANNELS } from "../../graphql/queries";
 import { useQuery } from "@apollo/client";
 import defaultPtofileImage from '/Chat/chatBanner.png';
 import { Socket, io } from "socket.io-client";
 import bcrypt from 'bcryptjs';
+import { channelType } from "./utils/types";
 
 
 /**
@@ -34,7 +35,6 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 	// const [socket, setSocket] = useState<Socket>();
 	// let Channels: channelType[] = [];
 	const fetch_channels = async () => {
-
 		if (error) console.log('Channels : Error:', error.message);
 		else if (loading) console.log('Channels : Loading...');
 		else if (data) {
@@ -45,7 +45,7 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 					channel.type !== "DM" &&
 					channel.type !== "PRIVATE"
 				)
-				.map((channel: channel) => ({
+				.map((channel: any) => ({
 					id: channel.id,
 					title: channel.title,
 					description: channel.description,
@@ -65,11 +65,12 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 							icon: admin.avatar?.filename
 						})),
 					members: channel.members
-						.map((member: { id: string, username: string, avatar: { filename: string }, status: string, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({
+						.map((member: any) => ({
 							id: member.id,
 							name: member.username,
 							icon: member.avatar?.filename,
 							status: member.status,
+							xp: member.xp,
 							blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
 							blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
 						})),
@@ -111,21 +112,42 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 		};
 	}, [setSocket]);
 
-	const joinRoom = async (channelId: string) => {
-		// emit a join event to the server
-		// emit an add member event instead of using the mutation
-		socket?.emit('add', { room: channelId, user: user.id })
+	useEffect(() => {
+		socket?.on('userAdded', joinRoom)
+
+		return () => {
+			socket?.off('userAdded', joinRoom)
+		};
+	}, [socket]);
+
+	const joinRoom = async (
+		data: {
+			id: string;
+			name: string;
+			icon: string;
+			status: string;
+			xp: number;
+			blocked: string[];
+			blocken: string[];
+		},
+		room: string,
+		opt: number
+	) => {
+		if (opt !== 1)
+			return ;
 		updateChannels([]);
 		setChannels((prevChannels: channelType[]) => {
 			const newChannels = [...prevChannels];
-			const newChannel = Channels.find((channel: channelType) => channel.id === channelId);
+			const newChannel = Channels.find((channel: channelType) => channel.id === room);
+			// call get user by id query to get everything else
 			newChannel?.members.push({
-				id: user.id,
-				name: user.username,
-				icon: user.avatar?.filename,
-				status: user.status,
-				blocked: [], // to handle later
-				blocken: [],
+				id: data.id,
+				name: data.name,
+				icon: data.icon,
+				status: data.status,
+				xp: data.xp,
+				blocked: data.blocked?.map((blocker: any) => blocker.blockedUserId),
+				blocken: data.blocken?.map((blocking: any) => blocking.blockerId)
 			});
 			if (newChannel) newChannels.push(newChannel);
 			newChannels.sort((a: channelType, b: channelType) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -147,7 +169,8 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 		const isMatch = await bcrypt.compare(password || '', channelPwd || '');
 		if (isMatch) {
 			console.log('Password correct');
-			joinRoom(channelId);
+			socket?.emit('joinRoom', channelId)
+			socket?.emit('add', { room: channelId, user: user.id })
 			setPasswordInputs((prevInputs: { [key: string]: boolean }) => ({
 				...prevInputs,
 				[channelId]: false,
@@ -237,7 +260,8 @@ const JoinRoom: React.FC<joinRoomProps> = ({
 										<button
 											className="channel-request accept-request"
 											onClick={() => {
-												joinRoom(ch.id);
+												socket?.emit('joinRoom', ch.id)
+												socket?.emit('add', { room: ch.id, user: user.id })
 												setId(ch.id);
 												setDisplay('Chat');
 											}}

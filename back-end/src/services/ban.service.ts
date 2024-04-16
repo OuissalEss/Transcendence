@@ -92,7 +92,7 @@ export class BanService {
         });
     }
 	
-    async banUser(cid: string, uid: string): Promise<User> {
+    async banUser(cid: string, uid: string) {
         // check permissions
         let ban = await this.prisma.ban.findFirst({where:{userId: uid, channelId: cid}})
         if (ban) {
@@ -119,7 +119,7 @@ export class BanService {
         });
     }
 
-    async unbanUser(cid: string, uid: string): Promise<User> {
+    async unbanUser(cid: string, uid: string) {
         await this.prisma.ban.deleteMany({
             where: {
                 AND: [{ userId: uid }, { channelId: cid }],

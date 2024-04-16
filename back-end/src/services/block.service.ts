@@ -37,11 +37,6 @@ export class BlockService {
         }
     }
 
-    /**
-     * Gets all block relationships for a user.
-     * @param {string} userId - User ID
-     * @returns {Promise<Block[]>}
-     */
     async getAllBlocks(userId: string): Promise<Block[]> {
         try {
             return this.prisma.block.findMany({
@@ -69,11 +64,6 @@ export class BlockService {
         }
     }
 
-    /**
-    * Gets all block relationships where the user is the blocker.
-    * @param {string} userId - User ID
-    * @returns {Promise<Block[]>}
-    */
     async getBlockedForUser(userId: string): Promise<Block[]> {
         try {
             return this.prisma.block.findMany({
@@ -98,12 +88,6 @@ export class BlockService {
         }
     }
 
-    /**
-     * Unblock a user for the specified user.
-     * @param {string} userId - User ID
-     * @param {string} blockId - Block's ID
-     * @returns {Promise<User>}
-     */
     async unblockUser(userId: string, blockId: string): Promise<Block> {
         try {
             // Check if the provided friendId is a valid id
@@ -150,7 +134,6 @@ export class BlockService {
         }
     }
 
-    // get all the blocks
     async getBlockList(): Promise<Block[]> {
         try {
             return await this.prisma.block.findMany();
@@ -161,15 +144,12 @@ export class BlockService {
 
     async blockUser(blockerId: string, blockedUserId: string): Promise<User> {
         try {
-            // if (!this.isBlocked(blockerId, blockedUserId)) {
             await this.prisma.block.create({
                 data: {
                     blockerId: blockerId,
                     blockedUserId: blockedUserId,
                 },
             });
-            // }
-
             return this.prisma.user.findUnique({
                 where: {
                     id: blockedUserId,

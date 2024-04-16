@@ -234,6 +234,16 @@ export const CHANNEL_USER_BY_ID = gql`
   query GetChannelUserById($id: String!) {
     getChannelUserById(id: $id) {
       id
+      username
+      avatar{filename}
+      status
+      xp
+      blocked {
+        blockedUserId
+      }
+      blocking {
+        blockerId
+      }
     }
   }
 `;

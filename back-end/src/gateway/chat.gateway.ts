@@ -70,11 +70,9 @@ export class ChatGateway {
     async handleLeaveRoom(@MessageBody() data: { room: string; user: string }) {
         try {
             const { room, user } = data;
-            // this.server.to(room).emit('userLeft');
-            // this.server.emit('removeUser', room, user);
             const User = await this.channel.leaveChannel(room, user);
             this.logger.log(`Client left room: ${room} User: ${User.id}`);
-            this.server.to(room).emit('userRemoved', { id: User.id, name: User.username, icon: undefined, status: User.status }, room, 0);
+            this.server.to(room).emit('userRemoved', { id: User.id, name: User.username, icon: User.avatar.filename, status: User.status }, room, 0);
             this.server.emit('remove', room, user);
             // this.server.socketsLeave(room);
         } catch (e) {
@@ -138,7 +136,7 @@ export class ChatGateway {
             const { room, user, duration, permanent } = data;
             this.logger.log(`Client is muting user: ${user} in room: ${room}`);
             const User = await this.mute.muteUser(room, user, duration, permanent);
-            this.server.to(room).emit('mutedAdded', { id: user, name: User.username, icon: undefined }, 1);
+            this.server.to(room).emit('mutedAdded', { id: user, name: User.username, icon: User.avatar.filename }, 1);
 
         } catch (e) {
             this.logger.error(e);
@@ -151,7 +149,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is unmuting user: ${user} in room: ${room}`);
             const User = await this.mute.unmuteUser(room, user);
-            this.server.to(room).emit('mutedRemoved', { id: user, name: User.username, icon: undefined }, 0);
+            this.server.to(room).emit('mutedRemoved', { id: user, name: User.username, icon: User.avatar.filename }, 0);
         } catch (e) {
             this.logger.error(e);
         }
@@ -163,7 +161,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is banning user: ${user} in room: ${room}`);
             const User = await this.ban.banUser(room, user);
-            this.server.to(room).emit('userBanned', { id: User.id, name: User.username, icon: undefined }, room, 1);
+            this.server.to(room).emit('userBanned', { id: User.id, name: User.username, icon: User.avatar.filename }, room, 1);
             this.server.emit('remove', room, user);
         } catch (e) {
             this.logger.error(e);
@@ -176,7 +174,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is unbanning user: ${user} in room: ${room}`);
             const User = await this.ban.unbanUser(room, user);
-            this.server.to(room).emit('userUnbanned', { id: User.id, name: User.username, icon: undefined }, room, 0);
+            this.server.to(room).emit('userUnbanned', { id: User.id, name: User.username, icon: User.avatar.filename }, room, 0);
 
         } catch (e) {
             this.logger.error(e);
@@ -190,7 +188,8 @@ export class ChatGateway {
             this.logger.log(`Client is adding user: ${user} in room: ${room}`);
             const User = await this.channel.addMember(room, user);
             this.server.emit('addRoom', room);
-            this.server.to(room).emit('userAdded', { id: User.id, name: User.username, icon: User.avatar.filename, status: User.status, xp: User.xp }, room, 1);
+            this.server.socketsJoin(room);
+            this.server.to(room).emit('userAdded', { id: User.id, name: User.username, icon: User.avatar.filename, status: User.status, xp: User.xp}, room, 1);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -202,7 +201,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is removing user: ${user} in room: ${room}`);
             const User = await this.channel.removeMember(room, user);
-            this.server.to(room).emit('userRemoved', { id: User.id, name: User.username, icon: undefined, status: User.status }, room, 0);
+            this.server.to(room).emit('userRemoved', { id: User.id, name: User.username, icon: User.avatar.filename, status: User.status }, room, 0);
             this.server.emit('remove', room, user);
         } catch (e) {
             this.logger.error(e);
@@ -215,7 +214,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is adding user: ${user} as a mod in room: ${room}`);
             const User = await this.channel.addAdmin(room, user);
-            this.server.to(room).emit('adminAdded', {id: User.id, name: User.username, icon: undefined}, 1);
+            this.server.to(room).emit('adminAdded', {id: User.id, name: User.username, icon: User.avatar.filename}, 1);
         } catch (e) {
             this.logger.error(e);
         } 
@@ -227,7 +226,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is removing user: ${user} as a mod in room: ${room}`);
             const User = await this.channel.removeAdmin(room, user);
-            this.server.to(room).emit('adminRemoved', {id: User.id, name: User.username, icon: undefined}, 0);
+            this.server.to(room).emit('adminRemoved', {id: User.id, name: User.username, icon: User.avatar.filename}, 0);
         } catch (e) {
             this.logger.error(e);
         } 

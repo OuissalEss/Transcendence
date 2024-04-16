@@ -10,8 +10,8 @@ import { CiCamera, CiLock, CiUnlock } from "react-icons/ci";
 import { FaAngleDown, FaAngleUp, FaChevronLeft, FaChevronRight, FaPen } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { MdBlock } from "react-icons/md";
-import { chatProps, PasswordSettingsProps, ChannelSettingsProps } from "./interfaces/props";
-import { channelType } from "./interfaces/props";
+import { chatProps, PasswordSettingsProps, ChannelSettingsProps } from "./utils/props";
+import { admins, banned, channelType, members, messages, muted, owner } from "./utils/types";
 import io, { Socket } from 'socket.io-client';
 import { useMutation } from "@apollo/client";
 import { UPDATE_CHANNEL_DESCRIPTION, UPDATE_CHANNEL_PASSWORD, UPDATE_CHANNEL_PROFILE_IMAGE, UPDATE_CHANNEL_TITLE, UPDATE_CHANNEL_TYPE } from "../../graphql/mutations";
@@ -368,7 +368,7 @@ const ChannelSettings_1: React.FC<ChannelSettingsProps> = ({
 							<div key={index} className="friend-box">
 								<div className="friend-profile" style={{ backgroundImage: `url(${member.icon})` }}></div>
 								<div className="username-box">{`@${member.name}`}</div>
-								{/* <div className="level-indicator">{`Level ${member.xp / 100}`}</div> */}
+								<div className="level-indicator">{`Level ${member.xp / 100}`}</div>
 								<div className="settings">
 									<Dropdown
 										channel={channel}
@@ -402,41 +402,17 @@ const ChannelSettings_2 = ({
 	channel: channelType;
 	setNextPage: React.Dispatch<React.SetStateAction<boolean>>;
 	socket?: Socket;
-	banned: {
-		id: string;
-		name: string;
-		icon: string;
-	}[];
-	muted: {
-		id: string;
-		name: string;
-		icon: string;
-		duration?: number;
-		isMuted?: boolean;
-		isPermanent?: boolean;
-	}[];
-	members: {
-		id: string;
-		name: string;
-		icon: string;
-		status: string;
-	}[];
-	admins: {
-		id: string;
-		name: string;
-		icon: string;
-	}[];
-	owner: {
-		id: string;
-		name: string;
-		icon: string;
-	};
+	banned: banned;
+	muted: muted;
+	members: members;
+	admins: admins;
+	owner: owner;
 }) => {
-	console.log("admins : ", admins);
-	console.log("owner : ", owner);
+	// console.log("admins : ", admins);
+	// console.log("owner : ", owner);
 	// console.log("members : ", members);
-	console.log("banned : ", banned);
-	console.log("muted : ", muted);
+	// console.log("banned : ", banned);
+	// console.log("muted : ", muted);
 	return (
 		<div className="flex-container">
 			{admins && (
@@ -598,13 +574,12 @@ const Dropdown = ({
 }: {
 	channel: channelType;
 	socket?: Socket;
-	admins: { id: string, name: string, icon: string }[] | [];
-	owner: { id: string, name: string, icon: string };
+	admins: admins | [];
+	owner: owner;
 	memeberId: string;
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isDoubleOpen, setIsDoubleOpen] = useState(false);
-	// const [updateUserType] = useMutation(UPDATE_CHANNEL_TYPE_USER);
 	const toggleDropdown = () => {
 		setIsOpen(!isOpen);
 		setIsDoubleOpen(false);
@@ -655,7 +630,7 @@ const Dropdown = ({
 							Visite Profile
 						</a>
 					</li>
-					{(owner.name === user.username || admins.some(admin => admin.name === user.username)) && (
+					{(owner.id === user.id || (admins.some(admin => admin.name === user.username)) && memeberId !== owner.id) && (
 						<><li>
 							<button
 								id="doubleDropdownButton"
@@ -700,7 +675,7 @@ const Dropdown = ({
 									Kick
 								</a>
 							</li>
-							{owner.name === user.username && (
+							{owner.id === user.id && (
 								<li>
 									{admins.some((admin) => admin.id === memeberId) ? (
 										<a
@@ -749,12 +724,12 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const channel: channelType = channels.find((channel: { id: string; }) => channel.id === id) || channels[0];
 	if (!channel)
 		setDisplay("");
-	const [messages, setMessages] = useState<{ id: string; text: string; sender: string; senderId: string; time: Date; read: boolean; }[]>(channel?.messages || []);
-	const [members, setMembers] = useState<{ id: string, name: string, icon: string, status: string, blocked: string[], blocken: string[] }[]>(channel?.members || []);
-	const [banList, setBanList] = useState<{ id: string, name: string, icon: string }[]>(channel.banned || []);
-	const [muteList, setMuteList] = useState<{ id: string, name: string, icon: string }[]>(channel.muted || []);
-	const [modList, setModList] = useState<{ id: string, name: string, icon: string }[]>(channel.admins || []);
-	const [owner, setOwner] = useState<{ id: string, name: string, icon: string }>(channel.owner || {});
+	const [messages, setMessages] = useState<messages>(channel?.messages || []);
+	const [members, setMembers] = useState<members>(channel?.members || []);
+	const [banList, setBanList] = useState<banned>(channel.banned || []);
+	const [muteList, setMuteList] = useState<muted>(channel.muted || []);
+	const [modList, setModList] = useState<admins>(channel.admins || []);
+	const [owner, setOwner] = useState<owner>(channel.owner || {});
 
 	const updateChannel = async (channel: channelType, socket: Socket | undefined) => {
 
@@ -773,13 +748,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		socket?.emit("channelUpdate", { data: { password: channel.password, type: channel.type }, opt: 3, room: channel.id });
 	}
 
-	/**
-	 * add two fields to the user entity blocked and blocking to the quieried channels in channeltype and channel 
-	 * add a use sate to store the blocked and the setter the blocking qont change no need to handle
-	 * add a function to user service who takes uid and checks for 
-	 */
-
-	let member: any = undefined;
+	let member: {id: string, name: string, icon: string, status: string, blocked: string[], blocken: string[]} | undefined = undefined
 	if (channel.type === "DM")
 		member = channel.members.find((member: { name: string; }) => member.name !== user.username);
 	const memberListner = (
@@ -788,6 +757,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			name: string;
 			icon: string;
 			status: string;
+			xp: number;
 			blocked: string[];
 			blocken: string[];
 		},
@@ -819,25 +789,26 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 							name: data.channel.owner.username,
 							icon: data.channel.owner.avatar?.filename
 						},
-						admins: data.channel.admins.map((admin: { id: string, username: string, avatar: { filename: string } }) => ({
+						admins: data.channel.admins.map((admin: any) => ({
 							id: admin.id,
 							name: admin.username,
 							icon: admin.avatar?.filename
 						})),
-						members: data.channel.members.map((member: { id: string, username: string, avatar: { filename: string }, status: string, blocked: { blockedUserId: string }[], blocking: { blockerId: string }[] }) => ({
+						members: data.channel.members.map((member: any) => ({
 							id: member.id,
 							name: member.username,
 							icon: member.avatar?.filename,
 							status: member.status,
+							xp: member.xp,
 							blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
 							blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
 						})),
-						banned: data.channel.banned.map((banned: { id: string, username: string, avatar: { filename: string } }) => ({
+						banned: data.channel.banned.map((banned: any) => ({
 							id: banned.id,
 							name: banned.username,
 							icon: banned.avatar?.filename
 						})),
-						muted: data.channel.muted.map((muted: { id: string, username: string, avatar: { filename: string } }) => ({
+						muted: data.channel.muted.map((muted: any) => ({
 							id: muted.id,
 							name: muted.username,
 							icon: muted.avatar?.filename
@@ -1007,12 +978,10 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 						time: data.time,
 						read: (data.sender !== user.username) ? true : false,
 					};
-					// if read is set to true decrease the unread count and update the read via a mutation or emit an event to the server
-					// else if read is false emit an event to the server so that it can appear in the sidebar
 					if (message.read)
 						socket?.emit('readMessage', { messageId: message.id, userId: user.id, roomId: id });
 					else
-						socket?.emit("unreadMessage", data.senderId); // listen on this event in the sidebar component
+						socket?.emit("unreadMessage", data.senderId);
 					channel.messages = [...channel.messages, message];
 					channel.messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
@@ -1021,8 +990,8 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			});
 			// to mark the message as seen , check if the user is the receiver is in the chat (display = chat) and the dm is opened id = room
 			updatedChannels.sort((a: any, b: any) => {
-				const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : new Date(0); // replace 0 with the last updated time
-				const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : new Date(0);
+				const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : a.updatedAt; // replace 0 with the last updated time
+				const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : b.updatedAt;
 				return new Date(msg2).getTime() - new Date(msg1).getTime();
 			})
 
@@ -1048,19 +1017,22 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 				icon: data.ChannelById.profileImage,
 				updatedAt: data.ChannelById.updatedAt,
 				members: data.ChannelById.members
-					.map((member: { id: string, username: string, avatar: { filename: string }, status: string }) => ({
+					.map((member: any) => ({
 						id: member.id,
 						name: member.username,
 						icon: member.avatar?.filename,
 						status: member.status,
+						xp: member.xp,
+						blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
+						blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
 					})),
-				muted: data.ChannelById.muted.map((muted: { id: string, username: string, avatar: { filename: string } }) => ({
+				muted: data.ChannelById.muted.map((muted: any) => ({
 					id: muted.id,
 					name: muted.username,
 					icon: muted.avatar?.filename
 				})),
 				messages: data.ChannelById.messages
-					.map((message: { id: string, text: string, time: Date, sender: string, senderId: string }) => ({
+					.map((message: any) => ({
 						text: message.text,
 						sender: message.sender,
 						senderId: message.senderId,
@@ -1071,7 +1043,6 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			};
 			setChannels((prevChannels: any) => {
 				const updatedChannels = [...prevChannels, newChannel];
-				// Sort the channels by the most recently updated
 				updatedChannels.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 				setId(roomId);
 				return updatedChannels;
@@ -1082,10 +1053,10 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 	const handleBlock = (data: { blockerId: string, blockedUserId: string }) => {
 		if (member) {
 			if (member.id === data.blockerId) {
-				member.blocken = member.blocken?.push(data.blockerId)
+				member.blocken = member.blocken ? [...member.blocken, data.blockerId] : [data.blockerId];
 			}
 			if (member.id === data.blockedUserId) {
-				member.blocked = member.blocked?.push(data.blockedUserId);
+				member.blocked = member.blocked ? [...member.blocked, data.blockedUserId] : [data.blockedUserId];
 			}
 
 		}
@@ -1164,9 +1135,6 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		setChannels((prevChannels: any) => [channel, ...prevChannels]);
 	}
 
-	// handle the messages read status once the user access the channel
-
-
 	useEffect(() => {
 		socket?.on('messageSent', messageListner);
 		socket?.on('userAdded', memberListner);
@@ -1196,7 +1164,7 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 			socket?.off('userUnblocked', handleUnblock);
 			socket?.off('updateChannel', handleChannelUpdates);
 		}
-	}, [handleUnblock, handleChannelUpdates, memberListner, adminListner, bannedListner, mutedListner, messageListner, handleSendDm, handleBlock]);
+	}, [socket]);
 
 	useEffect(() => {
 		setLock(channel.type !== "PUBLIC");
@@ -1227,8 +1195,8 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 		if (inputMessage.trim() !== '' && socket) {
 			socket.emit('sendMessage', { room: channel.id, text: inputMessage, sender: user.id });
 			setInputMessage('');
-			if (isTyping)
-				socket.emit('stopTyping', channel.id);
+			setIsTyping(false);
+			socket.emit('stopTyping', channel.id);
 			scrollToBottom()
 		}
 	};
@@ -1374,12 +1342,9 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 													<HiOutlineSpeakerWave className="w-10 h-10" />
 												</li>
 
-											) : !channel.muted?.find((mute: any) => mute.id === user.id) && (
+											) : !channel.muted?.find((mute: any) => mute.id === user.id) ? (
 
-												<><li
-													onClick={() => {
-														socket?.emit('muteUser', { room: channel.id, user: member?.id, duration: null, permanent: true });
-													}}><IoVolumeMuteSharp className="w-10 h-10" /></li>
+												<>
 													<li
 														className="chat__details d-flex d-xl-none"
 														onClick={() => {
@@ -1388,7 +1353,19 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 														}}
 													>
 														<GiPingPongBat className="w-10 h-10" />
-													</li></>
+													</li>
+													<li
+													onClick={() => {
+														socket?.emit('muteUser', { room: channel.id, user: member?.id, duration: null, permanent: true });
+													}}><IoVolumeMuteSharp className="w-10 h-10" />
+												</li>
+													</>
+											) : (
+												<li
+													onClick={() => {
+														socket?.emit('muteUser', { room: channel.id, user: member?.id, duration: null, permanent: true });
+													}}><IoVolumeMuteSharp className="w-10 h-10" />
+												</li>
 											)}
 
 											<li
@@ -1519,7 +1496,6 @@ const Chat: React.FC<chatProps> = ({ id, channels, setChannels, setDisplay, setI
 												onKeyDown={(e) => {
 													if (e.key === "Enter") {
 														handleSendMessage();
-														setIsTyping(false);
 													}
 												}}
 											/>

@@ -27,6 +27,7 @@ export const ADD_MEMBER = gql`
       username
       avatar{filename}
       status
+      xp
       blocked {
         blockedUserId
       }
@@ -61,6 +62,7 @@ export const CREATE_CHANNEL = gql`
         username
         avatar{filename}
         status
+        xp
         blocked {
           blockedUserId
         }

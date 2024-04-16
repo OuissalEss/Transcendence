@@ -131,6 +131,9 @@ export class MuteService {
                 where: {
                     id: uid,
                 },
+                include: {
+                    avatar: true,
+                }
             });
 
             if (existingMute) {
@@ -180,6 +183,9 @@ export class MuteService {
                 where: {
                     id: uid,
                 },
+                include: {
+                    avatar: true,
+                }
             });
         } catch (e) {
             this.logger.error(e);

@@ -1,5 +1,6 @@
 import { ChangeEvent } from "react";
 import { Socket } from "socket.io-client";
+import { admins, channelType, members, owner } from "./types";
 
 export interface AvatarSelectionProps {
     currentCharacterIndex: number;
@@ -87,116 +88,9 @@ export interface ChannelSettingsProps {
 	setChangePwd: React.Dispatch<React.SetStateAction<boolean>>;
 	setNextPage: React.Dispatch<React.SetStateAction<boolean>>;
 	socket?: Socket | undefined;
-	members: {
-		id: string;
-		name: string;
-		icon: string;
-		status: string;
-	}[];
-	admins: {
-		id: string;
-		name: string;
-		icon: string;
-	}[];
-	owner: {
-		id: string;
-		name: string;
-		icon: string;
-	};
+	members: members;
+	admins: admins;
+	owner: owner;
 	updateChannel: (channel: channelType, socket: Socket | undefined) => Promise<void>;  
 
 };
-
-export type channel = {
-	id: string,
-	title: string,
-	description: string,
-	type: string,
-	password: string | null,
-	profileImage: string,
-	updatedAt: Date,
-	owner: {
-	  id: string,
-	  username: string,
-	  avatar:{filename: string}
-	},
-	admins: {
-	  id: string,
-	  username: string,
-	  avatar:{filename: string}
-	}[],
-	members: {
-	  id: string,
-	  username: string,
-	  avatar:{filename: string},
-	  status: string,
-	  blocked: {
-		blockedUserId: string;
-	  }[]
-	  blocking: {
-		blockerId: string;
-	  }[]
-	}[],
-	banned: {
-	  id: string,
-	  username: string,
-	  avatar:{filename: string} }[],
-	muted: {
-	  id: string,
-	  username: string,
-	  avatar:{filename: string} }[],
-	messages: {
-	  id: string,
-	  text: string,
-	  time: Date,
-	  sender: string,
-	  senderId: string,
-	  read: boolean,
-	}[] 
-}
-
-export type channelType = {
-	id: string,
-	title: string,
-	description: string,
-	type: string,
-	password: string | null,
-	icon: string,
-	updatedAt: Date,
-	owner: {
-	  id: string,
-	  name: string,
-	  icon: string
-	},
-	admins: {
-	  id: string,
-	  name: string,
-	  icon: string
-	}[],
-	members: {
-	  id: string,
-	  name: string,
-	  icon: string,
-	  status: string,
-	  blocked: string[];
-	  blocken: string[];
-	}[],
-	banned: {
-	  id: string,
-	  name: string,
-	  icon: string
-	}[],
-	muted: {
-	  id: string,
-	  name: string,
-	  icon: string
-	}[],
-	messages: {
-	  id: string,
-	  text: string,
-	  sender: string,
-	  senderId: string,
-	  time: Date,
-	  read: boolean,
-	}[]
-  };

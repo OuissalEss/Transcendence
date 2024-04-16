@@ -4,7 +4,7 @@ import './chat.css';
 import { useEffect, useState } from 'react';
 import NewRoom from './newRoom';
 import JoinRoom from './joinRoom';
-import { channel, channelType } from './interfaces/props';
+import { channelType } from './utils/types';
 import { useQuery } from '@apollo/client';
 import { ALL_CHANNELS } from '../../graphql/queries';
 import NoChatIcon from '/Chat/NoChatIcon.png';
@@ -36,7 +36,7 @@ function ChatPageContainer() {
       console.log('All channels:', data);
       // extract the channels from the data
       const temp = data.AllChannels
-        .map((channel: channel) => ({
+        .map((channel: any) => ({
           id: channel.id,
           title: channel.title,
           description: channel.description,
@@ -50,33 +50,33 @@ function ChatPageContainer() {
             icon: channel.owner.avatar?.filename
           },
           admins: channel.admins
-            .map((admin: { id: string, username: string, avatar: { filename: string } }) => ({
+            .map((admin: any) => ({
               id: admin.id,
               name: admin.username,
               icon: admin.avatar?.filename
             })),
           members: channel.members
-            .map((member: { id: string, username: string, avatar: { filename: string }, status: string, blocked: { blockedUserId: string; }[], blocking: { blockerId: string; }[] }) => ({
+            .map((member: any) => ({
               id: member.id,
               name: member.username,
               icon: member.avatar?.filename,
               status: member.status,
-              // xp: member.xp,
+              xp: member.xp,
               blocked: member.blocked.map((blocker: { blockedUserId: string }) => blocker.blockedUserId),
               blocken: member.blocking.map((blocking: { blockerId: string }) => blocking.blockerId)
             })),
-          banned: channel.banned.map((banned: { id: string, username: string, avatar: { filename: string } }) => ({
+          banned: channel.banned.map((banned: any) => ({
             id: banned.id,
             name: banned.username,
             icon: banned.avatar?.filename
           })),
-          muted: channel.muted.map((muted: { id: string, username: string, avatar: { filename: string } }) => ({
+          muted: channel.muted.map((muted: any) => ({
             id: muted.id,
             name: muted.username,
             icon: muted.avatar?.filename
           })),
           messages: channel.messages
-            .map((message: { id: string, text: string, time: Date, sender: string, senderId: string, read: boolean }) => ({
+            .map((message: any) => ({
               id: message.id,
               text: message.text,
               sender: message.sender,
@@ -86,8 +86,8 @@ function ChatPageContainer() {
             })).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
         }))
       temp.sort((a: any, b: any) => {
-        const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : new Date(0);
-        const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : new Date(0);
+        const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : a.updatedAt;
+        const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : b.updatedAt;
         return new Date(msg2).getTime() - new Date(msg1).getTime();
       })
       console.log("USER: ", user);
