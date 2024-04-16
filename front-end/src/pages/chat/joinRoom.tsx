@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { IoLockClosed } from "react-icons/io5";
 import { channelType, joinRoomProps, channel } from "./interfaces/props";
 import { ALL_CHANNELS } from "../../graphql/queries";
-import { useMutation, useQuery } from "@apollo/client";
-import { ADD_MEMBER } from "../../graphql/mutations";
+import { useQuery } from "@apollo/client";
 import defaultPtofileImage from '/Chat/chatBanner.png';
 import { Socket, io } from "socket.io-client";
 import bcrypt from 'bcryptjs';
@@ -19,14 +18,14 @@ import bcrypt from 'bcryptjs';
  */
 
 const JoinRoom: React.FC<joinRoomProps> = ({
-	channels,
+	// channels,
 	setChannels,
 	setDisplay,
 	setId,
 }) => {
 	const [passwordInputs, setPasswordInputs] = useState<{ [key: string]: boolean }>({});
 	const [response, setResponse] = useState<{ [key: string]: boolean }>({});
-	const [addMember] = useMutation(ADD_MEMBER);
+	// const [addMember] = useMutation(ADD_MEMBER);
 	const [password, setPassword] = useState('');
 	const user = JSON.parse(localStorage.getItem('user') || '{}');
 	const { loading, error, data } = useQuery(ALL_CHANNELS);

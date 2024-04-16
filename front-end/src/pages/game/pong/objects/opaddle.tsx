@@ -34,7 +34,7 @@ export class oPaddle {
         this.ychange = 0;
 
         this.socket = socket;
-        this.x = this.isLeft ? this.w + 2: gameConfig.canvasWidth - this.w - 2;
+        this.x = this.isLeft ? this.w + 2 : gameConfig.canvasWidth - this.w - 2;
     }
 
     update(op: any) {
@@ -43,14 +43,16 @@ export class oPaddle {
         this.w = op.w;
         this.h = op.h;
         this.height = op.height;
-        this.width  = op.width;
+        this.width = op.width;
         this.speed = op.speed;
+        this.speed;
+        this.ychange;
         // Calculate the scale factor for both width and height
         const widthScaleFactor = gameConfig.canvasWidth / this.width;
         const heightScaleFactor = gameConfig.canvasHeight / this.height;
 
         // Update width and height properties
-        this.width = gameConfig.canvasWidth ;
+        this.width = gameConfig.canvasWidth;
         this.height = gameConfig.canvasHeight;
 
         this.w = 14;
@@ -64,7 +66,7 @@ export class oPaddle {
         this.x *= widthScaleFactor;
         this.y *= heightScaleFactor;
 
-        this.x = this.isLeft ? this.w + 2: gameConfig.canvasWidth - this.w - 2;
+        this.x = this.isLeft ? this.w + 2 : gameConfig.canvasWidth - this.w - 2;
 
         if (this.isLeft) {
             if (this.p.keyIsDown(87)) { // 'W' key
@@ -89,7 +91,7 @@ export class oPaddle {
         this.y = gameConfig.canvasHeight / 2;
 
         this.w = gameConfig.paddleWidth;
-        this.h = gameConfig.canvasHeight / 5 ;
+        this.h = gameConfig.canvasHeight / 5;
 
         this.speed = 5;
         this.ychange = 0;

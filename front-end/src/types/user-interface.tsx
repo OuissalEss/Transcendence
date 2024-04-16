@@ -17,10 +17,12 @@ export default interface User {
     }
     achievements: {
         achievement: string;
-    },
-    blocking: Block,
-    winner: Match,
-    loser: Match,
-    host: Match,
-    guest: Match,
+        createdAt: string
+    }[],
+    blocking: Block[],
+    winner: Match[],
+    loser: Match[],
+    host: Match[],
+    guest: Match[],
+    createdAt: string,
 }

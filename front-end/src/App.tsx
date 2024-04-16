@@ -1,17 +1,12 @@
 // app.tsx
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import Routes from './routes';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import Routes from './routes/index.tsx';
 import { io, Socket } from 'socket.io-client';
 
 import './assets/home.css'
 import { useAuth } from "./provider/authProvider.tsx";
-import { gql, useQuery } from "@apollo/client";
 import User from "./types/user-interface.tsx";
 import Loading from "./components/Loading.tsx";
-import GameLoading from './components/GameLoading.tsx';
-import DashboardLayout from './layouts/LayoutDefault.tsx';
-import { Router } from 'react-router-dom';
-import Chat from './pages/Chat.tsx';
 
 interface SocketContextType {
     socket: Socket | undefined;
@@ -169,7 +164,8 @@ function App() {
 
     const contextValue = useMemo(() => ({ socket, connected, userData, friends, users }), [socket, connected, userData, friends, users]);
 
-    console.log('app');
+    if (isLoading) return <Loading />
+
     return (
         <SocketContext.Provider value={contextValue}>
             <Routes />

@@ -84,8 +84,8 @@ function ChatPageContainer() {
             })).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime()),
         }))
       temp.sort((a: any, b: any) => {
-        const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : a.updatedAt;
-        const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : b.updatedAt;
+        const msg1 = a.messages.length > 0 ? a.messages[a.messages.length - 1].time : new Date(0);
+        const msg2 = b.messages.length > 0 ? b.messages[b.messages.length - 1].time : new Date(0);
         return new Date(msg2).getTime() - new Date(msg1).getTime();
       })
       console.log("USER: ", user);
@@ -101,7 +101,7 @@ function ChatPageContainer() {
       <div className="chat-container">
         {display === '' && <NoChannelSelected />}
         {display === 'JoinRoom' && <JoinRoom channels={channels} setChannels={setChannels} setDisplay={setDisplay} setId={setId} />}
-        {display === 'NewRoom' && <NewRoom setDisplay={setDisplay} setChannels={setChannels} />}
+        {display === 'NewRoom' && <NewRoom channels={channels} setDisplay={setDisplay} setChannels={setChannels} />}
         {display === 'Chat' && <Chat id={id} channels={channels} setChannels={setChannels} setDisplay={setDisplay} setId={setId} />}
       </div>
     </>

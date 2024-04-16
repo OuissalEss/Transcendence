@@ -1,6 +1,5 @@
 import './assets/Start.css';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 
 import LogoImage from '/logo.png';
@@ -106,7 +105,6 @@ function Start() {
   const [username, setUsername] = useState("");
   const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
   const [isCharacterSelected, setIsCharacterSelected] = useState(false);
-  const navigate = useNavigate();
   const currentCharacter = characters[currentCharacterIndex];
   const { token } = useAuth();
   const userData = getProfile();
@@ -159,7 +157,7 @@ function Start() {
   function handleStartButtonClick() {
     if (username && username.trim() != '' && isCharacterSelected) {
       updateUser({ variables: { user_name: username, char_name: currentCharacter.name } })
-        .then(async (response) => {
+        .then(async () => {
 
           const res = await fetch('http://localhost:3000/validateLogin', {
             method: 'GET',
@@ -194,7 +192,7 @@ function Start() {
 
   return (
     <div className="Start">
-        <img src={LogoImage} className="LogoImageStart" alt="LogoImage" referrerPolicy="no-referrer" />
+      <img src={LogoImage} className="LogoImageStart" alt="LogoImage" referrerPolicy="no-referrer" />
       <header className="Start-header mt-[50px]">
         <div className="Texto">
           <p className="Line">Welcome, Champion!</p>
@@ -215,15 +213,15 @@ function Start() {
             <p className="CharacterText">Click to choose your character</p>
           </button>
 
-          <img src={userData.avatar.filename} className="AvatarStart" alt="Avatar" />
+          <img src={userData.avatar.filename} className="AvatarStart" alt="Avatar"referrerPolicy="no-referrer"/>
           <div className="NameStart">
             <p className="CharacterNameStart">{currentCharacter.name}</p>
           </div>
 
-          <img src={currentCharacter.image} className={`CharacterImageStart ${isCharacterSelected ? 'Selected' : ''}`} alt={currentCharacter.name} referrerPolicy="no-referrer"/>
-          <img src={currentCharacter.infos} className="CharacterInfosStart" alt={`${currentCharacter.name} Infos`} referrerPolicy="no-referrer"/>
-          <img src={ChevronLeft} className="ChevronLeftStart" alt="ChevronLeftStart" onClick={handleLeftChevronClick} referrerPolicy="no-referrer"/>
-          <img src={ChevronRight} className="ChevronRightStart" alt="ChevronRightStart" onClick={handleRightChevronClick} referrerPolicy="no-referrer"/>
+          <img src={currentCharacter.image} className={`CharacterImageStart ${isCharacterSelected ? 'Selected' : ''}`} alt={currentCharacter.name} referrerPolicy="no-referrer" />
+          <img src={currentCharacter.infos} className="CharacterInfosStart" alt={`${currentCharacter.name} Infos`} referrerPolicy="no-referrer" />
+          <img src={ChevronLeft} className="ChevronLeftStart" alt="ChevronLeftStart" onClick={handleLeftChevronClick} referrerPolicy="no-referrer" />
+          <img src={ChevronRight} className="ChevronRightStart" alt="ChevronRightStart" onClick={handleRightChevronClick} referrerPolicy="no-referrer" />
         </div>
       </header>
       {isShowAlert &&

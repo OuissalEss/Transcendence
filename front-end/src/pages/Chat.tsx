@@ -9,6 +9,7 @@ const Chat = () => {
     const sendMessage = () => {
         // socket.emit('message', newMessage);
         setNewMessage('');
+        setMessages([]);
     };
     console.log('chat')
 

@@ -4,14 +4,12 @@ import QRCode from 'qrcode.react'; // Import QRCode library
 import copyIcon from "/Icons/copy1.png"
 import '../assets/tfactive.css'
 import Cookies from "js-cookie";
-import { gql } from "@apollo/client";
-import { useMutation } from '@apollo/react-hooks'
 
-const TwoFactorAuthentication = ({ onClose }: {onClose: any}) => {
+const TwoFactorAuthentication = ({ onClose }: { onClose: any }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const [secret, setSecret] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
-    const { token, setToken } = useAuth();
+    const { token } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -88,8 +86,8 @@ const TwoFactorAuthentication = ({ onClose }: {onClose: any}) => {
     };
 
     const [inputs, setInputs] = useState(['', '', '', '', '', '']);
-    const inputRefs = useRef([]);
-    const handleInputChange = (index, e) => {
+    const inputRefs = useRef<any>([]);
+    const handleInputChange = (index: any, e: any) => {
         const { value } = e.target;
         const newInputs = [...inputs];
         newInputs[index] = value;
@@ -101,7 +99,7 @@ const TwoFactorAuthentication = ({ onClose }: {onClose: any}) => {
         }
     };
 
-    const handleKeyDown = (index, e) => {
+    const handleKeyDown = (index: any, e: any) => {
         if (e.key === 'Backspace' && inputs[index] === '' && index > 0) {
             // Move focus to the previous input on Backspace press
             inputRefs.current[index - 1].focus();
@@ -131,7 +129,7 @@ const TwoFactorAuthentication = ({ onClose }: {onClose: any}) => {
                                 <div className="codeValue">{secret}</div>
                                 <div className="icon" onClick={copyCodeToClipboard}>
                                     <span title="Copy">
-                                        <img src={copyIcon} alt="Copy Icon" referrerPolicy="no-referrer"/>
+                                        <img src={copyIcon} alt="Copy Icon" referrerPolicy="no-referrer" />
                                     </span>
                                 </div>
                             </div>
@@ -146,7 +144,7 @@ const TwoFactorAuthentication = ({ onClose }: {onClose: any}) => {
                                             key={index}
                                             ref={(el) => (inputRefs.current[index] = el)}
                                             type="text"
-                                            maxLength="1"
+                                            maxLength={1}
                                             value={value}
                                             onChange={(e) => handleInputChange(index, e)}
                                             onKeyDown={(e) => handleKeyDown(index, e)}
@@ -161,7 +159,7 @@ const TwoFactorAuthentication = ({ onClose }: {onClose: any}) => {
                                         />
                                     ))}
                                 </div>
-                                    <div><button className='avtivatebtn' onClick={handleActivate}>Activate</button></div>
+                                <div><button className='avtivatebtn' onClick={handleActivate}>Activate</button></div>
                             </div>
                         </div>
                     </div>

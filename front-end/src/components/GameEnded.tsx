@@ -3,6 +3,7 @@ import { useAuth } from "../provider/authProvider";
 import '../assets/game_ended.css'
 import '../App.css';
 import User from "../types/user-interface";
+import Loading from "./Loading";
 
 interface FinishedGameData {
     Id: string,
@@ -32,7 +33,7 @@ const USER_DATA_QUERY = `
         }
 `;
 
-const GameEnded = ({ gameMode, gameData }: { gameMode: any, gameData: FinishedGameData }) => {
+const GameEnded = ({ gameMode, gameData }: { gameMode: any, gameData: FinishedGameData | null }) => {
     console.log("data = ", gameData);
     const [userData, setUserData] = useState<User>();
     const [isLoading, setLoading] = useState(true);
@@ -112,12 +113,13 @@ const GameEnded = ({ gameMode, gameData }: { gameMode: any, gameData: FinishedGa
             character: 'Aurora',
         };
     }
-    let leftScore = gameData.HostScore;
-    let rightScore = gameData.GuestScore;
-    if (gameData.Host == false) {
+    let leftScore = gameData?.HostScore || 0;
+    let rightScore = gameData?.GuestScore || 0;
+    if (gameData?.Host == false) {
         rightScore = gameData.HostScore;
         leftScore = gameData.GuestScore;
     }
+    if (isLoading) return <Loading />
     return (
         <div className="containerGE">
             <div className='flex center'>

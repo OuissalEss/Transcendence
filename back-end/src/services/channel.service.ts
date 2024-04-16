@@ -180,10 +180,7 @@ export class ChannelService {
 
         });
         return await this.prisma.user.findUnique({
-            where: {id: uid},
-            include: {
-                avatar: true,
-            }
+            where: {id: uid}
         });
     }
 
@@ -191,10 +188,7 @@ export class ChannelService {
         // check permissions
         try {
             const user = await this.prisma.user.findUnique({
-                where: {id: uid},
-                include: {
-                    avatar: true,
-                }
+                where: {id: uid}
             });
             const channelUser = await this.channelUserService.getChannelUser(cid, uid);
             if (channelUser) {
@@ -229,10 +223,7 @@ export class ChannelService {
                 data: {updatedAt: new Date()},
             })
             return await this.prisma.user.findUnique({
-                where: {id: uid},
-                include: {
-                    avatar: true,
-                }
+                where: {id: uid}
             });
         } catch (e) {
             this.logger.error(`Unable to remove Member from Channel: ${e.message} cid: ${cid} uid: ${uid}`);

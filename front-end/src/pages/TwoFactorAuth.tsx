@@ -3,7 +3,6 @@ import { useRef, useState } from "react";
 import lockIcon from "/Icons/Lock2.png"
 
 import Cookies from "js-cookie";
-
 import '../assets/twofactorauth.css'
 import { useAuth } from "../provider/authProvider.tsx";
 
@@ -12,10 +11,10 @@ export default function TwoFactorAuth() {
 
 
     const [inputs, setInputs] = useState(['', '', '', '', '', '']);
-    const inputRefs = useRef([]);
+    const inputRefs = useRef<any>([]);
     const [isVerificationSuccess, setIsVerificationSuccess] = useState(false);
     const { token } = useAuth();
-    const handleInputChange = (index, e) => {
+    const handleInputChange = (index: any, e: any) => {
         const { value } = e.target;
         const newInputs = [...inputs];
         newInputs[index] = value;
@@ -27,7 +26,7 @@ export default function TwoFactorAuth() {
         }
     };
 
-    const handleKeyDown = (index, e) => {
+    const handleKeyDown = (index: any, e: any) => {
         if (e.key === 'Backspace' && inputs[index] === '' && index > 0) {
             // Move focus to the previous input on Backspace press
             inputRefs.current[index - 1].focus();
@@ -64,7 +63,7 @@ export default function TwoFactorAuth() {
             });
     };
 
-
+    if (isVerificationSuccess) isVerificationSuccess;
 
     return (
         <section className="tfa">
@@ -73,7 +72,7 @@ export default function TwoFactorAuth() {
                 <div className="flex tfaContainer">
                     <div className="verify">
                         {/* <h1>Verification Code</h1> */}
-                        <img src={lockIcon} referrerPolicy="no-referrer"/>
+                        <img src={lockIcon} referrerPolicy="no-referrer" />
                         <div className="code">
                             {inputs.map((value, index) => (
                                 <input

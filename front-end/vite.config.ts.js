@@ -2,7 +2,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 var vite_config_default = defineConfig({
-  plugins: [react()]
+  plugins: [react()],
+  preview: {
+    port: 5173,
+    strictPort: true,
+   },
+   server: {
+    port: 5173,
+    strictPort: true,
+    host: true,
+    origin: "http://0.0.0.0:5173",
+   },
 });
 export {
   vite_config_default as default

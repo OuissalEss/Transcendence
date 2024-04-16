@@ -158,6 +158,7 @@ export default function Dashboard() {
           updatedTopFive.sort((a, b) => {
             if (b.xp == a.xp)
               return b.wins - a.wins
+            return 0;
           });
           for (let i = 0; i < 5; i++) {
             topFiveTest[i].id = updatedTopFive[i]?.id;
@@ -187,68 +188,68 @@ export default function Dashboard() {
   return (
     <main className="flex flex-col mt-5 main-dashboard-page">
       <div className="grid grid-cols-3 header_dashboard">
-          <div className='col-span-1 welcome_text '>
-              <h1>Welcome, {userData?.username}!</h1>
-          </div>
+        <div className='col-span-1 welcome_text '>
+          <h1>Welcome, {userData?.username}!</h1>
+        </div>
 
-          <div className='col-span-1 text-while'>
-              <SearchBar />
-          </div>
+        <div className='col-span-1 text-while'>
+          <SearchBar />
+        </div>
 
-          <div className='col-span-1'>
-              <Notifications />
-          </div>
+        <div className='col-span-1'>
+          <Notifications />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 dash_">
 
         <div className="dash-left">
-            <div className="Character">
-              <h1>Character</h1>
-              <div className="CharacterBar">
-                  <p>{myCharacter?.name}</p>
-                  <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" referrerPolicy="no-referrer"/>
-                  <img src={myCharacter?.Right} className="DashRight" alt="DashRight" referrerPolicy="no-referrer"/>
-                  <img src={myCharacter?.infos} className="CharacterInfos" alt="CharacterInfos" referrerPolicy="no-referrer"/>
-              </div>
+          <div className="Character">
+            <h1>Character</h1>
+            <div className="CharacterBar">
+              <p>{myCharacter?.name}</p>
+              <img src={myCharacter?.Left} className="DashLeft" alt="DashLeft" referrerPolicy="no-referrer" />
+              <img src={myCharacter?.Right} className="DashRight" alt="DashRight" referrerPolicy="no-referrer" />
+              <img src={myCharacter?.infos} className="CharacterInfos" alt="CharacterInfos" referrerPolicy="no-referrer" />
+            </div>
+          </div>
+
+          <div className="Question">
+            <h1>Up for a game?</h1>
+          </div>
+          <div className="dash_games grid grid-cols-3">
+            <div className="GameModeBar">
+              <h1>Online</h1>
+              <p>Challenge a <br></br> random player!</p>
+              <Link to="/game/pong?mode=online">
+                <div className="PlayNow">
+                  <h3>Play now</h3>
+                </div>
+              </Link>
+              <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" referrerPolicy="no-referrer" />
+
+            </div>
+            <div className="GameModeBar">
+              <h1>Offline</h1>
+              <p>Challenge a <br></br> friend offline!</p>
+              <Link to="/game/pong?mode=offline">
+                <div className="PlayNow">
+                  <h3>Play now</h3>
+                </div>
+              </Link>
+              <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" referrerPolicy="no-referrer" />
+            </div>
+            <div className="GameModeBar">
+              <h1>Robot</h1>
+              <p>Test your skills<br></br>against a robot!</p>
+              <Link to="/game/pong?mode=ai">
+                <div className="PlayNow">
+                  <h3>Play now</h3>
+                </div>
+              </Link>
+              <img src={Robot} alt="Robot" className="RobotPic" referrerPolicy="no-referrer" />
             </div>
 
-              <div className="Question">
-                <h1>Up for a game?</h1>
-              </div>
-            <div className="dash_games grid grid-cols-3">
-              <div className="GameModeBar">
-                <h1>Online</h1>
-                <p>Challenge a <br></br> random player!</p>
-                <Link to="/game/pong?mode=online">
-                  <div className="PlayNow">
-                    <h3>Play now</h3>
-                  </div>
-                </Link>
-                <img src={OnlinePic} alt="OnlinePic" className="OnlinePic" referrerPolicy="no-referrer"/>
-
-              </div>
-              <div className="GameModeBar">
-                <h1>Offline</h1>
-                <p>Challenge a <br></br> friend offline!</p>
-                <Link to="/game/pong?mode=offline">
-                  <div className="PlayNow">
-                    <h3>Play now</h3>
-                  </div>
-                </Link>
-                <img src={OfflinePic} alt="OfflinePic" className="OfflinePic" referrerPolicy="no-referrer"/>
-              </div>
-              <div className="GameModeBar">
-                <h1>Robot</h1>
-                <p>Test your skills<br></br>against a robot!</p>
-                <Link to="/game/pong?mode=ai">
-                  <div className="PlayNow">
-                    <h3>Play now</h3>
-                  </div>
-                </Link>
-                <img src={Robot} alt="Robot" className="RobotPic" referrerPolicy="no-referrer"/>
-              </div>
-              
           </div>
 
         </div>
@@ -269,12 +270,12 @@ export default function Dashboard() {
                       className='Top'
                       referrerPolicy="no-referrer"
                     />
-                      <img
-                        src={player.leaderboard}
-                        className='Leaderboard'
-                        alt='Leaderboard'
-                        referrerPolicy="no-referrer"
-                      />
+                    <img
+                      src={player.leaderboard}
+                      className='Leaderboard'
+                      alt='Leaderboard'
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                 </Link>
               ) : null

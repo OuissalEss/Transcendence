@@ -215,7 +215,7 @@ export class ChatGateway {
             const { room, user } = data;
             this.logger.log(`Client is adding user: ${user} as a mod in room: ${room}`);
             const User = await this.channel.addAdmin(room, user);
-            this.server.to(room).emit('adminAdded', {id: User.id, name: User.username, icon: User.avatar.filename}, 1);
+            this.server.to(room).emit('adminAdded', {id: User.id, name: User.username, icon: undefined}, 1);
         } catch (e) {
             this.logger.error(e);
         } 

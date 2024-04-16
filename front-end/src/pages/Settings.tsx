@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import '../assets/Settings.css';
 import SearchBar from '../components/SearchBar';
@@ -9,7 +8,7 @@ import Notifications from '../components/Notifications';
 import ImageCompressor from 'image-compressor.js';
 
 import User from '../types/user-interface';
-import { useQuery, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { useMutation } from '@apollo/react-hooks'
 
 // Characters
@@ -44,13 +43,11 @@ const characters = [
     { name: 'Aegon', image: Aegon, infos: AegonInfos },
 ];
 
-import { Cloudinary } from "@cloudinary/url-gen";
+import { Cloudinary } from "@cloudinary/url-gen/index";
 import Alert from '../components/Alert';
 import TwoFactorAuthActivation from '../components/TwoFactorAuthActivation';
-import { useSocket } from '../App';
 import Block from '../types/block-interface';
 import { useAuth } from '../provider/authProvider';
-import GameLoading from '../components/GameLoading';
 import Loading from '../components/Loading';
 import { Socket, io } from 'socket.io-client';
 
@@ -80,21 +77,6 @@ const USER_DATA_QUERY = `
             guest{id}
             createdAt
         }
-        getUserBlocked{
-            id
-            blockedUser{
-                id
-                username
-                avatar {
-                    filename
-                }
-            }
-        }
-    }
-`;
-
-const USER_BLOCKED = gql`
-    query {
         getUserBlocked{
             id
             blockedUser{
@@ -214,7 +196,7 @@ function Settings() {
     useEffect(() => {
         const newSocket = io('ws://localhost:3003/chat');
         setSocket(newSocket);
-
+        uploadUrl;
         return () => {
             newSocket.disconnect();
         };
@@ -241,9 +223,9 @@ function Settings() {
         setCharacterChanged(true);
     };
 
-    const handleChangeCharacterClick = () => {
-        setCharacterChanged(true);
-    };
+    // const handleChangeCharacterClick = () => {
+    //     setCharacterChanged(true);
+    // };
 
     const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
@@ -280,7 +262,7 @@ function Settings() {
 
     const uploadAvatar = async () => {
         const imageCompressor = new ImageCompressor(); // Instantiate ImageCompressor
-        if (selectedFile){
+        if (selectedFile) {
             const compressedFile = await imageCompressor.compress(selectedFile, { // Use compress method
                 maxWidth: 500,
                 maxHeight: 500,
@@ -346,7 +328,7 @@ function Settings() {
         try {
             await desactivate2Fa({ variables: {} });
             console.log("2fa updated successfully!");
-        } catch (error:any) {
+        } catch (error: any) {
             console.error("Error updating Username:", error.message);
         }
         alert('2FA desactivated successful');
@@ -394,7 +376,7 @@ function Settings() {
         try {
             await unblockUser({ variables: { block_id: id } });
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            socket?.emit("unblockUser", {blockerId: user.id, blockedUserId: userId});
+            socket?.emit("unblockUser", { blockerId: user.id, blockedUserId: userId });
             console.log("Username updated successfully!");
         } catch (error: any) {
             console.error("Error updating Username:", error.message);
@@ -406,21 +388,21 @@ function Settings() {
         return <Loading />
     return (
         <div className="SettingsPage ml-[90px] mt-[20px]">
-        <div className="grid grid-cols-3 header_settings ml-[40px] mr-[70px]">
-            <div className='col-span-1 Settings mt-[10px]'>
+            <div className="grid grid-cols-3 header_settings ml-[40px] mr-[70px]">
+                <div className='col-span-1 Settings mt-[10px]'>
                     <h1>Settings</h1>
                 </div>
 
-          <div className='col-span-1 text-while'>
-              <SearchBar />
-          </div>
+                <div className='col-span-1 text-while'>
+                    <SearchBar />
+                </div>
 
-          <div className='col-span-1'>
-              <Notifications />
-          </div>
-      </div>
+                <div className='col-span-1'>
+                    <Notifications />
+                </div>
+            </div>
             <div className='SettingsRep mt-[100px] grid grid-cols-3'>
-            <div className="SettingsBar  col-span-2">
+                <div className="SettingsBar  col-span-2">
                     <div className="ProfileS">
                         {isEditing ? (
                             <input type="text" value={editedUsername}
@@ -428,101 +410,101 @@ function Settings() {
                                 onKeyDown={handleKeyDown}
                                 autoFocus className="EditInput" />
                         ) : (
-                                <p className="Username">{editedUsername}</p>
+                            <p className="Username">{editedUsername}</p>
 
                         )}
 
-                        <img src={UserIcon} alt="User Icon" className="UserIcon" referrerPolicy="no-referrer"/>
-                        <img src={Edit} alt="Edit Icon" className="EditIcon" onClick={handleEditClick} referrerPolicy="no-referrer"/>
+                        <img src={UserIcon} alt="User Icon" className="UserIcon" referrerPolicy="no-referrer" />
+                        <img src={Edit} alt="Edit Icon" className="EditIcon" onClick={handleEditClick} referrerPolicy="no-referrer" />
                     </div>
 
-                <div className="AvatarEditCircle" >
-                    <label htmlFor="avatarInput" className="AvatarEditText">
-                        &nbsp; Edit <br /> Avatar
-                    </label>
-                    <input
-                        type="file"
-                        id="avatarInput"
-                        style={{ display: 'none' }}
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                    />
-                </div>
-                {avatarImage ? (
-                    <img src={avatarImage} className="AvatarBackground" alt="Avatar" referrerPolicy="no-referrer"/>
-                ) : (
-                    <img src={userAvatar} className="AvatarBackground" alt="AvatarBackground" referrerPolicy="no-referrer"/>
-                )} <div className="CharacterRectangleSettings">
-                    <p className="CharacterTextSettings">Change your character</p>
-                </div>
-
-
-
-                {characterChanged ? (
-                    <div>
-                        <div className="NameS">
-                            <p className="CharacterNameSettings">{currentCharacter.name}</p>
-                        </div>
-                        <img src={currentCharacter.image} className="CharacterImageSettings" alt={currentCharacter.name} referrerPolicy="no-referrer"/>
-                        <img
-                            src={currentCharacter.infos}
-                            className="CharacterInfosSettings"
-                            alt={`${currentCharacter.name} Infos`}
-                            referrerPolicy="no-referrer"
+                    <div className="AvatarEditCircle" >
+                        <label htmlFor="avatarInput" className="AvatarEditText">
+                            &nbsp; Edit <br /> Avatar
+                        </label>
+                        <input
+                            type="file"
+                            id="avatarInput"
+                            style={{ display: 'none' }}
+                            accept="image/*"
+                            onChange={handleAvatarChange}
                         />
                     </div>
-                ) : (
-                    <div>
-                        <div className="NameS">
-                            <p className="CharacterNameSettings">{myCharacter.name}</p>
-                        </div>
-                        <img src={myCharacter.image} className="CharacterImageSettings" alt={myCharacter.name} referrerPolicy="no-referrer"/>
-                        <img
-                            src={myCharacter.infos}
-                            className="CharacterInfosSettings"
-                            alt={`${myCharacter.name} Infos`}
-                            referrerPolicy="no-referrer"
-                        />
+                    {avatarImage ? (
+                        <img src={avatarImage} className="AvatarBackground" alt="Avatar" referrerPolicy="no-referrer" />
+                    ) : (
+                        <img src={userAvatar} className="AvatarBackground" alt="AvatarBackground" referrerPolicy="no-referrer" />
+                    )} <div className="CharacterRectangleSettings">
+                        <p className="CharacterTextSettings">Change your character</p>
                     </div>
-                )}
 
 
-                <img
-                    src={ChevronLeft}
-                    className="ChevronLeftSettings"
-                    alt="ChevronLeft"
-                    onClick={handleLeftChevronClick}
-                    referrerPolicy="no-referrer"
-                />
-                <img
-                    src={ChevronRight}
-                    className="ChevronRightSettings"
-                    alt="ChevronRight"
-                    onClick={handleRightChevronClick}
-                    referrerPolicy="no-referrer"
-                />
 
-                {!userData?.connection.is2faEnabled ? (
-                    <div className="TFA" onClick={showTFA}>
-                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" referrerPolicy="no-referrer"/><h1>Activate Two-factor authentication</h1>
-                    </div>
-                ) : (
-                    <div className="TFA" onClick={handleDesactivate}>
-                        <img src={TFAicon} alt="TFA Icon" className="TFAIcon" referrerPolicy="no-referrer"/><h1>Desactivate Two-factor authentication</h1>
-                    </div>
-                )}
-
-                <div className="SaveTheChanges">
-                    <button className="SaveTheChangesRectangle" onClick={handleSaveButtonClick}>
-                        {loading1 ? (
-                            <div className="Processing">
-                                <div className="border-t-transparent border-solid animate-spin rounded-full border-blue-400 border-4 h-6 w-6"></div>
+                    {characterChanged ? (
+                        <div>
+                            <div className="NameS">
+                                <p className="CharacterNameSettings">{currentCharacter.name}</p>
                             </div>
-                        ) : (<span></span>)}
-                        <p className="SaveTheChangesText">Save the changes!</p>
-                    </button>
+                            <img src={currentCharacter.image} className="CharacterImageSettings" alt={currentCharacter.name} referrerPolicy="no-referrer" />
+                            <img
+                                src={currentCharacter.infos}
+                                className="CharacterInfosSettings"
+                                alt={`${currentCharacter.name} Infos`}
+                                referrerPolicy="no-referrer"
+                            />
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="NameS">
+                                <p className="CharacterNameSettings">{myCharacter.name}</p>
+                            </div>
+                            <img src={myCharacter.image} className="CharacterImageSettings" alt={myCharacter.name} referrerPolicy="no-referrer" />
+                            <img
+                                src={myCharacter.infos}
+                                className="CharacterInfosSettings"
+                                alt={`${myCharacter.name} Infos`}
+                                referrerPolicy="no-referrer"
+                            />
+                        </div>
+                    )}
+
+
+                    <img
+                        src={ChevronLeft}
+                        className="ChevronLeftSettings"
+                        alt="ChevronLeft"
+                        onClick={handleLeftChevronClick}
+                        referrerPolicy="no-referrer"
+                    />
+                    <img
+                        src={ChevronRight}
+                        className="ChevronRightSettings"
+                        alt="ChevronRight"
+                        onClick={handleRightChevronClick}
+                        referrerPolicy="no-referrer"
+                    />
+
+                    {!userData?.connection.is2faEnabled ? (
+                        <div className="TFA" onClick={showTFA}>
+                            <img src={TFAicon} alt="TFA Icon" className="TFAIcon" referrerPolicy="no-referrer" /><h1>Activate Two-factor authentication</h1>
+                        </div>
+                    ) : (
+                        <div className="TFA" onClick={handleDesactivate}>
+                            <img src={TFAicon} alt="TFA Icon" className="TFAIcon" referrerPolicy="no-referrer" /><h1>Desactivate Two-factor authentication</h1>
+                        </div>
+                    )}
+
+                    <div className="SaveTheChanges">
+                        <button className="SaveTheChangesRectangle" onClick={handleSaveButtonClick}>
+                            {loading1 ? (
+                                <div className="Processing">
+                                    <div className="border-t-transparent border-solid animate-spin rounded-full border-blue-400 border-4 h-6 w-6"></div>
+                                </div>
+                            ) : (<span></span>)}
+                            <p className="SaveTheChangesText">Save the changes!</p>
+                        </button>
+                    </div>
                 </div>
-            </div>
                 <div className="BlockedList col-span-1 ">
                     <div className="BlockedListTitle">
                         <h1>Blocked List</h1>
@@ -531,16 +513,16 @@ function Settings() {
                         {blockedList?.map((b, index) => {
                             return (
                                 <li key={index} className="BlockedItem">
-                                    <img src={b.image} alt="Blocked Avatar" className="BlockedAvatar" referrerPolicy="no-referrer"/>
+                                    <img src={b.image} alt="Blocked Avatar" className="BlockedAvatar" referrerPolicy="no-referrer" />
                                     <p className="BlockedName">{b.username}</p>
-                                    <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" onClick={() => handleUnblock(b.b_id, b.id)} referrerPolicy="no-referrer"/>
+                                    <img src={Unblock} alt="Unblock Icon" className="UnblockIcon" onClick={() => handleUnblock(b.b_id, b.id)} referrerPolicy="no-referrer" />
                                 </li>
                             );
                         })}
                     </ul>
 
                 </div>
-                
+
             </div>
             {isShowAlert &&
                 <div className="alertContainer">

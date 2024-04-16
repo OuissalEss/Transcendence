@@ -17,12 +17,12 @@ COPY . .
 
 RUN chmod +x ./frontend-entrypoint.sh
 
-RUN cp ./nginx/default.conf /etc/nginx/http.d/default.conf
+# RUN cp ./nginx/default.conf /etc/nginx/http.d/default.conf
 
-# Build the Vue 3 project
+# # Build the Vue 3 project
 RUN npm run build
 
-RUN cp -rf dist /var/www/dist
-
+# RUN cp -rf dist /var/www/dist
+EXPOSE 5173
 # Start the Nest.js application
 CMD ["sh", "./frontend-entrypoint.sh"]

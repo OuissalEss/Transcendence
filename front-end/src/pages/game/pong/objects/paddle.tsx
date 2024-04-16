@@ -21,8 +21,9 @@ export class Paddle {
 
         this.p = p;
 
+
         this.w = gameConfig.paddleWidth;
-        this.h = gameConfig.canvasHeight / 5 ;
+        this.h = gameConfig.canvasHeight / 5;
 
         this.width = gameConfig.canvasWidth;
         this.height = gameConfig.canvasHeight;
@@ -31,20 +32,22 @@ export class Paddle {
         this.isLeft = isLeft;
         this.ychange = 0;
 
-        this.x = isLeft ? this.w + 2: gameConfig.canvasWidth - this.w - 2;
+        this.x = isLeft ? this.w + 2 : gameConfig.canvasWidth - this.w - 2;
     }
 
     update(socket: any) {
+        this.ychange;
+        this.height;
         // Calculate the scale factor for both width and height
         const widthScaleFactor = gameConfig.canvasWidth / this.width;
-        const heightScaleFactor = gameConfig.canvasHeight / this.height;
+        // const heightScaleFactor = gameConfig.canvasHeight / this.height;
 
         // Update width and height properties
-        this.width = gameConfig.canvasWidth ;
+        this.width = gameConfig.canvasWidth;
         this.height = gameConfig.canvasHeight;
 
         this.w = gameConfig.paddleWidth;
-        this.h = gameConfig.canvasHeight / 5 ;
+        this.h = gameConfig.canvasHeight / 5;
 
         if (gameConfig.windowW < 768) {
             this.w = gameConfig.canvasWidth / 50;
@@ -80,7 +83,7 @@ export class Paddle {
         this.y = gameConfig.canvasHeight / 2;
 
         this.w = gameConfig.paddleWidth;
-        this.h = gameConfig.canvasHeight / 5 ;
+        this.h = gameConfig.canvasHeight / 5;
 
         this.speed = 5;
         this.ychange = 0;

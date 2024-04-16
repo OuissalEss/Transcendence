@@ -31,7 +31,7 @@ const USER_DATA_QUERY = `
         }
     `;
 
-const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any, gameData: GameData, leftScore: number, rightScore: number }) => {
+const Players = ({ gameMode, gameData, leftScore, rightScore }: { gameMode: any, gameData: GameData | null, leftScore: number, rightScore: number }) => {
     const [userData, setUserData] = useState<User>();
     const [isLoading, setLoading] = useState(true);
     const { token } = useAuth();

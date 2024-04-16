@@ -1,30 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import Notifs from '../types/notifications-interface';
+import Notifs from '../types/notifications-interface.tsx';
 import { Link } from "react-router-dom";
-import { useLazyQuery, useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "@apollo/client";
 import { useSocket } from "../App.tsx";
-import Leaderboard1 from "*.png";
-import { useAuth } from '../provider/authProvider.tsx';
 import { useMutation } from '@apollo/react-hooks'
 import { Socket, io } from 'socket.io-client';
 
-const USER_DATA_QUERY = `
-    query {
-        getUserNotifications{
-            id
-            time
-            type
-            isRead
-            receiver{id}
-            sender{
-                id
-                username
-                avatar {
-                    filename
-                }
-            }
-        }
-    }`;
 
 const NOTIF_QUERY = gql`
     query {
@@ -58,7 +39,6 @@ const Notifications = () => {
     const [notifications, setNotifications] = useState<{ id: string, userId: string, type: string, isRead: Boolean, notif: string }[]>([]);
     const [showNotification, setShowNotification] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const { token } = useAuth();
     const { socket } = useSocket();
     const [sock, setSocket] = useState<Socket>();
 
@@ -84,7 +64,7 @@ const Notifications = () => {
         })
 
     }, [socket, sock]);
-    
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -103,10 +83,10 @@ const Notifications = () => {
     if (notifLoading) return <p>Loading...</p>;
     if (notifError) return <p>Error: {notifError?.message}</p>;
 
-
+    if (notifData) notifData;
     const updateNotifications = (notifications: Notifs[]) => {
-        let notificationList: { id: string; userId: string; type: string; isRead: Boolean; notif: string;}[] = [];
-        for (let i = 0; i < notifications.length; i++){
+        let notificationList: { id: string; userId: string; type: string; isRead: Boolean; notif: string; }[] = [];
+        for (let i = 0; i < notifications.length; i++) {
             if (!notifications[i].isRead) {
                 let newNotification = {
                     id: notifications[i].id,
@@ -115,7 +95,7 @@ const Notifications = () => {
                     isRead: notifications[i].isRead,
                     notif: ''
                 };
-    
+
                 if (notifications[i].type === 'FRIEND_REQUEST') {
                     newNotification.notif = `${notifications[i].sender.username} sent you a friend request`;
                 } else if (notifications[i].type === 'ACHIEVEMENT') {
@@ -182,7 +162,7 @@ const Notifications = () => {
                     ) : (
                         <div className="noNotificationsContainer">
                             <p className="noNotificationsMessage">No notifications yet</p>
-                            <img className="noNotificationsImage" src="/Icons/noNotifs.png" alt="No notifications" referrerPolicy="no-referrer"/>
+                            <img className="noNotificationsImage" src="/Icons/noNotifs.png" alt="No notifications" referrerPolicy="no-referrer" />
                         </div>
                     )}
                 </div>

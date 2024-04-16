@@ -1,14 +1,12 @@
 'use client'
-import {Link, Navigate, useLocation} from "react-router-dom";
-import { redirect } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 //import {deleteCookie} from "cookies-next";
 import Cookies from "js-cookie";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { useMutation } from '@apollo/react-hooks'
 import { Socket, io } from "socket.io-client";
-import { useAuth } from "../provider/authProvider";
 import { useSocket } from '../App';
 
 const UPDATE_USER_STATUS = gql`
@@ -74,14 +72,8 @@ const Sidebar = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [sock, setSocket] = useState<Socket>();
   const { socket } = useSocket();
-  const {data, loading} = useQuery(CHANNEL);
-  const { token } = useAuth();
+  const { data, loading } = useQuery(CHANNEL);
   let unreadMessageCount = 0;
-  const location = useLocation();
-  const fetch_data = () => {
-   
-
-  }
   useEffect(() => {
     if (data) {
       if (data) {
@@ -90,10 +82,10 @@ const Sidebar = () => {
           const filteredMessages = channel.messages.filter((message: any) => message.senderId !== user.id && !message.read);
           unreadMessageCount += filteredMessages.length;
         });
-      if (unreadMessageCount)
-        setShowNotification(true);
+        if (unreadMessageCount)
+          setShowNotification(true);
+      }
     }
-  }
 
   }, [data, loading]);
 
@@ -102,38 +94,38 @@ const Sidebar = () => {
     setSocket(newSocket);
 
     return () => {
-        newSocket.disconnect();
+      newSocket.disconnect();
     };
   }, [setSocket]);
 
   useEffect(() => {
     sock?.on("messageUnread", (senderId: string) => {
       if (senderId === user.id)
-        return ;
+        return;
       unreadMessageCount++;
       if (unreadMessageCount)
         setShowNotification(true);
     })
     sock?.on("messageRead", (senderId: string) => {
       if (senderId === user.id)
-        return ;
+        return;
       unreadMessageCount--;
       if (unreadMessageCount <= 0)
         setShowNotification(false);
-      unreadMessageCount = unreadMessageCount < 0 ? 0 : unreadMessageCount; 
+      unreadMessageCount = unreadMessageCount < 0 ? 0 : unreadMessageCount;
     })
     return () => {
       sock?.off("messageRead");
       sock?.off("messageUnread");
-		}
+    }
   }, [sock])
 
   async function LogOut() {
     try {
-        await updateUserStatus({ variables: { new_status: "OFFLINE" } });
-        console.log("Username updated successfully!");
-    } catch (error) {
-        console.error("Error updating Username:", error.message);
+      await updateUserStatus({ variables: { new_status: "OFFLINE" } });
+      console.log("Username updated successfully!");
+    } catch (error: any) {
+      console.error("Error updating Username:", error?.message);
     }
     socket?.emit("friendDisconnected");
     Cookies.remove('token');
@@ -148,8 +140,8 @@ const Sidebar = () => {
           <aside className="sidebar items-center">
             <div className="sidebar__top">
               <Link to="/">
-                <img title="Logo" className="sidebar__logo" 
-                  src="/logo.png" alt="logo" style={{ width: "100%", height: "auto" }} referrerPolicy="no-referrer"/>
+                <img title="Logo" className="sidebar__logo"
+                  src="/logo.png" alt="logo" style={{ width: "100%", height: "auto" }} referrerPolicy="no-referrer" />
               </Link>
             </div>
             <ul className="sidebar__list">

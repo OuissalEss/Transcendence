@@ -12,7 +12,6 @@ import GetStarted from '../pages/GetStarted';
 import Settings from "../pages/Settings";
 import MyProfile from "../pages/MyProfile";
 import Profiles from "../pages/Profiles";
-import React from "react";
 
 
 const Routes = () => {

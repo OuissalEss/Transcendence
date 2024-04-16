@@ -1,4 +1,4 @@
-import { BlockController } from './../controllers/block.controller';
+import { BlockController } from '../controllers/block.controller';
 import { Module } from '@nestjs/common';
 import { BlockService } from "../services/block.service";
 import { BlockResolver } from "../resolvers/block.resolver";

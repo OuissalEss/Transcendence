@@ -1,11 +1,8 @@
-import { Navigate, Outlet, useNavigate } from "react-router-dom";
-import { useAuth } from "../provider/authProvider";
-import { useEffect } from "react";
-import DashboardLayout from "../layouts/LayoutDefault.tsx";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../provider/authProvider.tsx";
 import { jwtDecode } from "jwt-decode";
 import TwoFactorAuth from "../pages/TwoFactorAuth.tsx";
 import Start from "../Start.tsx";
-import React from "react";
 import Sidebar from "../components/Sidebar.tsx";
 import Friends from "../components/Friends.tsx";
 import { useSocket } from "../App.tsx";
@@ -14,18 +11,17 @@ import { useSocket } from "../App.tsx";
 import '../App.css'
 
 export interface Payload {
-	sub: int;
+	sub: number;
 	username: string;
-	createdAt: date;
+	createdAt: string;
 	isFirstTime: boolean
 	isTwoFactorEnable: boolean
 	isTwoFaAuthenticated: boolean
 }
 
 export const ProtectedRoute = () => {
-    const { socket } = useSocket();
+	const { socket } = useSocket();
 	const { token }: { token: string | undefined } = useAuth();
-	const navigate = useNavigate();
 
 	// useEffect(() => {
 	// 	if (token == null) {

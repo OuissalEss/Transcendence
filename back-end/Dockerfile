@@ -1,13 +1,24 @@
-FROM node:latest
+# Base image
+FROM node:18
 
-WORKDIR /var/app/
+# Create app directory
+WORKDIR /usr/src/app
 
-COPY package*.json .
+COPY prisma ./prisma/
 
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+
+# Install app dependencies
 RUN npm install
 
+# Bundle app source
 COPY . .
 
-EXPOSE 3000
+RUN chmod +x ./backend-entrypoint.sh
 
-CMD ["nest", "start"]
+# Creates a "dist" folder with the production build
+RUN npm run build
+
+
+CMD ["sh", "./backend-entrypoint.sh"]

@@ -1,20 +1,15 @@
 'use client'
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ReactP5Wrapper } from "@p5-wrapper/react";
 import { gameConfig } from './constants';
-import { jwtDecode } from 'jwt-decode';
-import Cookies from "js-cookie";
 
 import { Puck } from './objects/puck';
-import { Socket, io } from 'socket.io-client';
 import Player from '../../../components/Player';
 
 import { oPaddle } from './objects/opaddle';
-import User from "../../../types/user-interface";
 import "../../../assets/game.css"
 import { useSocket } from '../../../App';
 import GameLoading from '../../../components/GameLoading';
-import { useAuth } from '../../../provider/authProvider';
 import GameEnded from '../../../components/GameEnded';
 import AlreadyInGame from '../../../components/AlreadyInGame';
 
@@ -65,14 +60,14 @@ const calculatCanvasSize = () => {
 	}
 };
 
-const sketch = (p5: any, socket: any, updateScores: any, mode) => {
+const sketch = (p5: any, socket: any, updateScores: any, mode: string) => {
 	let puck: Puck;
 	// let paddleLeft: Paddle;
 	// let paddleRight: Paddle;
 	let opaddleL: oPaddle;
 	let opaddleR: oPaddle;
-	let leftScore: number;
-	let rightScore: number;
+	// let leftScore: number;
+	// let rightScore: number;
 
 	// Initiate Window Configurations
 	gameConfig.windowW = window.innerWidth;
@@ -80,7 +75,7 @@ const sketch = (p5: any, socket: any, updateScores: any, mode) => {
 
 	p5.setup = () => {
 
-
+		mode;
 		// Calculate Canvas Size
 		calculatCanvasSize();
 
@@ -91,8 +86,6 @@ const sketch = (p5: any, socket: any, updateScores: any, mode) => {
 		puck = new Puck(p5);
 		opaddleL = new oPaddle(p5, opL, true, socket);
 		opaddleR = new oPaddle(p5, opR, false, socket);
-		leftScore = 0;
-		rightScore = 0;
 	};
 
 	p5.windowResized = () => {
@@ -150,14 +143,8 @@ const sketch = (p5: any, socket: any, updateScores: any, mode) => {
 			opR.speed = gameState.rightPaddle.speed;
 			opR.width = gameState.rightPaddle.canvasW;
 			opR.height = gameState.rightPaddle.canvasH;
-			// if (leftScore != gameState.leftScore || rightScore != gameState.rightScore) {
-			// 	audio.loop = false;
-			// 	audio.play();
-			// }
 			puck.ballUpdate(gameState.Ball, gameConfig.canvasWidth, gameConfig.canvasHeight);
 			updateScores(gameState.leftScore, gameState.rightScore);
-			leftScore = gameState.leftScore;
-			rightScore = gameState.rightScore;
 		});
 
 		opaddleL.update(opL);
@@ -193,8 +180,6 @@ import ringer from '/Sounds/ding.mp3';
 import hit from '/Sounds/hit.mp3';
 import Wall from '/Sounds/wallHit.mp3';
 
-import { left } from '@cloudinary/url-gen/qualifiers/textAlignment';
-
 const audio = new Audio(ringer);
 const BallHit = new Audio(hit);
 const wallHit = new Audio(Wall);
@@ -205,15 +190,12 @@ const Pong = () => {
 	const [isLoading, setLoading] = useState(false);
 	const { socket } = useSocket();
 	const [gameIsLive, setGameLive] = useState(true);
-	const [oppUsername, setOppUsername] = useState();
-	const [oppImage, setOppImage] = useState();
-	const [oppId, setOppId] = useState();
 	const [gameData, setGameData] = useState<GameData | null>(null);
 	const [finishedGameData, setFinishedGameData] = useState<FinishedGameData | null>(null);
 	const [alreadyInGame, setAlreadyInGame] = useState(false);
 
 	const urlParams = new URLSearchParams(window.location.search);
-	let mode = urlParams.get('mode');
+	let mode = urlParams.get('mode') || '';
 
 	if (!["online", "offline", "ai", "alter"].includes(mode)) {
 		mode = "400";
@@ -241,7 +223,7 @@ const Pong = () => {
 			wallHit.play();
 		})
 
-		socket.on("matchStatus", (status: boolean) => {
+		socket.on("matchStatus", (status: any) => {
 			if (!status.matchStatus)
 				setLoading(true);
 			else
@@ -304,7 +286,7 @@ const Pong = () => {
 		return <GameLoading />
 
 	if (!gameIsLive)
-		return <GameEnded gameMode={mode} gameData={finishedGameData} leftScore={leftScore} rightScore={rightScore} />
+		return <GameEnded gameMode={mode} gameData={finishedGameData} />
 	if (alreadyInGame)
 		return <AlreadyInGame />
 	return (

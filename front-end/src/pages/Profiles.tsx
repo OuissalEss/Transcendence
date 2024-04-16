@@ -1,7 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useQuery, gql } from "@apollo/client";
-import { useMutation } from '@apollo/react-hooks'
-
+import { useNavigate } from 'react-router-dom';
 
 import '../assets/profiles.css';
 import SearchBar from '../components/SearchBar';
@@ -31,6 +28,7 @@ import Friend from '../types/friend-interface';
 import { useSocket } from '../App';
 import { Socket, io } from 'socket.io-client';
 import Match from '../types/match-interface';
+import Loading from '../components/Loading';
 
 const USER_DATA = `
 query($user_id: String!) {
@@ -108,12 +106,12 @@ query($user_id: String!) {
 
 
 const achievements = [
-  { enum: 'welcome', title: 'Welcome to the Arena', image: WelcomeWithoutB },
-  { enum: 'robot', title: 'Robot Champion', image: RobotWithoutB },
-  { enum: 'social', title: 'Social Paddler', image: FirstfWithoutB },
-  { enum: 'winning', title: 'Winning Streak', image: FiveWithoutB },
-  { enum: 'loyal', title: 'Loyal Opponent', image: ThreeWithoutB },
-  { enum: 'team', title: 'Team Spirit', image: RoomWithoutB },
+  { enum: 'welcome', title: 'Welcome to the Arena', image: WelcomeWithoutB, createdAt: '' },
+  { enum: 'robot', title: 'Robot Champion', image: RobotWithoutB, createdAt: '' },
+  { enum: 'social', title: 'Social Paddler', image: FirstfWithoutB, createdAt: '' },
+  { enum: 'winning', title: 'Winning Streak', image: FiveWithoutB, createdAt: '' },
+  { enum: 'loyal', title: 'Loyal Opponent', image: ThreeWithoutB, createdAt: '' },
+  { enum: 'team', title: 'Team Spirit', image: RoomWithoutB, createdAt: '' },
 ];
 interface TopFive {
   id: string,
@@ -148,20 +146,17 @@ function Profiles() {
   const [sock, setSocket] = useState<Socket>();
 
   useEffect(() => {
-    const newSocket = io('ws://localhost:3003/chat');
-    setSocket(newSocket);
-
-
-    return () => {
-        newSocket.disconnect();
-    };
-  }, [setSocket]);
-
-  useEffect(() => {
     if (id == userId) {
       navigate('/myprofile');
     }
-  }, []);
+
+    const newSocket = io('ws://localhost:3003/chat');
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [setSocket]);
 
   useEffect(() => {
     if (!token) return; // If token is not available, do nothing
@@ -198,17 +193,22 @@ function Profiles() {
         console.error('Error fetching friends:', error);
       });
   }, []);
-  console.log("user = ", userData);
 
   useEffect(() => {
     if (socket === undefined) return;
 
     socket.on('RequestReceived', ({ username, userId, image, friendId }: { username: string, userId: string, image: string, friendId: string }) => {
+      username;
+      userId;
+      image;
       setbuttonText('accept')
       setfriendShipId(friendId);
     })
 
     socket.on('RequestAccepted', ({ username, userId, image }: { username: string, userId: string, image: string }) => {
+      username;
+      userId;
+      image;
       setbuttonText('remove')
     })
 
@@ -247,6 +247,7 @@ function Profiles() {
   if (!friends) return
   if (!receiver) return
   if (!sender) return
+  if (isLoading) return <Loading />
 
   // Top 5
   const sortedUsers: User[] = [...users];
@@ -262,6 +263,7 @@ function Profiles() {
   topFive.sort((a, b) => {
     if (b.xp == a.xp)
       return b.wins - a.wins
+    return 0;
   });
 
   // Leaderboard
@@ -278,26 +280,27 @@ function Profiles() {
     enum: string;
     title: string;
     image: string;
+    createdAt?: string;
   };
 
   const myAchievements: Achievement[] = [];
-      const uniqueAchievements: Set<string> = new Set();
+  const uniqueAchievements: Set<string> = new Set();
 
-      userData?.achievements?.forEach(userAchievement => {
-          let a = achievements.find(achievement => achievement.enum === userAchievement.achievement);
-          if (a && !uniqueAchievements.has(a.enum)) {
-              a.createdAt = userAchievement.createdAt;
-              myAchievements.push(a);
-              uniqueAchievements.add(a.enum);
-          }
-      });
+  userData?.achievements?.forEach(userAchievement => {
+    let a = achievements.find(achievement => achievement.enum === userAchievement.achievement);
+    if (a && !uniqueAchievements.has(a.enum)) {
+      a.createdAt = userAchievement.createdAt;
+      myAchievements.push(a);
+      uniqueAchievements.add(a.enum);
+    }
+  });
   // Friends
-  let FriendsList = friends.map((friend: User) => ({
-    id: friend.id,
-    username: friend.username,
-    status: friend.status,
-    image: friend.avatar ? friend.avatar.filename : '/Avatars/default.jpeg'
-  }));
+  // let FriendsList = friends.map((friend: User) => ({
+  //   id: friend.id,
+  //   username: friend.username,
+  //   status: friend.status,
+  //   image: friend.avatar ? friend.avatar.filename : '/Avatars/default.jpeg'
+  // }));
 
   // calculate Level
   const xp = userData.xp;
@@ -327,7 +330,7 @@ function Profiles() {
 
   // Update Friend Table
   const handleAddFriend = () => {
-      socket?.emit("friendRequest", { senderId: userId, receiverId: id })
+    socket?.emit("friendRequest", { senderId: userId, receiverId: id })
   }
   const handleRemoveFriend = () => {
     socket?.emit("removeFriend", { friendId: friendShipId })
@@ -339,55 +342,55 @@ function Profiles() {
     socket?.emit("removeFriend", { friendId: friendShipId })
   }
   const handleSendMessage = () => {
-    sock?.emit('DM', {id1: id, id2: userId});
+    sock?.emit('DM', { id1: id, id2: userId });
     navigate('/chat');
     console.log("CREATE CHANNEL !!!");
   }
 
-  
+
   return (
     <div className="Profile">
       <div className="grid grid-cols-2 header_myProfile mb-[30px]">
         <div className='col-span-1 text-while'>
-            <SearchBar />
+          <SearchBar />
         </div>
 
         <div className='col-span-1'>
-            <Notifications />
+          <Notifications />
         </div>
       </div>
       <div className="PlayerProfile">{userData.username}'s Profile</div>
-        <div className="PlayerBar">
-          
-          <div className="PlayerName">{userData.username}</div>
-          <img src={userData.avatar.filename} className="Riri" alt="Riri" referrerPolicy="no-referrer"/>
-          {buttonText == 'add' &&
-            <div className="AddFriend" onClick={handleAddFriend}>Add Friend</div>
-          }
-          {buttonText == 'remove' &&
-            <div>
-              <div className="AddFriend r" onClick={handleRemoveFriend}>Remove Friend</div>
-              <div className="AddFriend s" onClick={handleSendMessage}>Send Message</div>
-            </div>
-          }
-          {buttonText == 'accept' &&
-            <div className="AddFriend" onClick={handleAcceptRequest}>Accept Request</div>
-          }
-          {buttonText == 'cancel' &&
-            <div className="AddFriend" onClick={handleCancelRequest}>Cancel Request</div>
-          }
-          <img src={myLeaderboard} className="LB" alt="Leaderboard3" referrerPolicy="no-referrer"/>
-          <div className="PLevelTube">
-            <div className="PLevelMarker">Lv.{currentLevel}</div>
-            <div className="PTube">
-              <div className="PLevelProgress" style={{ width: `${levelProgress}%` }}><span>{levelProgress.toFixed(0)}%</span></div>
-            </div>
-            <div className="PLevelMarker">Lv.{nextLevel}</div>
+      <div className="PlayerBar">
+
+        <div className="PlayerName">{userData.username}</div>
+        <img src={userData.avatar.filename} className="Riri" alt="Riri" referrerPolicy="no-referrer" />
+        {buttonText == 'add' &&
+          <div className="AddFriend" onClick={handleAddFriend}>Add Friend</div>
+        }
+        {buttonText == 'remove' &&
+          <div>
+            <div className="AddFriend r" onClick={handleRemoveFriend}>Remove Friend</div>
+            <div className="AddFriend s" onClick={handleSendMessage}>Send Message</div>
           </div>
-          <div className="PStats">
-            <p className="PStatText">{myWins}&nbsp;Wins&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myDraws}&nbsp;Draw&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myLosses}&nbsp;Losses</p>
+        }
+        {buttonText == 'accept' &&
+          <div className="AddFriend" onClick={handleAcceptRequest}>Accept Request</div>
+        }
+        {buttonText == 'cancel' &&
+          <div className="AddFriend" onClick={handleCancelRequest}>Cancel Request</div>
+        }
+        <img src={myLeaderboard} className="LB" alt="Leaderboard3" referrerPolicy="no-referrer" />
+        <div className="PLevelTube">
+          <div className="PLevelMarker">Lv.{currentLevel}</div>
+          <div className="PTube">
+            <div className="PLevelProgress" style={{ width: `${levelProgress}%` }}><span>{levelProgress.toFixed(0)}%</span></div>
           </div>
+          <div className="PLevelMarker">Lv.{nextLevel}</div>
         </div>
+        <div className="PStats">
+          <p className="PStatText">{myWins}&nbsp;Wins&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myDraws}&nbsp;Draw&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{myLosses}&nbsp;Losses</p>
+        </div>
+      </div>
       <div className="PlayerResp grid grid-cols-2 mt-[30px]">
         <div className='col-span-1 '>
           <div className="PAchievements ">Achievements
@@ -395,45 +398,45 @@ function Profiles() {
 
           <div className="PAchievementBar ">
             <div className="PChevLeftC" onClick={handlePrevAchievement}>
-              <img src={ChevLeft} alt="Left Chevron" className="PChevLeft" referrerPolicy="no-referrer"/>
+              <img src={ChevLeft} alt="Left Chevron" className="PChevLeft" referrerPolicy="no-referrer" />
             </div>
             <div className="PAchievementContainer">
-              <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" referrerPolicy="no-referrer"/>
+              <img src={myAchievements[currentAchievementIndex]?.image} className="Achievement" alt="Achievement" referrerPolicy="no-referrer" />
               <span>{myAchievements[currentAchievementIndex]?.title}</span>
             </div>
             <div className="PChevRightC" onClick={handleNextAchievement}>
-              <img src={ChevRight} alt="Right Chevron" className="PChevRight" referrerPolicy="no-referrer"/>
+              <img src={ChevRight} alt="Right Chevron" className="PChevRight" referrerPolicy="no-referrer" />
             </div>
           </div>
-          
+
         </div>
 
-      <div className='col-span-1  ml-[10px]'>
-        <div className="PPL ">Playthrough Legacy</div>
+        <div className='col-span-1  ml-[10px]'>
+          <div className="PPL ">Playthrough Legacy</div>
           <div className="PPLBar">
             <ul >
-                  {matches.map((match, index) => {
-                    return (
-                      <li key={index} className="play">
-                        <div className="PlayerLeft">
-                          <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} referrerPolicy="no-referrer"/>
-                          <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
-                        </div>
-                        <p className="ScoreP">{match.host_score_m} - {match.guest_score_m}</p>
-                        <div className="PlayerRight">
-                          <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} referrerPolicy="no-referrer"/>
-                          <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
-                        </div>
-                      </li>
-                    );
-                  })}
+              {matches.map((match, index) => {
+                return (
+                  <li key={index} className="play">
+                    <div className="PlayerLeft">
+                      <img src={match.host.avatar.filename} className="LeftPlayer" alt={match.host.username} referrerPolicy="no-referrer" />
+                      <p className="PlayerName" title={match.host.username}>{match.host.username}</p>
+                    </div>
+                    <p className="ScoreP">{match.host_score_m} - {match.guest_score_m}</p>
+                    <div className="PlayerRight">
+                      <img src={match.guest.avatar.filename} className="RightPlayer" alt={match.guest.username} referrerPolicy="no-referrer" />
+                      <p className="PlayerName" title={match.guest.username}>{match.guest.username}</p>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
-        
+
+          </div>
+
         </div>
 
       </div>
-
-        </div>
     </div>
   );
 }

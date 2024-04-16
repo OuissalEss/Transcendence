@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  frontend:
+    build: front-end
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: always
+  backend:
+    build: back-end
+    ports:
+      - "3000:3000"
+      - "3003:3003"
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} 
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+    restart: always
+volumes:
+    db-data:
