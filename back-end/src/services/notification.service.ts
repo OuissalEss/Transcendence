@@ -11,58 +11,70 @@ export class NotificationService {
     constructor(
         private prisma: PrismaService,
         private userService: UserService,
-    ) {}
+    ) { }
 
     async getAllNotifications(): Promise<Notification[]> {
-        return await this.prisma.notification.findMany({});
+        try {
+            return await this.prisma.notification.findMany({});
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     async getNotificationById(notificationId: string): Promise<Notification> {
-        return await this.prisma.notification.findUnique({
-            where: {
-                id: notificationId
-            },
-            include: {
-                sender: {
-                    include: {
-                        avatar: true,
-                    }
+        try {
+            return await this.prisma.notification.findUnique({
+                where: {
+                    id: notificationId
                 },
-                receiver: {
-                    include: {
-                        avatar: true,
-                    }
-                },
-            }
-        });
+                include: {
+                    sender: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                    receiver: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                }
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     async getUserNotifications(userId: string): Promise<Notification[]> {
-        let userObject: User = await this.userService.getUserById(userId);
-        if (!userObject) throw new NotFoundException("User doesn't exist");
+        try {
+            let userObject: User = await this.userService.getUserById(userId);
+            if (!userObject) throw new NotFoundException("User doesn't exist");
 
-        const notifs = await this.prisma.notification.findMany({
-            where: {
-                receiverId: userId
-            },
-            include: {
-                sender: {
-                    include: {
-                        avatar: true,
-                    }
+            const notifs = await this.prisma.notification.findMany({
+                where: {
+                    receiverId: userId
                 },
-                receiver: {
-                    include: {
-                        avatar: true,
-                    }
-                },
-            }
-        });
-        return notifs;
+                include: {
+                    sender: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                    receiver: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                }
+            });
+            return notifs;
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     async createNotification(createNotificationInput: CreateNotificationInput): Promise<Notification> {
-        try{
+        try {
             return await this.prisma.notification.create({
                 data: {
                     time: new Date(),
@@ -78,13 +90,13 @@ export class NotificationService {
     }
 
     async updateIsRead(userId: string, notificationId: string): Promise<Notification> {
-        let userObject: User = await this.userService.getUserById(userId);
-        if (!userObject) throw new NotFoundException("User doesn't exist");
-    
-        let notifObject: Notification = await this.getNotificationById(notificationId);
-        if (!notifObject) throw new NotFoundException("Notification doesn't exist");
-
         try {
+            let userObject: User = await this.userService.getUserById(userId);
+            if (!userObject) throw new NotFoundException("User doesn't exist");
+
+            let notifObject: Notification = await this.getNotificationById(notificationId);
+            if (!notifObject) throw new NotFoundException("Notification doesn't exist");
+
             const updatedNotif = await this.prisma.notification.update({
                 where: {
                     id: notificationId,
@@ -93,7 +105,7 @@ export class NotificationService {
                 data: {
                     isRead: true,
                 },
-                include:{
+                include: {
                     sender: {
                         include: {
                             avatar: true,
@@ -108,7 +120,7 @@ export class NotificationService {
             });
             return updatedNotif;
         } catch (e) {
-          throw new ForbiddenException("Unable to update Notification.");
+            throw new ForbiddenException("Unable to update Notification.");
         }
-      }
+    }
 }

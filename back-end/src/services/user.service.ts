@@ -92,12 +92,12 @@ export class UserService {
      * @returns {Promise<User>}
      */
     async updateUsername(userId: string, updatedUsername: string): Promise<User> {
+        try {
         // Check if the provided userId is a valid id
         let userObject: User = await this.getUserById(userId);
 
         if (!userObject) throw new NotFoundException("User does't exist");
 
-        try {
             return this.prisma.user.update({
                 where: { id: userId },
                 data: { username: updatedUsername },
@@ -118,12 +118,12 @@ export class UserService {
         userId: string,
         updatedFirstName: string
     ): Promise<User> {
+        try {
         // Check if the provided userId is a valid id
         let userObject: Promise<User> = this.getUserById(userId);
 
         if (!userObject) throw new NotFoundException("User does't exist");
 
-        try {
             return this.prisma.user.update({
                 where: { id: userId },
                 data: { firstName: updatedFirstName },
@@ -144,11 +144,11 @@ export class UserService {
         userId: string,
         updatedLastName: string
     ): Promise<User> {
+        try {
         const user = this.getUserById(userId);
 
         if (!user) throw new NotFoundException("User not found");
 
-        try {
             return this.prisma.user.update({
                 where: { id: userId },
                 data: { lastName: updatedLastName },
@@ -195,6 +195,7 @@ export class UserService {
      * @returns {Promise<User>}
      */
     async updateStatus(userId: string, status: Status): Promise<User> {
+        try {
         // Check if the provided userId is a valid id
         let userObject: Promise<User> = this.getUserById(userId);
 
@@ -205,7 +206,6 @@ export class UserService {
             throw new BadRequestException("Invalid status");
         }
 
-        try {
             return this.prisma.user.update({
                 where: { id: userId },
                 data: {
@@ -224,10 +224,10 @@ export class UserService {
      * @returns {Promise<User>}
      */
     async addXp(userId: string, xptoadd: number): Promise<User> {
+        try {
         let userObject: Promise<User> = this.getUserById(userId);
         if (!userObject) throw new NotFoundException("User does't exist");
 
-        try {
             return this.prisma.user.update({
                 where: { id: userId },
                 data: {
@@ -246,6 +246,7 @@ export class UserService {
      * @returns {Promise<User>}
      */
     async updateCharacter(userId: string, character: Character): Promise<User> {
+        try {
         // Check if the provided userId is a valid id
         let userObject: Promise<User> = this.getUserById(userId);
 
@@ -256,7 +257,6 @@ export class UserService {
             throw new BadRequestException("Invalid character");
         }
 
-        try {
             return this.prisma.user.update({
                 where: { id: userId },
                 data: {
@@ -275,10 +275,10 @@ export class UserService {
      * @returns {Promise<User>}
      */
     async updateAvatarfileName(userId: string, newAvatar: string): Promise<User> {
+        try {
         // Check if the provided userId is a valid id
         let userObject: User = await this.getUserById(userId);
         if (!userObject) throw new NotFoundException("User does't exist");
-        try {
             await this.prisma.avatar.update({
                 where: { id: userObject.avatar.id },
                 data: {
@@ -298,11 +298,11 @@ export class UserService {
   * @returns {Promise<User>}
   */
     async updateOtp(userId: string, otpSecret: string): Promise<User> {
+        try {
         // Check if the provided userId is a valid id
         let userObject: User = await this.getUserById(userId);
         if (!userObject) throw new NotFoundException("User does't exist");
 
-        try {
             await this.prisma.connection.update({
                 where: { userId: userObject.id },
                 data: {
@@ -323,12 +323,12 @@ export class UserService {
 * @returns {Promise<User>}
 */
     async activate2Fa(userId: string, status: boolean): Promise<boolean> {
+        try {
         // Check if the provided userId is a valid id
         let userObject: User = await this.getUserById(userId);
 
         if (!userObject) throw new NotFoundException("User does't exist");
 
-        try {
             await this.prisma.connection.update({
                 where: { userId: userObject.id },
                 data: {

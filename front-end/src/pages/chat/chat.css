@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,10 +7,10 @@
 .discussion-container {
 	position: absolute;
 	top: 55%;
-	left: 0%;
+	left: 1%;
 	transform: translate(-50%, -50%);
 	height: 80%;
-	background-color: rgb(105, 81, 170, 0.29);
+	background-color: rgba(114, 196, 255, 0.2);
 	border-radius: 20px;
 	margin-left: 19%;
 	position: absolute;
@@ -20,11 +21,11 @@
 .chat-container {
 	position: absolute;
 	top: 55%;
-	left: 62%;
+	left: 63%;
 	transform: translate(-50%, -50%);
 	width: 58%;
 	height: 80%;
-	background-color: rgba(115, 81, 170, 0.28);
+	background-color: rgba(114, 196, 255, 0.2);
 	border-radius: 20px;
 	z-index: 10;
 }
@@ -35,7 +36,7 @@
     justify-content: space-between;
 	margin-top: 20%;
     margin-bottom: 10%;
-	margin-left: 1%;
+	margin-left: 3%;
 }
 
 .transparent-button {
@@ -44,8 +45,12 @@
     color: #f0e9e9;
     cursor: pointer;
     height: 45px; /* Adjust height */
-	width: 135px;
+	width: 145px;
     padding: 8px 16px; /* Adjust padding */
+}
+
+.mr-7 {
+    margin-right: 3rem;
 }
 
 .transparent-button:hover {
@@ -57,12 +62,14 @@
 	font-size: 25px;
 	color: #3E1256;
 	font-weight: bold;
+	z-index: 3;
 }
 
 .text-2 {
 	font-size: 25px;
 	color: #f5f3f6;
 	font-weight: bold;
+	
 }
 
 .searchInput {
@@ -213,32 +220,6 @@
 	overflow-y: auto; /* Make the container scrollable */
   }
 
-  /* .members-container::-webkit-scrollbar {
-	width: 8px;
-	background-color: transparent;
-  } */
-  
-  /* .members-container::-webkit-scrollbar-thumb {
-	background-color: transparent;
-	border-radius: 4px;
-	background-image: url('../../../public/assets/scroll.avif');
-	background-size: cover;
-  } */
-  
-  /* .member-container {
-	flex: 0 0 21%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	background-color: rgba(255, 255, 255, 0.3);
-	border-radius: 10px;
-	padding: 10px;
-	margin-bottom: 2%;
-	margin-top: 0%;
-	height: fit-content;
-	width: calc(50% - 25px);
-  } */
-  
   .friend-button {
 	background: none;
 	border: none;
@@ -389,22 +370,6 @@
 	overflow-y: auto; /* Make the container scrollable */
   }
 
-/* .channels-container::-webkit-scrollbar {
-	width: 1px;
-	background-color: transparent;
-  }
-  
- .channels-container::-webkit-scrollbar-thumb {
-	background-color: transparent;
-	border-radius: 2px;
-	background-image: url('../../../public/assets/scroll.avif');
-	background-size: cover;
-	-webkit-border-radius: 2px;
-	-moz-border-radius: 2px;
-	-ms-border-radius: 2px;
-	-o-border-radius: 2px;
-} */
-
 .channel-list {
 	font-family: 'Yusei Magic', sans-serif;
 	text-align: center;
@@ -536,22 +501,8 @@
 .descriptionContainer .searchImg {
 	margin-left: 15px;
 	margin-bottom: 50%;
-	/* Add any other styles you need */
 
 }
-
-/* .discussion-list {
-    overflow-y: auto;
-    max-height: calc(80% - 50px);
-    padding: 10px;
-} */
-
-/* .chat-lis .searchBarContainer .button-container {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin: 500px;
-} */
 
 .chat-list {
 	position: absolute;
@@ -1208,7 +1159,7 @@
   background-color: rgba(255, 192, 203, 0.5);
 }
 
-.characterImage, .logo, .title {
+.characterImage, .logo, .c {
   position: fixed;
   z-index: 10;
 }
@@ -1283,3 +1234,81 @@
   .bg-yellow-500 { background-color: #FBBF24; }
   .bg-blue-500 { background-color: #3B82F6; }
   
+
+  	.NoChatIcon {
+		margin-left: 390px;
+		margin-top: 240px;
+		width: 100px;
+		height: 100px;
+	}
+  @media (max-width: 1314px)
+  {
+	.chat-container{
+		width: 50%;
+		/* margin-left: 40px; */
+	}
+	.text-2 {
+		font-size: 20px;
+		margin-left: -100px;
+		
+	}
+
+	.NoChatIcon{
+		margin-left: 270px;
+		margin-top: 260px;
+		width: 80px;
+		height: 80px;
+	}
+
+	/* .mt-6{
+		width: 1%;	
+	} */
+	.mr-7 {
+		margin-right: 3rem;
+		
+	}
+
+	button.transparent-button.ml-7.mt-6 {
+		width: auto;
+	}
+
+	button.transparent-button.mr-7.mt-6{
+
+			width: auto;
+	}
+
+	.button-container {
+		margin-left: 3%;
+	}
+	
+	.discussion-container {
+		
+		left: 6%;
+		
+	}
+
+  }
+
+  @media (max-width: 1521px)
+  {
+	.mr-7 {
+		margin-right: 1rem;
+	}
+
+
+	.button-container {
+		margin-left: -2%;
+	}
+  }
+
+  @media (max-width: 1045px)
+  {
+	button.transparent-button.ml-7.mt-6 {
+		width: 100px;
+	}
+
+	button.transparent-button.mr-7.mt-6{
+
+			width: 100px;
+	}
+  }

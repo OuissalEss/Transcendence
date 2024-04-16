@@ -36,7 +36,7 @@ const UPDATE_READ = gql`
 const Notifications = () => {
     const [updateNotifIsRead] = useMutation(UPDATE_READ);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [notifications, setNotifications] = useState<{ id: string, userId: string, type: string, isRead: Boolean, notif: string }[]>([]);
+    const [notifications, setNotifications] = useState<{ id: string, userId: string, type: string, isRead: Boolean, notif: string, time:Date }[]>([]);
     const [showNotification, setShowNotification] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const { socket } = useSocket();
@@ -85,7 +85,7 @@ const Notifications = () => {
 
     if (notifData) notifData;
     const updateNotifications = (notifications: Notifs[]) => {
-        let notificationList: { id: string; userId: string; type: string; isRead: Boolean; notif: string; }[] = [];
+        let notificationList: { id: string; userId: string; type: string; isRead: Boolean; notif: string; time: Date}[] = [];
         for (let i = 0; i < notifications.length; i++) {
             if (!notifications[i].isRead) {
                 let newNotification = {
@@ -93,9 +93,9 @@ const Notifications = () => {
                     userId: notifications[i].sender.id,
                     type: notifications[i].type,
                     isRead: notifications[i].isRead,
+                    time: notifications[i].time,
                     notif: ''
                 };
-
                 if (notifications[i].type === 'FRIEND_REQUEST') {
                     newNotification.notif = `${notifications[i].sender.username} sent you a friend request`;
                 } else if (notifications[i].type === 'ACHIEVEMENT') {
@@ -106,6 +106,20 @@ const Notifications = () => {
                 notificationList.push(newNotification);
             }
         }
+        notificationList.forEach((a, indexA) => {
+            notificationList.forEach((b, indexB) => {
+                if (indexA !== indexB && a.userId === b.userId && a.type === b.type) {
+                    if (a.time >= b.time) {
+                        notificationList.splice(indexB, 1);
+                    } else {
+                        notificationList.splice(indexA, 1);
+                    }
+                }
+            });
+        });
+        notificationList.sort((a, b) => {
+            return new Date(b.time).getTime() - new Date(a.time).getTime();
+        });
         if (showDropdown == false && notificationList.length > 0)
             setShowNotification(true);
         setNotifications(notificationList);
@@ -136,7 +150,7 @@ const Notifications = () => {
             <div className="bellDiv" onClick={toggleDropdown}>
                 <img
                     className="bellImg"
-                    src="/Icons/Bell.png"
+                    src="/Icons/Notifs.png"
                     alt="search"
                     referrerPolicy="no-referrer"
                 />
@@ -150,11 +164,11 @@ const Notifications = () => {
                             {notifications.map((notification, index) => (
                                 notification && notification.type == "MATCH" ? (
                                     <Link key={index} to="/game/pong?mode=online" onClick={() => updateIsRead(notification.id)}>
-                                        <li className="notif" key={index}>{notification.notif}</li>
+                                        <li className="notif" key={index}>🏓 {notification.notif}</li>
                                     </Link>
                                 ) : (
                                     <Link key={index} to={`/profiles?id=${notification.userId}`} onClick={() => updateIsRead(notification.id)}>
-                                        <li className="notif" key={index}>{notification.notif}</li>
+                                        <li className="notif" key={index}>{notification.type === "FRIEND_REQUEST" ? "👫" : "🏆"} {notification.notif}</li>
                                     </Link>
                                 )
                             ))}

@@ -1,6 +1,5 @@
 
 import LeftMssg from '/LeftMssg.png';
-import RightMssg from '/RightMssg.png';
 import FirstWithB from '/Achievements/FirstfWithB.png';
 import FiveWithB from '/Achievements/FiveWithB.png';
 import RobotWithB from '/Achievements/RobotWithB.png';
@@ -8,6 +7,8 @@ import RoomWithB from '/Achievements/RoomWithB.png';
 import ThreeWithB from '/Achievements/ThreeWithB.png';
 import WelcomeWithB from '/Achievements/WelcomeWithB.png';
 import '../assets/about.css'
+import Salmaimg from '/AboutUs/Salmaimg.png';
+import Ouissalimg from '/AboutUs/Ouissalimg.png'
 
 export default function About() {
 
@@ -51,7 +52,7 @@ export default function About() {
                     <div className="aboutContainer">
                         <div className="AboutUsOuissal">
                             <h1>Ouissal 🐾</h1>
-                            <img src={RightMssg} className="RightMssg1"alt="RightMssg" referrerPolicy="no-referrer"/>
+                            <img src={Ouissalimg} className="Ouissalimg"alt="Ouissalimg" referrerPolicy="no-referrer"/>
                         </div>
                         <div className="AboutUsZineb">
                             <h1>Zineb ✨</h1>
@@ -59,7 +60,7 @@ export default function About() {
                         </div>
                         <div className="AboutUsSalma">
                             <h1>Salma 🦋</h1>
-                            <img src={RightMssg} className="RightMssg2" alt="RightMssg" referrerPolicy="no-referrer"/>
+                            <img src={Salmaimg} className="Salmaimg" alt="Salmaimg" referrerPolicy="no-referrer"/>
                         </div>
                     </div>
                 </div>

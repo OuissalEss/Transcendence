@@ -120,7 +120,7 @@ export class Puck {
          // Calculate the angle based on the difference in y coordinates
          let relativeIntersectY = (p.y + p.h / 2) - this.y;
          let normalizedIntersectY = relativeIntersectY / (p.h / 2);
-         let bounceAngle = normalizedIntersectY * (Math.PI / 4); // Adjust as needed
+         let bounceAngle = angle; // Adjust as needed
 
  // Adjust bounce angle for stability, especially for small angles
  bounceAngle = Math.max(bounceAngle, -Math.PI / 4); // Ensure minimum angle
@@ -191,7 +191,7 @@ export class Puck {
                 // Calculate the angle based on the difference in y coordinates
         let relativeIntersectY = (p.y + p.h / 2) - this.y;
         let normalizedIntersectY = relativeIntersectY / (p.h / 2);
-        let bounceAngle = normalizedIntersectY * (Math.PI / 4); // Adjust as needed
+        let bounceAngle = angle; // Adjust as needed
 // Adjust bounce angle for stability, especially for small angles
         bounceAngle = Math.min(bounceAngle, Math.PI / 4); // Ensure maximum angle
 

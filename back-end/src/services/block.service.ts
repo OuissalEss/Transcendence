@@ -8,30 +8,34 @@ import { UserService } from "./user.service";
 
 @Injectable()
 export class BlockService {
-   constructor(
-    private prisma: PrismaService,
-    private userService: UserService
-    ) {}
+    constructor(
+        private prisma: PrismaService,
+        private userService: UserService
+    ) { }
 
     async getBlockById(blockId: string): Promise<Block> {
-        let blockObject = this.prisma.block.findUnique({
-          where: { id: blockId },
-          include: {
-            blockedUser: {
-                include:{
-                    avatar: true,
-                }
-            },
-            blocker: {
-                include:{
-                    avatar: true,
-                }
-            },
-        },
-        });
-        if (!blockObject) throw new NotFoundException("Block doesn't exist");
-        return blockObject
-      }
+        try {
+            let blockObject = this.prisma.block.findUnique({
+                where: { id: blockId },
+                include: {
+                    blockedUser: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                    blocker: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                },
+            });
+            if (!blockObject) throw new NotFoundException("Block doesn't exist");
+            return blockObject
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     /**
      * Gets all block relationships for a user.
@@ -39,26 +43,30 @@ export class BlockService {
      * @returns {Promise<Block[]>}
      */
     async getAllBlocks(userId: string): Promise<Block[]> {
-        return this.prisma.block.findMany({
-            where: {
-                OR: [
-                    { blockerId: userId },
-                    { blockedUserId: userId }
-                ]
-            },
-            include: {
-                blockedUser: {
-                    include:{
-                        avatar: true,
-                    }
+        try {
+            return this.prisma.block.findMany({
+                where: {
+                    OR: [
+                        { blockerId: userId },
+                        { blockedUserId: userId }
+                    ]
                 },
-                blocker: {
-                    include:{
-                        avatar: true,
-                    }
+                include: {
+                    blockedUser: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                    blocker: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     /**
@@ -67,23 +75,27 @@ export class BlockService {
     * @returns {Promise<Block[]>}
     */
     async getBlockedForUser(userId: string): Promise<Block[]> {
-        return this.prisma.block.findMany({
-            where: {
-                blockerId: userId,
-            },
-            include: {
-                blockedUser: {
-                    include:{
-                        avatar: true,
-                    }
+        try {
+            return this.prisma.block.findMany({
+                where: {
+                    blockerId: userId,
                 },
-                blocker: {
-                    include:{
-                        avatar: true,
-                    }
+                include: {
+                    blockedUser: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
+                    blocker: {
+                        include: {
+                            avatar: true,
+                        }
+                    },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     /**
@@ -93,78 +105,96 @@ export class BlockService {
      * @returns {Promise<User>}
      */
     async unblockUser(userId: string, blockId: string): Promise<Block> {
-        // Check if the provided friendId is a valid id
-        let userObject: User = await this.userService.getUserById(userId);
-        if (!userObject) throw new NotFoundException("User doesn't exist");
-
-        // Check if the provided blockId is a valid id
-        let blockObject: Block = await this.getBlockById(blockId);
-        if (!blockObject) throw new NotFoundException("Block doesn't exist");
-
-        // Delete Block relationship
         try {
+            // Check if the provided friendId is a valid id
+            let userObject: User = await this.userService.getUserById(userId);
+            if (!userObject) throw new NotFoundException("User doesn't exist");
+
+            // Check if the provided blockId is a valid id
+            let blockObject: Block = await this.getBlockById(blockId);
+            if (!blockObject) throw new NotFoundException("Block doesn't exist");
+
+            // Delete Block relationship
             return await this.prisma.block.delete({
                 where: {
                     id: blockId,
                     blockerId: userObject.id,
                 },
             });
-          } catch (e) {
+        } catch (e) {
             throw new ForbiddenException("Unable to delete Block.");
-          }
+        }
     }
 
     async getBlockenListByUid(uid: string): Promise<Block[]> {
-		return await this.prisma.block.findMany({
-			where: {
-				blockedUserId: uid,
-			},
-		});
-
-	}
-
-    async getBlockedListByUid(uid: string): Promise<Block[]> {
-		return await this.prisma.block.findMany({
-			where: {
-				blockerId: uid,
-			},
-		});
-
-	}
-
-	// get all the blocks
-	async getBlockList(): Promise<Block[]> {
-		return await this.prisma.block.findMany();
-	}
-
-	async blockUser(blockerId: string, blockedUserId: string): Promise<User> {
-        // if (!this.isBlocked(blockerId, blockedUserId)) {
-            await  this.prisma.block.create({
-                data: {
-                blockerId: blockerId,
-                blockedUserId: blockedUserId,
+        try {
+            return await this.prisma.block.findMany({
+                where: {
+                    blockedUserId: uid,
                 },
             });
-        // }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
-		return this.prisma.user.findUnique({
-			where: {
-			id: blockedUserId,
-			},
-            include: {
-                avatar: true,
-            }
-		});
-	}
+    async getBlockedListByUid(uid: string): Promise<Block[]> {
+        try {
+            return await this.prisma.block.findMany({
+                where: {
+                    blockerId: uid,
+                },
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
-	async isBlocked(blockerId: string, blockedUserId: string): Promise<boolean> {
-		const block = await this.prisma.block.findFirst({
-			where: {
-			blockerId: blockerId,
-			blockedUserId: blockedUserId,
-			},
-		});
-		return block != null;
-	}
+    // get all the blocks
+    async getBlockList(): Promise<Block[]> {
+        try {
+            return await this.prisma.block.findMany();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async blockUser(blockerId: string, blockedUserId: string): Promise<User> {
+        try {
+            // if (!this.isBlocked(blockerId, blockedUserId)) {
+            await this.prisma.block.create({
+                data: {
+                    blockerId: blockerId,
+                    blockedUserId: blockedUserId,
+                },
+            });
+            // }
+
+            return this.prisma.user.findUnique({
+                where: {
+                    id: blockedUserId,
+                },
+                include: {
+                    avatar: true,
+                }
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async isBlocked(blockerId: string, blockedUserId: string): Promise<boolean> {
+        try {
+            const block = await this.prisma.block.findFirst({
+                where: {
+                    blockerId: blockerId,
+                    blockedUserId: blockedUserId,
+                },
+            });
+            return block != null;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
 }

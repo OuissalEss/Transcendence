@@ -74,7 +74,7 @@ const SearchBar = () => {
         <div className="searchBarContainer">
             <div className="searchImg">
                 <img
-                    src="/Icons/Search.png"
+                    src="/Icons/Search2.png"
                     alt="search"
                     style={{ width: '100%', height: "auto" }}
                     referrerPolicy="no-referrer"

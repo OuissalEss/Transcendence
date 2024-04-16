@@ -42,14 +42,18 @@ export class MatchService {
      * @returns {Promise<Match>}
      */
     async getMatchById(id: string): Promise<Match> {
-        const match = await this.prisma.match.findUnique({
-            where: {
-                id: id
-            },
-            include: matchIncludes,
-        });
-        if (!match) throw new NotFoundException("Match not found");
-        return match;
+        try {
+            const match = await this.prisma.match.findUnique({
+                where: {
+                    id: id
+                },
+                include: matchIncludes,
+            });
+            if (!match) throw new NotFoundException("Match not found");
+            return match;
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     /**
@@ -59,10 +63,10 @@ export class MatchService {
      * @returns {Promise<Match>}
      */
     async updateHostScore(matchId: string, host_score: number): Promise<Match> {
-        let matchObject: Promise<Match> = this.getMatchById(matchId);
-        if (!matchObject) throw new NotFoundException("Match does't exist");
-
         try {
+            let matchObject: Promise<Match> = this.getMatchById(matchId);
+            if (!matchObject) throw new NotFoundException("Match does't exist");
+
             return this.prisma.match.update({
                 where: { id: matchId },
                 data: { host_score_m: host_score },
@@ -80,10 +84,10 @@ export class MatchService {
      * @returns {Promise<Match>}
      */
     async updateGuestScore(matchId: string, guest_score: number): Promise<Match> {
-        let matchObject: Promise<Match> = this.getMatchById(matchId);
-        if (!matchObject) throw new NotFoundException("Match does't exist");
-
         try {
+            let matchObject: Promise<Match> = this.getMatchById(matchId);
+            if (!matchObject) throw new NotFoundException("Match does't exist");
+
             return this.prisma.match.update({
                 where: { id: matchId },
                 data: { guest_score_m: guest_score },
@@ -101,10 +105,10 @@ export class MatchService {
      * @returns {Promise<Match>} Updated match object
     */
     async updateMatchWinner(matchId: string, match_winner: string): Promise<Match> {
-        let matchObject: Promise<Match> = this.getMatchById(matchId);
-        if (!matchObject) throw new NotFoundException("Match does't exist");
-
         try {
+            let matchObject: Promise<Match> = this.getMatchById(matchId);
+            if (!matchObject) throw new NotFoundException("Match does't exist");
+
             return this.prisma.match.update({
                 where: { id: matchId },
                 data: { winnerId: match_winner },
@@ -121,10 +125,10 @@ export class MatchService {
      * @returns {Promise<Match>} Updated match object
     */
     async updateMatchLoser(matchId: string, match_loser: string): Promise<Match> {
-        let matchObject: Promise<Match> = this.getMatchById(matchId);
-        if (!matchObject) throw new NotFoundException("Match does't exist");
-
         try {
+            let matchObject: Promise<Match> = this.getMatchById(matchId);
+            if (!matchObject) throw new NotFoundException("Match does't exist");
+
             return this.prisma.match.update({
                 where: { id: matchId },
                 data: { loserId: match_loser },
@@ -153,8 +157,8 @@ export class MatchService {
             throw new ForbiddenException("Unable to create match.");
         }
     }
-    
-    
+
+
     /**
      * Deletes a match and their associated data.
      *

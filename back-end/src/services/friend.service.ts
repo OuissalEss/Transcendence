@@ -26,32 +26,42 @@ export class FriendService {
    * @returns {Promise<Friend[]>}
    */
   async getAllFriends(): Promise<Friend[]> {
-    return this.prisma.friend.findMany({
-      include: friendIncludes
-    });
+    try {
+      return this.prisma.friend.findMany({
+        include: friendIncludes
+      });
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
   }
 
   async getFriendById(friendId: string): Promise<Friend> {
-    // Check if the provided userId is a valid id
-    let friendObject = await this.prisma.friend.findUnique({
-      where: {
-        id: friendId
-      },
-      include: friendIncludes
-    });
+    try {
+      // Check if the provided userId is a valid id
+      let friendObject = await this.prisma.friend.findUnique({
+        where: {
+          id: friendId
+        },
+        include: friendIncludes
+      });
 
-    if (!friendObject) throw new NotFoundException("Friend doesn't exist");
+      if (!friendObject) throw new NotFoundException("Friend doesn't exist");
 
-    return friendObject
+      return friendObject
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
   }
 
   async getFriendList(userId): Promise<User[]> {
-    // Check if the provided userId is a valid id
-    let userObject: User = await this.userService.getUserById(userId);
-
-    if (!userObject) throw new NotFoundException("User does't exist");
-
     try {
+      // Check if the provided userId is a valid id
+      let userObject: User = await this.userService.getUserById(userId);
+
+      if (!userObject) throw new NotFoundException("User does't exist");
+
       const friends: Friend[] = await this.getAllFriends();
       const friendList: User[] = [];
 
@@ -70,10 +80,10 @@ export class FriendService {
   }
 
   async getFriendSender(userId): Promise<Friend[]> {
+    try {
     // Check if the provided userId is a valid id
     let userObject: User = await this.userService.getUserById(userId);
     if (!userObject) throw new NotFoundException("User does't exist");
-    try {
       const friendSender: Friend[] = await this.prisma.friend.findMany({
         where: {
           senderId: userObject.id
@@ -88,10 +98,10 @@ export class FriendService {
   }
 
   async getFriendReceiver(userId): Promise<Friend[]> {
+    try {
     // Check if the provided userId is a valid id
     let userObject: User = await this.userService.getUserById(userId);
     if (!userObject) throw new NotFoundException("User does't exist");
-    try {
       const friendReceiver: Friend[] = await this.prisma.friend.findMany({
         where: {
           receiverId: userObject.id
@@ -129,6 +139,7 @@ export class FriendService {
   }
 
   async updateAccept(userId: string, friendId: string): Promise<Friend> {
+    try {
     // Check if the provided friendId is a valid id
     let userObject: User = await this.userService.getUserById(userId);
     if (!userObject) throw new NotFoundException("User doesn't exist");
@@ -136,7 +147,6 @@ export class FriendService {
     // Check if the provided friendId is a valid id
     let friendObject: Friend = await this.getFriendById(friendId);
     if (!friendObject) throw new NotFoundException("Friend doesn't exist");
-    try {
       const friendship = await this.prisma.friend.update({
         where: {
           id: friendId,
@@ -166,6 +176,7 @@ export class FriendService {
   }
 
   async deleteFriend(userId: string, friendId: string): Promise<Friend> {
+    try {
     // Check if the provided friendId is a valid id
     let userObject: User = await this.userService.getUserById(userId);
     if (!userObject) throw new NotFoundException("User doesn't exist");
@@ -175,7 +186,6 @@ export class FriendService {
     if (!friendObject) throw new NotFoundException("Friend doesn't exist");
 
     console.log(userId, friendId);
-    try {
       return this.prisma.friend.delete({
         where: {
           id: friendId,

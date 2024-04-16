@@ -15,63 +15,79 @@ export class TwoFactorAuthService {
     ) { }
 
     public async generateTwoFactorAuthSecret(userId: string) {
-        const user = await this.userService.getUserById(userId);
+        try {
+            const user = await this.userService.getUserById(userId);
 
-        if (!user) throw new NotFoundException("User does't exist");
+            if (!user) throw new NotFoundException("User does't exist");
 
-        if (user.connection.is2faEnabled) {
-            return {
-                generated: false
+            if (user.connection.is2faEnabled) {
+                return {
+                    generated: false
+                }
             }
-        }
 
-        const secret = authenticator.generateSecret();
-        const app_name = process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME || 'Spin&Smash';
-        const otpAuthUrl = authenticator.keyuri(user.email, app_name, secret);
+            const secret = authenticator.generateSecret();
+            const app_name = process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME || 'Spin&Smash';
+            const otpAuthUrl = authenticator.keyuri(user.email, app_name, secret);
 
-        await this.userService.updateOtp(userId, secret);
+            await this.userService.updateOtp(userId, secret);
 
-        return {
-            generated: true,
-            secret,
-            otpAuthUrl
+            return {
+                generated: true,
+                secret,
+                otpAuthUrl
+            }
+        } catch (error) {
+            console.error('Error:', error);
         }
     }
 
     public async qrCodeStreamPipe(stream: Response, otpPathUrl: string) {
-        return toFileStream(stream, otpPathUrl);
+        try {
+            return toFileStream(stream, otpPathUrl);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     public async activationOfTwoFa(code: string, userId: string, status: boolean) {
-        const user = await this.userService.getUserById(userId);
+        try {
+            const user = await this.userService.getUserById(userId);
 
-        if (!user) throw new NotFoundException("User does't exist");
+            if (!user) throw new NotFoundException("User does't exist");
 
-        if (!user.connection.otp) {
-            throw new UnauthorizedException('2Fa OTP is not Configured');
+            if (!user.connection.otp) {
+                throw new UnauthorizedException('2Fa OTP is not Configured');
+            }
+
+            if (user.connection.is2faEnabled) {
+                throw new UnauthorizedException('2Fa is already Activated');
+            }
+
+            // Activating 2fa
+            const isCodeValid = await this.verifyTwoFaCode(code, userId);
+
+            if (!isCodeValid) {
+                throw new UnauthorizedException('Invalid authentication code');
+            }
+            return await this.userService.activate2Fa(userId, status);
+        } catch (error) {
+            console.error('Error:', error);
         }
-
-        if (user.connection.is2faEnabled) {
-            throw new UnauthorizedException('2Fa is already Activated');
-        }
-
-        // Activating 2fa
-        const isCodeValid = await this.verifyTwoFaCode(code, userId);
-
-        if (!isCodeValid) {
-            throw new UnauthorizedException('Invalid authentication code');
-        }
-        return await this.userService.activate2Fa(userId, status);
     }
 
     public async verifyTwoFaCode(code: string, userId: string) {
-        const user = await this.userService.getUserById(userId);
+        try {
+            const user = await this.userService.getUserById(userId);
 
-        if (!user) throw new NotFoundException("User does't exist");
+            if (!user) throw new NotFoundException("User does't exist");
 
-        return authenticator.verify({
-            token: code,
-            secret: user.connection.otp
-        });
+            return authenticator.verify({
+                token: code,
+                secret: user.connection.otp
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 }

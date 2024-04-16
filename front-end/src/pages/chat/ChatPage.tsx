@@ -1,18 +1,20 @@
 import Chat from './chat';
 import Discussions from './discussions';
 import './chat.css';
-import { HiUserGroup } from "react-icons/hi";
 import { useEffect, useState } from 'react';
 import NewRoom from './newRoom';
 import JoinRoom from './joinRoom';
 import { channel, channelType } from './interfaces/props';
 import { useQuery } from '@apollo/client';
 import { ALL_CHANNELS } from '../../graphql/queries';
+import NoChatIcon from '/Chat/NoChatIcon.png';
+import Notifications from '../../components/Notifications';
+import SearchBar from '../../components/SearchBar';
 
 function NoChannelSelected() {
   return (
     <div className="flex center ">
-      <HiUserGroup className="w-40 h-40 text-white center pos-icon-container" />
+      <img src={NoChatIcon} className='NoChatIcon' alt="NoChatIcon" referrerPolicy="no-referrer"/>
       <div className="fixed z-10 center pos-icon">
         <p className="text-2">No Discussion Selected !</p>
       </div>
@@ -97,6 +99,17 @@ function ChatPageContainer() {
 
   return (
     <>
+      <div className="grid grid-cols-3 header">
+        <div className='col-span-1 t'>
+            <h1 className='title c'>Chat</h1>
+        </div>
+        <div className='col-span-1 text-while'>
+            <SearchBar />
+        </div>
+        <div className='col-span-1'>
+            <Notifications />
+        </div>
+      </div>
       <Discussions setDisplay={setDisplay} setId={setId} channels={channels} setChannels={setChannels} />
       <div className="chat-container">
         {display === '' && <NoChannelSelected />}

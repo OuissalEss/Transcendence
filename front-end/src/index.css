@@ -413,7 +413,7 @@ html {
   width: 35vw;
   background-color: rgb(255 255 241 / 20%);
   border-radius: 35px;
-  padding: 15px;
+  padding: 16px;
 }
 
 .searchInput {
@@ -480,8 +480,6 @@ html {
 
 .searchImg {
   width: 20px;
-  margin-right: 15px;
-  filter: grayscale(50%) brightness(95%) contrast(90%);
 }
 
 /* ---------- Notifications ---------- */
@@ -512,16 +510,17 @@ html {
   border-radius: 30px;
   width: 60px;
   margin-left: 15vw;
+  margin-top: 8px;
 }
 
 .bellDiv {
   width: 60px;
-  padding: 20px;
+  padding: 10px;
 }
 
 .bellImg {
   /* margin: 5px; */
-  border-radius: 15px;
+  /* border-radius: 15px; */
 }
 
 .cercleNotif{
