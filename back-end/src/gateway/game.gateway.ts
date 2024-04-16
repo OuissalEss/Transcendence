@@ -200,7 +200,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.games.delete(game);
 
 			if (game.getMode() === 'invite') {
-				let inviteCode = null;
+				let inviteCode: string | null = null;
 
 				this.inviteGame.forEach((value, key) => {
 					if (value.receiverSocket == client || value.senderSocket == client)
@@ -212,6 +212,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		// Remove player from playerInfoMap
 		this.playerInfoMap.delete(clientId);
+		let inviteCode: string | null = null;
+
+		this.inviteGame.forEach((value, key) => {
+			if (value.receiverSocket == client || value.senderSocket == client)
+				inviteCode = key;
+		});
+		if (inviteCode != null)
+			this.inviteGame.delete(inviteCode);
 	}
 
 	private async updateAndBroadcastGameState() {
